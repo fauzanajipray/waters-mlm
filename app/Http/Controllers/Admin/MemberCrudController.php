@@ -263,5 +263,8 @@ class MemberCrudController extends CrudController
 
     public function reportMember($id){
         $user = User::where('id', $id)->firstOrFail();
+
+        $noMember = optional($this->crud->members[$user->id - 1] ?? null)['no_member'] ?? '-';
+        return view('member.report_member', ['title' => "Report Member ({$noMember} - {$user->name})", 'user' => $user]);
     }
 }
