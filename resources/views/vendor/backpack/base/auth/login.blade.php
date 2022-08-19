@@ -3,7 +3,9 @@
 @section('content')
     <div class="row justify-content-center">
         <div class="col-12 col-md-8 col-lg-4">
-            <h3 class="text-center mb-4">{{ trans('backpack::base.login') }} <b>{{config('app.name')}}</b></h3>
+            <div class="text-center mb-3">
+                <img style="width:150px;height:auto" src="{{asset('images/bg-waters.png')}}">
+            </div>
             <div class="card">
                 <div class="card-body">
                     <form class="col-md-12 p-t-10" role="form" method="POST" action="{{ route('backpack.auth.login') }}">

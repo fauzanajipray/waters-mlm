@@ -1,0 +1,16 @@
+.app-header .navbar-brand {
+    justify-content: flex-start;
+}
+
+.sidebar .nav-link.active {
+    background: #4f648a;
+   font-weight: bold;
+}
+
+.sidebar .nav-link.active .nav-icon {
+    color: #fff;
+}
+
+.sidebar .nav-link:hover {
+    background: #4f648a;
+}
