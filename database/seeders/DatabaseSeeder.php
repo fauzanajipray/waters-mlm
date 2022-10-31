@@ -58,6 +58,14 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('qwerty'),
             'name' => 'Budi'
         ]);
+
+        User::updateOrCreate([
+            'email' => 'fauzan@gmail.com'
+        ], [
+            'email' => 'fauzan@gmail.com',
+            'password' => bcrypt('qwerty'),
+            'name' => 'Fauzan'
+        ]);
     }
 
     private function product()

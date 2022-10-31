@@ -7,11 +7,12 @@ use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Backpack\CRUD\app\Models\Traits\CrudTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, CrudTrait;
+    use HasApiTokens, HasFactory, Notifiable, CrudTrait, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -22,6 +23,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'member_id',
     ];
 
     /**
@@ -51,5 +53,13 @@ class User extends Authenticatable
 
     public function reportMember(){
         return '<a href="' . backpack_url('member') . '/' . $this->id . '/report-member" class="btn btn-sm btn-link"><i class="la la-chart-bar"></i> Report Member</a>';
+    }
+
+    public function registerMember(){
+        if($this->member_id == null){
+            return '<a href="' . backpack_url('member') . '/' . $this->id . '/create-member" class="btn btn-sm btn-link"><i class="la la-user-plus"></i> Register Member</a>';
+        }else{
+            return '<a href="#" class="btn btn-sm btn-link text-disable"><i class="la la-user-edit"></i> Already Registered</a>';
+        }
     }
 }

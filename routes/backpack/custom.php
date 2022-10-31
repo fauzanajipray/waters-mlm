@@ -16,6 +16,7 @@ Route::group([
     ),
     'namespace'  => 'App\Http\Controllers\Admin',
 ], function () { // custom admin routes
+    Route::crud('user', 'UserCrudController');
     Route::crud('member', 'MemberCrudController');
     Route::get('member/{id}/download-card-member', 'MemberCrudController@downloadCardMember');
     Route::get('member/{id}/report-member', 'MemberCrudController@reportMember');
