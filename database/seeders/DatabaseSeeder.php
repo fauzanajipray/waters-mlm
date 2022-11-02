@@ -195,11 +195,11 @@ class DatabaseSeeder extends Seeder
         ], [
             'member_numb' => 'M-001',
             'id_card' => '12345',
-            'name' => 'Andianto',
+            'name' => 'Kevin Andianto',
             'level_id' => 2,
             'gender' => 'M',
             'phone' => '08291029320',
-            'email' => 'andianto@wt.com',
+            'email' => 'kevin@rectmedia.com',
             'address' => 'Jalan Shukumura', 
             'upline_id' => null
         ]);
@@ -209,11 +209,11 @@ class DatabaseSeeder extends Seeder
         ], [
             'member_numb' => 'M-002',
             'id_card' => '12346',
-            'name' => 'Michael Amazon',
+            'name' => 'Benny Michael Amazon',
             'level_id' => 1,
             'gender' => 'M',
             'phone' => '082123456',
-            'email' => 'mamazon@wt.com',
+            'email' => 'benny@gmail.com',
             'address' => 'Jalan Pramuka', 
             'upline_id' => 1
         ]);
@@ -223,11 +223,11 @@ class DatabaseSeeder extends Seeder
         ], [
             'member_numb' => 'M-003',
             'id_card' => '12347',
-            'name' => 'Devina Putri',
+            'name' => 'Andi Devina Putri',
             'level_id' => 1,
             'gender' => 'F',
             'phone' => '082129832232',
-            'email' => 'dputri@wt.com',
+            'email' => 'andi@gmail.com',
             'address' => 'Jalan Manggis', 
             'upline_id' => 1
         ]);
@@ -237,11 +237,11 @@ class DatabaseSeeder extends Seeder
         ], [
             'member_numb' => 'M-004',
             'id_card' => '12348',
-            'name' => 'Angela Mahaletou',
+            'name' => 'Fauzan Mahaletou',
             'level_id' => 1,
             'gender' => 'F',
             'phone' => '08212938292',
-            'email' => 'amahal@wt.com',
+            'email' => 'fauzan@gmail.com',
             'address' => 'Jalan Beku', 
             'upline_id' => 1
         ]);

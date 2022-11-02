@@ -258,6 +258,7 @@ class TransactionCrudController extends CrudController
         $this->data['fields'] = $this->crud->getUpdateFields($id);
         $this->data['saveAction'] = $this->crud->getSaveAction();
         $this->data['id'] = $id;
+
         $this->crud->modifyField('qty', [
             'value' => optional($this->data['entry'])->qty_sold ?? 1,
         ]);
