@@ -35,6 +35,26 @@ class Transaction extends Model
     |--------------------------------------------------------------------------
     */
 
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    public function level()
+    {
+        return $this->belongsTo(Level::class, 'level_id');
+    }
+
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updatedBy()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
     /*
     |--------------------------------------------------------------------------
     | SCOPES

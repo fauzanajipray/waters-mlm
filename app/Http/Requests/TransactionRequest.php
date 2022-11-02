@@ -23,9 +23,12 @@ class TransactionRequest extends FormRequest
      * @return array
      */
     public function rules()
-    {
+    {   
         return [
-            // 'name' => 'required|min:5|max:255'
+            'transaction_date' => 'required|date',
+            'product_id' => 'required|exists:products,id',
+            'member_id' => 'required|exists:members,id',
+            'qty' => 'required|numeric|min:1',
         ];
     }
 

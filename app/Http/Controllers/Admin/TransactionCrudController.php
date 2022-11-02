@@ -4,8 +4,15 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
 use App\Http\Requests\TransactionRequest;
+use App\Models\Member;
+use App\Models\Product;
+use App\Models\Transaction;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\DB;
+use Prologue\Alerts\Facades\Alert;
 
 /**
  * Class TransactionCrudController
@@ -27,70 +34,32 @@ class TransactionCrudController extends CrudController
      */
     public function setup()
     {
-        CRUD::setModel(\App\Models\User::class);
-        CRUD::setRoute(config('backpack.base.route_prefix') . '/transaction');
-        CRUD::setEntityNameStrings('Transaction', 'Transactions');
+        $this->crud->setModel(Transaction::class);
+        $this->crud->setRoute(config('backpack.base.route_prefix') . '/transaction');
+        $this->crud->setEntityNameStrings('transaction', 'transactions');
 
-        $this->crud->transactions = [
-            [
-                'product_name' => 'Han Waters Satu',
-                'member_name' => User::where('id', 1)->first()->name ?? null,
-                'qty' => 1,
-                'price' => 10000000,
-                'total_price' => 10000000,
-                'date' => '2 Jan 2022',
-                'date_real' => '2022-01-02'
-            ], 
-            [
-                'product_name' => 'Han Waters Satu',
-                'member_name' => User::where('id', 1)->first()->name ?? null,
-                'qty' => 2,
-                'price' => 10000000,
-                'total_price' => 20000000,
-                'date' => '12 Aug 2022',
-                'date_real' => '2022-08-12'
-            ], 
-            [
-                'product_name' => 'Han Waters Dua',
-                'member_name' => User::where('id', 2)->first()->name ?? null,
-                'qty' => 2,
-                'price' => 9000000,
-                'total_price' => 18000000,
-                'date' => '18 May 2022',
-                'date_real' => '2022-05-18'
-            ],
-            [
-                'product_name' => 'Han Waters Dua',
-                'member_name' => User::where('id', 2)->first()->name ?? null,
-                'qty' => 3,
-                'price' => 9000000,
-                'total_price' => 27000000,
-                'date' => '17 June 2022',
-                'date_real' => '2022-06-07'
-            ]
-        ];
     }
 
     public function getColumns(){
-        CRUD::column('date')->label('Date')
+        $this->crud->column('date')->label('Date')
         ->value(function($entry){
             return optional($this->crud->transactions[$entry->id - 1] ?? null)['date'] ?? null;
         });
-        CRUD::column('product_name')->label('Product Name')
+        $this->crud->column('product_name')->label('Product Name')
         ->value(function($entry){
             return optional($this->crud->transactions[$entry->id - 1] ?? null)['product_name'] ?? null;
         });
-        CRUD::column('member_name')->label('Member Name')
+        $this->crud->column('member_name')->label('Member Name')
         ->value(function($entry){
             return optional($this->crud->transactions[$entry->id - 1] ?? null)['member_name'] ?? null;
         });
-        CRUD::column('qty')->label('Qty')->value(function($entry){
+        $this->crud->column('qty')->label('Qty')->value(function($entry){
             return formatNumber(optional($this->crud->transactions[$entry->id - 1] ?? null)['qty'] ?? null);
         });
-        CRUD::column('price')->label('Price')->value(function($entry){
+        $this->crud->column('price')->label('Price')->value(function($entry){
             return 'Rp '. formatNumber(optional($this->crud->transactions[$entry->id - 1] ?? null)['price'] ?? null);
         });
-        CRUD::column('total_price')->label('Total Price')  ->value(function($entry){
+        $this->crud->column('total_price')->label('Total Price')  ->value(function($entry){
             return 'Rp '. formatNumber(optional($this->crud->transactions[$entry->id - 1] ?? null)['total_price'] ?? null);
         });
     }
@@ -103,15 +72,57 @@ class TransactionCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        $this->getColumns();
+        // $this->getColumns();
+        $this->crud->viewAfterContent = ['image_preview_helper'];
+        $this->crud->firstCellNonFlex = true;
+
+        $this->crud->addColumns([
+            'code',
+            'transaction_date', 
+            // 'status',
+            'member_numb', 
+            'member_name', 
+            'product_name', 
+            'qty_sold', 
+            'unit_price', 
+            'total_price', 
+            'id_card',
+            'member_id',
+            [
+                'name' => 'level_id',
+                'label' => 'Level',
+                'entity' => 'level',
+                'attribute' => 'name' ,
+                'model' => Level::class,
+            ],
+            'product_id',
+            'product_model',
+        ]);
+
+        $this->crud->removeButton('update');
     }
 
 
     protected function setupShowOperation(){
-        $this->crud->set('show.setFromDb', false);
-        $this->getColumns();
-        $this->crud->column($this->crud->model->getCreatedAtColumn())->type('datetime');
-        $this->crud->column($this->crud->model->getUpdatedAtColumn())->type('datetime');
+        $this->setupListOperation();
+        $this->crud->addColumns([
+            [
+                'name' => 'created_by',
+                'label' => 'Created By',
+                'entity' => 'createdBy',
+                'attribute' => 'name' ,
+                'model' => User::class,
+            ],
+            [
+                'name' => 'updated_by',
+                'label' => 'Updated By',
+                'entity' => 'updatedBy',
+                'attribute' => 'name' ,
+                'model' => User::class,
+            ],            
+            'created_at',
+            'updated_at',
+        ]);
     }
 
     /**
@@ -122,19 +133,49 @@ class TransactionCrudController extends CrudController
      */
     protected function setupCreateOperation()
     {
-        CRUD::setValidation(TransactionRequest::class);
-        CRUD::field('date')->type('fixed_date_picker');
-        CRUD::field('product_name')->type('select2_from_array')->options(['Han Waters Satu' => 'Han Waters Satu', 'Han Waters Dua' => 'Han Waters Dua', 'Han Waters Tiga' => 'Han Waters Tiga', 'Han Waters Empat' => 'Han Waters Empat']);
-        CRUD::field('member_name')->type('select2_from_array')->options(User::select('name')->get()->mapWithKeys(function($entry){
-            return [$entry->name => $entry->name];
-        }));
-        CRUD::field('qty')->type('number_format');
+        $this->crud->setValidation(TransactionRequest::class);
 
-        /**
-         * Fields can be defined using the fluent syntax or array syntax:
-         * - CRUD::field('price')->type('number');
-         * - CRUD::addField(['name' => 'price', 'type' => 'number'])); 
-         */
+        $product = Product::select('id', 'name', 'model', 'price')->orderBy('name', 'ASC')->get();
+        $product = $product->map(function($item){
+            $item->name = $item->name . ' | ' . $item->model . ' | ' . 'Rp ' . formatNumber($item->price);
+            return $item;
+        });
+        // $users = User::with('member')->whereHas('member')->orderBy('name', 'ASC')->get();
+        // $users = $users->map(function($item){
+        //     $item->name = $item->member->member_numb . ' - ' . $item->name;
+        //     return $item;
+        // });
+
+        $members = Member::select('id', 'member_numb', 'name')->orderBy('name', 'ASC')->get();
+        $members = $members->map(function($item){
+            $item->name = $item->member_numb . ' - ' . $item->name;
+            return $item;
+        });
+
+        $this->crud->addField([
+            'name' => 'transaction_date',
+            'type' => 'date_picker',
+            'label' => 'Date',
+            'date_picker_option' => [
+                'todayBtn' => 'linked',
+                'format'   => 'dd-mm-yyyy',
+                'language' => 'en'
+            ],]);
+        $this->crud->addField([
+            'name' => 'product_id',
+            'type' => 'select2_from_array',
+            'label' => 'Product',
+            'options' => $product->pluck('name', 'id')->toArray(),
+            'allows_null' => false,
+        ]);
+        $this->crud->addField([
+            'name' => 'member_id',
+            'type' => 'select2_from_array',
+            'label' => 'Member',
+            'options' => $members->pluck('name', 'id')->toArray(),
+            'allows_null' => false,
+        ]);
+        $this->crud->field('qty')->type('number_format');
     }
 
     /**
@@ -145,48 +186,110 @@ class TransactionCrudController extends CrudController
      */
     protected function setupUpdateOperation()
     {
+        $this->crud->addField([
+            'name' => 'code',
+            'type' => 'text',
+            'label' => 'Code',
+            'attributes' => [
+                'readonly' => 'readonly',
+            ],
+        ]);
         $this->setupCreateOperation();
+        $this->crud->removeField('qty');
+        $this->crud->addField([
+            'name' => 'qty',
+            'type' => 'number_format',
+            'label' => 'Quantity',
+        ]);
+
+    }
+    
+    protected function generateCode() {
+        // TODO : Ganti Format Urutan
+        $code = 'TRX-'.date('Ymd').'-'.rand(1000, 9999);
+        $check = Transaction::where('code', $code)->first();
+        if($check) {
+            $this->generateCode();
+        }
+        return $code;
     }
 
-    public function store()
+    public function store(Request $request)
     {
-        // show a success message
-        \Alert::success(trans('backpack::crud.insert_success'))->flash();
-
-        return redirect($this->crud->route);
+        $requests = $request->all();
+        $this->crud->validateRequest($requests);
+        $member = Member::find($requests['member_id']);
+        $product = Product::find($requests['product_id']);
+        DB::beginTransaction();
+        try {
+            $requests['code'] = $this->generateCode();
+            $requests['id_card'] = $member->id_card;
+            $requests['member_name'] = $member->name;
+            $requests['member_numb'] = $member->member_numb;
+            $requests['level_id'] = $member->level_id;
+            $requests['product_name'] = $product->name;
+            $requests['product_model'] = $product->model;
+            $requests['qty_sold'] = $requests['qty'];
+            $requests['unit_price'] = $product->price;
+            $requests['total_price'] = $requests['qty'] * $product->price;
+            $requests['created_by'] = backpack_user()->id;
+            $requests['updated_by'] = backpack_user()->id;
+            $requests['status'] = 'pending';
+            // dd($requests);
+            $transaction = Transaction::create($requests);
+            // show a success message
+            Alert::success(trans('backpack::crud.insert_success'))->flash();
+            // save the redirect choice for next time
+            DB::commit();
+            return redirect($this->crud->route);
+        } catch (\Exception $e) {
+            DB::rollback();
+            Alert::error($e->getMessage())->flash();
+            return redirect()->back();
+        }
     }
 
     public function edit($id)
-    {
+    {   
         $this->crud->hasAccessOrFail('update');
-        // get entry ID from Request (makes sure its the last ID for nested resources)
-        $id = $this->crud->getCurrentEntryId() ?? $id;
-        // get the info for that entry
 
-        $this->data['entry'] = $this->crud->getEntryWithLocale($id);
-        $this->crud->setOperationSetting('fields', $this->crud->getUpdateFields());
+        $this->data['entry'] = $this->crud->getEntry($id);
+        $this->data['crud'] = $this->crud;
+        $this->data['fields'] = $this->crud->getUpdateFields($id);
+        $this->data['saveAction'] = $this->crud->getSaveAction();
+        $this->data['id'] = $id;
+        $this->crud->modifyField('qty', [
+            'value' => optional($this->data['entry'])->qty_sold ?? 1,
+        ]);
+        $this->crud->modifyField('code', [
+            'value' => optional($this->data['entry'])->code ?? $this->generateCode(),
+        ]);
+        $this->crud->modifyField('transaction_date', [
+            'value' => optional($this->data['entry'])->transaction_date ?? date('Y-m-d'),
+        ]);
+        return view('crud::edit', $this->data);
+    }
+
+    public function create()
+    {
+        $this->crud->hasAccessOrFail('create');
 
         $this->data['crud'] = $this->crud;
+        $this->data['fields'] = $this->crud->getCreateFields();
         $this->data['saveAction'] = $this->crud->getSaveAction();
-        $this->data['title'] = $this->crud->getTitle() ?? trans('backpack::crud.edit').' '.$this->crud->entity_name;
-        $this->data['id'] = $id;
-
-        $fields = ['product_name', 'member_name', 'qty'];
-
-        foreach($fields as $field){
-            $this->crud->modifyField($field, ['value' => optional($this->crud->transactions[$this->data['entry']->id - 1] ?? null)[$field] ?? null]);
-        }
-
-        $this->crud->modifyField('date', ['value' => optional($this->crud->transactions[$this->data['entry']->id - 1] ?? null)['date_real'] ?? null]);
-
-        // load the view from /resources/views/vendor/backpack/crud/ if it exists, otherwise load the one in the package
-        return view($this->crud->getEditView(), $this->data);
+        $this->crud->modifyField('transaction_date', [
+            'value' => date('Y-m-d'),
+        ]);
+        $this->crud->modifyField('qty', [
+            'value' => 1,
+        ]);
+        return view('crud::create', $this->data);
     }
 
     public function update()
     {
         // show a success message
-        \Alert::success(trans('backpack::crud.update_success'))->flash();
+        Alert::success(trans('backpack::crud.update_success'))->flash();
 
         return redirect($this->crud->route);
     }
