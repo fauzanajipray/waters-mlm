@@ -27,9 +27,9 @@ class ProductCrudController extends CrudController
      */
     public function setup()
     {
-        CRUD::setModel(Product::class);
-        CRUD::setRoute(config('backpack.base.route_prefix') . '/product');
-        CRUD::setEntityNameStrings('product', 'products');
+        $this->crud->setModel(Product::class);
+        $this->crud->setRoute(config('backpack.base.route_prefix') . '/product');
+        $this->crud->setEntityNameStrings('product', 'products');
     }
 
     /**
@@ -42,9 +42,9 @@ class ProductCrudController extends CrudController
     {
         $this->crud->viewAfterContent = ['image_preview_helper'];
         $this->crud->firstCellNonFlex = true;
-        CRUD::column('name')->label('Name');
-        CRUD::column('model');
-        CRUD::column('price')->label('Price')->prefix('Rp. ')->type('number_format');
+        $this->crud->column('name')->label('Name');
+        $this->crud->column('model');
+        $this->crud->column('price')->label('Price')->prefix('Rp. ')->type('number_format');
     }
 
     /**
@@ -66,10 +66,9 @@ class ProductCrudController extends CrudController
                 }
             }],
         ]);
-
-        CRUD::field('name')->label('Name');
-        CRUD::field('model')->label('Model');
-        CRUD::field('price')->label('Price')->type('number_format')->prefix('Rp');
+        $this->crud->field('name')->label('Name');
+        $this->crud->field('model')->label('Model');
+        $this->crud->field('price')->label('Price')->type('number_format')->prefix('Rp');
     }
 
     /**
@@ -104,20 +103,6 @@ class ProductCrudController extends CrudController
      */
     protected function setupShowOperation()
     {
-        $this->crud->set('show.setFromDb', false);
-        $this->crud->addColumn([
-            'name' => 'name',
-            'label' => 'Name',
-        ]);
-        $this->crud->addColumn([
-            'name' => 'model',
-            'label' => 'Model',
-        ]);
-        $this->crud->addColumn([
-            'name' => 'price',
-            'label' => 'Price',
-            'prefix' => 'Rp. ',
-            'type' => 'number_format',
-        ]);
+        $this->setupListOperation();
     }
 }

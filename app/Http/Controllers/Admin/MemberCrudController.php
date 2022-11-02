@@ -2,11 +2,19 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\User;
 use App\Http\Requests\MemberRequest;
+use App\Models\Level;
+use App\Models\Member;
+use App\Models\User;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Validator;
+use Prologue\Alerts\Facades\Alert;
 
 /**
  * Class MemberCrudController
@@ -20,7 +28,7 @@ class MemberCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
-    
+
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
      * 
@@ -28,96 +36,30 @@ class MemberCrudController extends CrudController
      */
     public function setup()
     {
-        CRUD::setModel(\App\Models\User::class);
-        CRUD::setRoute(config('backpack.base.route_prefix') . '/member');
-        CRUD::setEntityNameStrings('member', 'members');
-
-        $this->crud->members = [
-            [
-                'no_member' => '5000-2000-1000',
-                'ktp_sim' => 1234,
-                'level' => 'L3',
-                'role' => 'Super Admin',
-                'jenis_kelamin' => 'Male',
-                'mobile_phone' => '0811234',
-                'alamat' => 'Jalan Beruang No 1',
-                'upline' => null,
-                'expired' => '1 Jun 2024'
-            ],
-            [
-                'no_member' => '5000-2001-2000',
-                'ktp_sim' => 5678,
-                'level' => 'L2',
-                'role' => 'Admin',
-                'jenis_kelamin' => 'Male',
-                'mobile_phone' => '0815678',
-                'alamat' => 'Jalan Hasanuddin No 43',
-                'upline' => User::where('id', 1)->first()->name ?? null,
-                'expired' => '14 Jan 2024'
-            ],
-            [
-                'no_member' => '5000-2002-2000',
-                'ktp_sim' => 9101112,
-                'level' => 'L1',
-                'role' => 'Admin',
-                'jenis_kelamin' => 'Male',
-                'mobile_phone' => '0819101112',
-                'alamat' => 'Jalan Kemerdekaan No 45',
-                'upline' => User::where('id', 1)->first()->name ?? null,
-                'expired' => '19 Oct 2025'
-            ],
-            [
-                'no_member' => '5000-2001-2000',
-                'ktp_sim' => 13141516,
-                'level' => 'Member',
-                'role' => 'Member',
-                'jenis_kelamin' => 'Male',
-                'mobile_phone' => '08113141516',
-                'alamat' => 'Jalan Mangga No 17',
-                'upline' => User::where('id', 1)->first()->name ?? null,
-                'expired' => '23 Mar 2025'
-            ],
-        ];
+        $this->crud->setModel(\App\Models\Member::class);
+        $this->crud->setRoute(config('backpack.base.route_prefix') . '/member');
+        $this->crud->setEntityNameStrings('member', 'members');
     }
 
-    public function getColumns(){
-        CRUD::column('no_member')->label('No. Member')->value(function($entry){
-            return optional($this->crud->members[$entry->id - 1] ?? null)['no_member'] ?? null;
-        });
-        CRUD::column('ktp_sim')->label('KTP / SIM')
-        ->value(function($entry){
-            return optional($this->crud->members[$entry->id - 1] ?? null)['ktp_sim'] ?? null;
-        });
-        CRUD::column('name')->orderable(false)->searchLogic(false)->label('Name');
-        CRUD::column('level')->label('Level')
-        ->value(function($entry){
-            return optional($this->crud->members[$entry->id - 1] ?? null)['level'] ?? null;
-        });
-        CRUD::column('role')->label('Role')
-        ->value(function($entry){
-            return optional($this->crud->members[$entry->id - 1] ?? null)['role'] ?? null;
-        });
-        CRUD::column('jenis_kelamin')->label('Gender')
-        ->value(function($entry){
-            return optional($this->crud->members[$entry->id - 1] ?? null)['jenis_kelamin'] ?? null;
-        });
-        CRUD::column('mobile_phone')->label('Mobile Phone')->value(function($entry){
-            return optional($this->crud->members[$entry->id - 1] ?? null)['mobile_phone'] ?? null;
-        });
-        CRUD::column('email')->orderable(false)->searchLogic(false)->label('Email');
-        CRUD::column('alamat')->label('Address')->value(function($entry){
-            return optional($this->crud->members[$entry->id - 1] ?? null)['alamat'] ?? null;
-        });
-        CRUD::column('upline')->label('Upline')->value(function($entry){
-            return optional($this->crud->members[$entry->id - 1] ?? null)['upline'] ?? null;
-        });
-        CRUD::column('expired')->label('Expired')->value(function($entry){
-            return optional($this->crud->members[$entry->id - 1] ?? null)['expired'] ?? null;
-        });
-        CRUD::column('photo_member')->label('Photo Member')->type('image_preview')
-        ->searchLogic(false)->orderable(false)->limit(1000)->url(function($entry){
-            return url('images/profile.jpg');
-        });
+    protected function getUplineGroup(){
+        $downlineInGroup = [];
+        $mainMember = User::with('member')->where('id', backpack_user()->id)->firstOrFail()->member->toArray();
+        // add to downlineGroup
+        $downlineInGroup[$mainMember['id']] = $mainMember['member_numb'] . ' - ' . $mainMember['name'];
+        // get downline
+        $downline = Member::where('upline_id', $mainMember['id'])->get()->toArray();
+        // add to downlineGroup
+        foreach($downline as $d){
+            $downlineInGroup[$d['id']] = $d['member_numb'] . ' - ' . $d['name'];
+        }
+        // get downline from downline
+        foreach($downline as $d){
+            $downline2 = Member::where('upline_id', $d['id'])->get()->toArray();
+            foreach($downline2 as $d2){
+                $downlineInGroup[$d2['id']] = $d2['member_numb'] . ' - ' . $d2['name'];
+            }
+        }
+        return $downlineInGroup;
     }
 
     /**
@@ -130,20 +72,31 @@ class MemberCrudController extends CrudController
     {
         $this->crud->viewAfterContent = ['image_preview_helper'];
         $this->crud->firstCellNonFlex = true;
-        $this->getColumns();
-        $this->crud->addButtonFromModelFunction('line', 'cardMember', 'cardMember', 'beginning');
-        $this->crud->addButtonFromModelFunction('line', 'reportMember', 'reportMember', 'beginning');
-    }
+        $this->crud->column('member_numb')->label('No. Member');
+        $this->crud->column('id_card')->label('ID Card');
+        $this->crud->column('name');
+        $this->crud->addColumn([
+            'name' => 'level_id',
+            'label' => 'Level',
+            'entity' => 'level',
+            'attribute' => 'name' ,
+            'model' => Level::class,
+        ]);
+        $this->crud->column('gender');
+        $this->crud->column('phone');
+        $this->crud->column('email');
+        $this->crud->column('address');
+        $this->crud->addColumn([
+            'name' => 'photo_url',
+            'label' => 'Photo Member',
+            'type' => 'image',
+            'prefix' => 'storage/',
+        ]);
 
-    protected function setupShowOperation(){
-        $this->crud->set('show.setFromDb', false);
-        $this->crud->viewAfterContent = ['image_preview_helper'];
-        $this->getColumns(true);
-        $this->crud->column($this->crud->model->getCreatedAtColumn())->type('datetime');
-        $this->crud->column($this->crud->model->getUpdatedAtColumn())->type('datetime');
-
-        $this->crud->addButtonFromModelFunction('line', 'cardMember', 'cardMember', 'beginning');
-        $this->crud->addButtonFromModelFunction('line', 'reportMember', 'reportMember', 'beginning');
+        // TODO : Add this buttons
+        // $this->crud->removeButton('create');
+        // $this->crud->addButtonFromModelFunction('line', 'cardMember', 'cardMember', 'beginning');
+        // $this->crud->addButtonFromModelFunction('line', 'reportMember', 'reportMember', 'beginning');
     }
 
     /**
@@ -154,41 +107,63 @@ class MemberCrudController extends CrudController
      */
     protected function setupCreateOperation()
     {
-        CRUD::setValidation(MemberRequest::class);
-
-        CRUD::field('ktp_sim')->label('NIK / SIM');
-        CRUD::field('name')->label('Name');
-        CRUD::field('password')->label('Password')->type('password');
-        CRUD::field('confirmation_password')->label('Password Confirmation')->type('password');
-        CRUD::field('role')->label('Role')
-        ->type('select2_from_array')->options([
-            'Super Admin' => 'Super Admin',
-            'Admin' => 'Admin',
-            'Member' => 'Member',
-            'Guest' => 'Guest'
-        ]);
-        CRUD::field('jenis_kelamin')->label('Gender')
-        ->type('select2_from_array')->options(['Male' => 'Male', 'Female' => 'Female']);
-        CRUD::field('mobile_phone')->label('Mobile Phone');
-        CRUD::field('email')->label('Email');
-        CRUD::field('alamat')->label('Address');
-        CRUD::field('upline')->label('Upline')
-        ->type('select2_from_array')->options(User::select('name')->get()->mapWithKeys(function($item) {
-            return [$item['name'] => $item['name']];
-        }));
-
-        CRUD::field('photo_member')->label('Photo Member')->type('image_fix')->crop(true)->aspect_ratio(0.67)
-        ->max_file_size(5000000)->url(function($entry){
-            if(isset($entry)){
-                return url('images/profile.jpg');
-            }
+        $this->crud->setValidation(MemberRequest::class);
+        $level = Level::find(1);
+        $members = Member::all()->map(function($member){
+            $member->name = $member->member_numb . ' - ' . $member->name;
+            return $member;
         });
-
-        /**
-         * Fields can be defined using the fluent syntax or array syntax:
-         * - CRUD::field('price')->type('number');
-         * - CRUD::addField(['name' => 'price', 'type' => 'number'])); 
-         */
+        $this->crud->addField([
+            'name' => 'level_id',
+            'type' => 'hidden',
+            'value' => $level->id,
+        ]);
+        $this->crud->addField([
+            'name' => 'upline_id',
+            'label' => 'Upline',
+            'type' => 'select2_from_array',
+            'options' => $members->pluck('name', 'id')->toArray(),
+            'allows_null' => false,
+        ]);
+        $this->crud->addField([
+            'name' => 'member_numb',
+            'label' => 'No. Member',
+            'type' => 'text',
+            'attributes' => [
+                'readonly' => 'readonly',
+            ],
+            'value' => $this->generateMemberNumber(),
+        ]);
+        $this->crud->addField([
+            'name' => 'level_name',
+            'label' => 'Level',
+            'type' => 'text',
+            'value' => $level->code.' - '.$level->name,
+            'attributes' => [
+                'placeholder' => 'Level',
+                'disabled' => 'disabled'
+            ],
+        ]);
+        $this->crud->field('id_card')->label('ID Card')->type('number');
+        $this->crud->field('name');
+        $this->crud->addField([
+            'name' => 'gender',
+            'label' => 'Gender',
+            'type' => 'select_from_array',
+            'options' => ['M' => 'Male', 'F' => 'Female'],
+        ]);
+        $this->crud->field('phone')->type('number');
+        $this->crud->field('email')->type('email');
+        $this->crud->field('address')->type('textarea');
+        $this->crud->addField([
+            'name' => 'photo_url',
+            'label' => 'Photo Member',
+            'type' => 'image',
+            'upload' => true,
+            'crop' => true,
+            'aspect_ratio' => 1,
+            'prefix' => 'storage/',
+        ]);
     }
 
     /**
@@ -200,51 +175,92 @@ class MemberCrudController extends CrudController
     protected function setupUpdateOperation()
     {
         $this->setupCreateOperation();
+        $this->crud->removeField('member_numb');
+        $this->crud->addField([
+            'name' => 'member_numb',
+            'label' => 'No. Member',
+            'type' => 'text',
+            'attributes' => [
+                'readonly' => 'readonly',
+            ],
+        ])->afterField('upline_id');
     }
-
+    
+    /**
+     * Define what happens when the Show operation is loaded.
+     * 
+     * @see https://backpackforlaravel.com/docs/crud-operation-show
+     * @return void
+     */
+    protected function setupShowOperation() {
+        $this->setupListOperation();
+        $this->crud->removeColumn('photo_url');
+        $this->crud->addColumn([
+            'name' => 'photo_url',
+            'label' => 'Photo Member',
+            'type' => 'image',
+            'prefix' => 'storage/',
+            'height' => '200px',
+        ]);
+    }
 
     public function store()
     {
-        // show a success message
-        \Alert::success(trans('backpack::crud.insert_success'))->flash();
+        $this->crud->validateRequest();
+        $requests = request()->all();
+        DB::beginTransaction();
+        try {
+            $checkMember = Member::where('member_numb', $requests['member_numb'])->first();
+            if($checkMember){
+                $requests['member_numb'] = $this->generateMemberNumber();
+            }
 
-        return redirect($this->crud->route);
-    }
+            // Create Member 
+            $member = Member::create($requests);
+            // TODO : Create User
+            // $user = User::create([
+            //     'name' => $requests['name'],
+            //     'email' => $requests['email'],
+            //     'password' => Hash::make('12345678'),
+            //     'member_id' => $member->id,
+            //     // 'role' => 'member', // TODO: Add Role
+            // ]);
 
-    public function edit($id)
-    {
-        $this->crud->hasAccessOrFail('update');
-        // get entry ID from Request (makes sure its the last ID for nested resources)
-        $id = $this->crud->getCurrentEntryId() ?? $id;
-        // get the info for that entry
-
-        $this->data['entry'] = $this->crud->getEntryWithLocale($id);
-        $this->crud->setOperationSetting('fields', $this->crud->getUpdateFields());
-
-        $this->data['crud'] = $this->crud;
-        $this->data['saveAction'] = $this->crud->getSaveAction();
-        $this->data['title'] = $this->crud->getTitle() ?? trans('backpack::crud.edit').' '.$this->crud->entity_name;
-        $this->data['id'] = $id;
-
-        $fields = ['ktp_sim', 
-        'role', 'jenis_kelamin', 'mobile_phone', 'alamat', 'upline'
-        ];
-
-        foreach($fields as $field){
-            $this->crud->modifyField($field, ['value' => optional($this->crud->members[$this->data['entry']->id - 1] ?? null)[$field] ?? null]);
+            DB::commit();
+            Alert::success(trans('backpack::crud.insert_success'))->flash();
+            return redirect($this->crud->route);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Alert::error('Error ', $e->getMessage())->flash();
+            return redirect()->back()->withInput()->withErrors($e->getMessage());
         }
-        $this->crud->modifyField('photo_member', ['value' => 'profile.jpg']);
-
-        // load the view from /resources/views/vendor/backpack/crud/ if it exists, otherwise load the one in the package
-        return view($this->crud->getEditView(), $this->data);
     }
-
+    
     public function update()
-    {
-        // show a success message
-        \Alert::success(trans('backpack::crud.update_success'))->flash();
+    {   
+        $this->crud->validateRequest();
+        $requests = request()->all();
+        $user = User::where('member_id', $requests['id'])->first();
+        DB::beginTransaction();
+        try {
+            // Update Member 
+            $member = Member::find($requests['id']);
+            $member->update($requests);
+            //Update User
+            // TODO : Update User
+            // $user->update([
+            //     'name' => $requests['name'],
+            //     'email' => $requests['email'],
+            // ]);
+            DB::commit();
+            Alert::success('Member has been updated successfully')->flash();
+            return redirect($this->crud->route);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Alert::error('Error ', $e->getMessage())->flash();
+            return redirect()->back()->withInput();
+        }
 
-        return redirect($this->crud->route);
     }
 
     public function destroy($id)
@@ -255,7 +271,7 @@ class MemberCrudController extends CrudController
     public function downloadCardMember($id) {
         $user = User::where('id', $id)->firstOrFail();
 
-        $noMember = optional($this->crud->members[$user->id - 1] ?? null)['no_member'] ?? '-';
+        $noMember = optional($this->crud->members[$userid - 1] ?? null)['no_member'] ?? '-';
         $title = "Card Member ({$noMember} - {$user->name})";
         $pdf = PDF::loadView('member.card_member_pdf', ['user' => $user, 'title' => $title, 'member' => optional($this->crud->members[$user->id - 1] ?? null)]);
         return $pdf->download($title . ".pdf");
@@ -266,5 +282,73 @@ class MemberCrudController extends CrudController
 
         $noMember = optional($this->crud->members[$user->id - 1] ?? null)['no_member'] ?? '-';
         return view('member.report_member', ['title' => "Report Member ({$noMember} - {$user->name})", 'user' => $user]);
+    }
+
+    protected function setupModerateRoutes($segment, $routeName, $controller)
+    {
+        Route::get('user/{id}/'.$segment.'/create', [
+            'as'        => $routeName.'.getCreateMember',
+            'uses'      => $controller.'@getCreateMember',
+            'operation' => 'createMember',
+        ]);
+        Route::post('user/{id}/'.$segment.'/create', [
+            'as'        => $routeName.'.postCreateMember',
+            'uses'      => $controller.'@postCreateMember',
+            'operation' => 'createMember',
+        ]);
+    }
+
+    protected function generateMemberNumber(){
+        $member = Member::orderBy('member_numb', 'desc')->first();
+        $lastMemberNumb = $member->member_numb ?? 0;
+        $memberNumb = explode('-', $lastMemberNumb)[1] + 1;
+        $memberNumb = 'M-' . str_pad($memberNumb, 3, '0', STR_PAD_LEFT);
+        return $memberNumb;
+    }
+
+    public function getCreateMember($id) {
+        $this->crud->setOperation('createMember');
+        $this->data['crud'] = $this->crud;
+        $this->data['title'] = 'Add '.$this->crud->entity_name;
+        $this->data['member_numb'] = $this->generateMemberNumber();
+        // $this->data['id'] = $id;
+        $this->data['level'] = Level::find(1);
+        $this->data['user'] = User::where('id', $id)->firstOrFail();
+        $this->data['upline'] = User::with('member')->where('id', backpack_user()->id)->firstOrFail()->member;
+        $this->data['uplines'] = Member::select('name', 'id', 'member_numb')->get();
+        return view('vendor.backpack.crud.create-member', $this->data);
+    }
+
+    public function postCreateMember(Request $request, $id){
+        $requests = $request->all();
+        $validator = Validator::make($requests, (new MemberRequest)->rules());
+
+        if ($validator->fails()) {
+            Alert::error("Validation Error")->flash();
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+        DB::beginTransaction();
+        try {
+            $checkMember = Member::where('member_numb', $requests['member_numb'])->first();
+            if($checkMember){
+                $requests['member_numb'] = $this->generateMemberNumber();
+            }
+            // Create Member
+            $member = Member::create($requests);
+            // Update User
+            $user = User::where('id', $id)->firstOrFail();
+            $user->update([
+                'member_id' => $member->id,
+                'name' => $requests['name']
+            ]);
+            Alert::success('Register Member success')->flash();
+            DB::commit();
+            return redirect()->route('member.index');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Alert::error('Error, '.$e->getMessage())->flash();
+
+            return redirect()->back()->withInput();
+        }
     }
 }

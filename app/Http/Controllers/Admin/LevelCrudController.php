@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\LevelRequest;
+use App\Http\Requests\LevelRequestUpdate;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Illuminate\Validation\Rule;
@@ -27,9 +28,9 @@ class LevelCrudController extends CrudController
      */
     public function setup()
     {
-        CRUD::setModel(\App\Models\Level::class);
-        CRUD::setRoute(config('backpack.base.route_prefix') . '/level');
-        CRUD::setEntityNameStrings('level', 'levels');
+        $this->crud->setModel(\App\Models\Level::class);
+        $this->crud->setRoute(config('backpack.base.route_prefix') . '/level');
+        $this->crud->setEntityNameStrings('level', 'levels');
     }
 
     /**
@@ -40,22 +41,16 @@ class LevelCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        CRUD::column('code');
-        CRUD::column('name');
-        CRUD::column('description');
-        CRUD::column('minimum_downline');
-        CRUD::column('minimum_sold_by_downline');
-        CRUD::column('minimum_sold');
-        CRUD::column('ordering_level');
-        CRUD::column('bp_percentage');
-        CRUD::column('bs_percentage');
-        CRUD::column('or_percentage');
-
-        /**
-         * Columns can be defined using the fluent syntax or array syntax:
-         * - CRUD::column('price')->type('number');
-         * - CRUD::addColumn(['name' => 'price', 'type' => 'number']); 
-         */
+        $this->crud->column('code');
+        $this->crud->column('name');
+        $this->crud->column('description');
+        $this->crud->column('minimum_downline');
+        $this->crud->column('minimum_sold_by_downline');
+        $this->crud->column('minimum_sold');
+        $this->crud->column('ordering_level');
+        $this->crud->column('bp_percentage');
+        $this->crud->column('bs_percentage');
+        $this->crud->column('or_percentage');
     }
 
     /**
@@ -66,29 +61,18 @@ class LevelCrudController extends CrudController
      */
     protected function setupCreateOperation()
     {
-        CRUD::setValidation([
-            'code' => 'required|unique:levels',
-            'name' => 'required',
-            'description' => 'required',
-            'minimum_downline' => 'required|numeric',
-            'minimum_sold_by_downline' => 'required|numeric',
-            'minimum_sold' => 'required|numeric',
-            'ordering_level' => 'required|numeric',
-            'bp_percentage' => 'required|numeric|between:0,100',
-            'bs_percentage' => 'required|numeric|between:0,100',
-            'or_percentage' => 'required|numeric|between:0,100',
-        ]);
+        $this->crud->setValidation(LevelRequest::class);
 
-        CRUD::field('code');
-        CRUD::field('name');
-        CRUD::field('description');
-        CRUD::field('minimum_downline');
-        CRUD::field('minimum_sold_by_downline');
-        CRUD::field('minimum_sold');
-        CRUD::field('ordering_level');
-        CRUD::field('bp_percentage')->type('number');
-        CRUD::field('bs_percentage')->type('number');
-        CRUD::field('or_percentage')->type('number');
+        $this->crud->field('code');
+        $this->crud->field('name');
+        $this->crud->field('description');
+        $this->crud->field('minimum_downline');
+        $this->crud->field('minimum_sold_by_downline');
+        $this->crud->field('minimum_sold');
+        $this->crud->field('ordering_level');
+        $this->crud->field('bp_percentage')->type('number');
+        $this->crud->field('bs_percentage')->type('number');
+        $this->crud->field('or_percentage')->type('number');
     }
 
     /**
@@ -99,11 +83,11 @@ class LevelCrudController extends CrudController
      */
     protected function setupUpdateOperation()
     {
+        $this->crud->setValidation(LevelRequestUpdate::class);
         $this->setupCreateOperation();
         $this->crud->setValidation([
-            'code' => [
-                'required', 
-                Rule::unique('levels')->ignore($this->crud->getCurrentEntryId())],
+            'code' => ['required', Rule::unique('levels')->ignore($this->crud->getCurrentEntryId())],
+            'name' => ['required', Rule::unique('levels')->ignore($this->crud->getCurrentEntryId())],
         ]);
     }
 }

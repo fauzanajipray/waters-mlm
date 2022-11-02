@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\UserRequest;
+use App\Http\Requests\UserRequestUpdate;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
-use Illuminate\Console\View\Components\Alert;
 use Illuminate\Http\Request;
+use Prologue\Alerts\Facades\Alert;
 
 /**
  * Class UserCrudController
@@ -46,9 +47,8 @@ class UserCrudController extends CrudController
         CRUD::column('email');
         CRUD::column('password');
 
-        $this->crud->addButtonFromModelFunction('line', 'register_member', 'registerMember', 'beginning');
-        // $this->crud->addButtonFromView('line', 'register_member', 'register_member', 'end');
-
+        // TODO: Add Register Member Button
+        // $this->crud->addButtonFromModelFunction('line', 'register_member', 'registerMember', 'beginning');
     }
 
     /**
@@ -59,12 +59,7 @@ class UserCrudController extends CrudController
      */
     protected function setupCreateOperation()
     {
-        CRUD::setValidation([
-            'name' => 'required|min:2',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6|confirmed',
-            'password_confirmation' => 'required|min:6',
-        ]);
+        CRUD::setValidation(UserRequest::class);
 
         CRUD::field('name');
         CRUD::field('email');
@@ -74,12 +69,6 @@ class UserCrudController extends CrudController
             'type' => 'password',
             'label' => 'Confirm Password',
         ]);
-
-        /**
-         * Fields can be defined using the fluent syntax or array syntax:
-         * - CRUD::field('price')->type('number');
-         * - CRUD::addField(['name' => 'price', 'type' => 'number'])); 
-         */
     }
 
     /**
@@ -90,21 +79,10 @@ class UserCrudController extends CrudController
      */
     protected function setupUpdateOperation()
     {
+        $this->crud->setValidation(UserRequestUpdate::class);
         $this->setupCreateOperation();
-        $this->crud->addField([
-            'label' => 'Current Password',
-            'name' => 'current_password',
-            'type' => 'password',
-            'value' => 'current_password',
-        ])->afterField('email');
-        $this->crud->setValidation([
-            // validation Passwrod Old 
-            'current_password' => ['required', 'min:6', function ($attribute, $value, $fail) {
-                $current_password = \App\Models\User::find($this->crud->getCurrentEntryId())->password;
-                if (!\Hash::check($value, $current_password)) {
-                    return $fail('The current password is incorrect.');
-                }
-            }],
+        $this->crud->setValidation([      
+            'email' => ['required', 'email', \Illuminate\Validation\Rule::unique('users')->ignore(request()->id)],
         ]);
     }
 
@@ -115,33 +93,25 @@ class UserCrudController extends CrudController
      * @return void
      */
     protected function setupShowOperation() {
-        $this->setupListOperation();        
+        $this->setupListOperation();
     }
 
     protected function store(Request $request) {
         $this->crud->setRequest($this->crud->validateRequest());
-        //bcypt password
         $password = bcrypt($request->password);
-        $request->merge(['password' => $password]);
-        
-        $user = $this->crud->create($request->all());
+        $request->merge(['password' => $password]);        
+        $this->crud->create($request->all());
+        Alert::success('User has been created successfully')->flash();
         return redirect()->route('user.index');
     }
 
     protected function update(Request $request) {
-        // validate request data except email
-        $this->crud->setValidation([
-            'name' => 'required|min:2',
-            'email' => ['required', 'email', \Illuminate\Validation\Rule::unique('users')->ignore($request->id)],
-            'password' => 'required|min:6|confirmed',
-            'password_confirmation' => 'required|min:6',
-        ]);
+        $this->crud->setValidation(UserRequestUpdate::class);
         $this->crud->setRequest($this->crud->validateRequest());
-        //bcypt password
         $password = bcrypt($request->password);
         $request->merge(['password' => $password]);
-        
-        $user = $this->crud->update($request->id, $request->all());
+        $this->crud->update($request->id, $request->all());
+        Alert::success('User has been updated successfully')->flash();
         return redirect()->route('user.index');
     }
 }

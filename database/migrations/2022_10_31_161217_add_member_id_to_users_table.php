@@ -14,8 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->unsignedBigInteger('member_id')->nullable()->after('id');
-            $table->foreign('member_id')->references('id')->on('members')->onDelete('restrict')->onUpdate('cascade');
+            $table->string('member_id')->nullable()->after('id')->unique();
             $table->softDeletes()->after('remember_token');
         });
     }
@@ -29,9 +28,8 @@ return new class extends Migration
     {   
         Schema::disableForeignKeyConstraints();
         Schema::table('users', function (Blueprint $table) {
-            $table->dropForeign(['member_id']);
             $table->dropColumn('member_id');
             $table->dropSoftDeletes();
-        }, );
+        });
     }
 };

@@ -28,11 +28,13 @@ class DatabaseSeeder extends Seeder
     private function user()
     {
         User::updateOrCreate([
-            'email' => 'kevin@rectmedia.com'
+            'email' => 'kevin@rectmedia.com',
+            'member_id' => 1,
         ], [
             'email' => 'kevin@rectmedia.com',
             'password' => bcrypt('qwerty'),
-            'name' => 'Kevin'
+            'name' => 'Kevin',
+            'member_id' => 1,
         ]);
 
         User::updateOrCreate([
@@ -40,7 +42,8 @@ class DatabaseSeeder extends Seeder
         ], [
             'email' => 'benny@gmail.com',
             'password' => bcrypt('qwerty'),
-            'name' => 'Benny'
+            'name' => 'Benny',
+            'member_id' => 2,
         ]);
 
         User::updateOrCreate([
@@ -48,7 +51,8 @@ class DatabaseSeeder extends Seeder
         ], [
             'email' => 'andi@gmail.com',
             'password' => bcrypt('qwerty'),
-            'name' => 'Andi'
+            'name' => 'Andi',
+            'member_id' => 3,
         ]);
 
         User::updateOrCreate([
@@ -64,7 +68,8 @@ class DatabaseSeeder extends Seeder
         ], [
             'email' => 'fauzan@gmail.com',
             'password' => bcrypt('qwerty'),
-            'name' => 'Fauzan'
+            'name' => 'Fauzan',
+            'member_id' => 4,
         ]);
     }
 
@@ -185,6 +190,7 @@ class DatabaseSeeder extends Seeder
     private function member()
     {
         Member::updateOrCreate([
+            'id' => 1,
             'member_numb' => 'M-001',
         ], [
             'member_numb' => 'M-001',
@@ -198,6 +204,7 @@ class DatabaseSeeder extends Seeder
             'upline_id' => null
         ]);
         Member::updateOrCreate([
+            'id' => 2,
             'member_numb' => 'M-002',
         ], [
             'member_numb' => 'M-002',
@@ -211,6 +218,7 @@ class DatabaseSeeder extends Seeder
             'upline_id' => 1
         ]);
         Member::updateOrCreate([
+            'id' => 3,
             'member_numb' => 'M-003',
         ], [
             'member_numb' => 'M-003',
@@ -224,6 +232,7 @@ class DatabaseSeeder extends Seeder
             'upline_id' => 1
         ]);
         Member::updateOrCreate([
+            'id' => 4,
             'member_numb' => 'M-004',
         ], [
             'member_numb' => 'M-004',

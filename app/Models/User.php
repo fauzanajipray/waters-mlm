@@ -51,18 +51,10 @@ class User extends Authenticatable
     |--------------------------------------------------------------------------
     */
 
-    public function cardMember(){
-        return '<a href="' . backpack_url('member') . '/' . $this->id . '/download-card-member" target="_blank" class="btn btn-sm btn-link"><i class="la la-download"></i> Card Member</a>';
-
-    }
-
-    public function reportMember(){
-        return '<a href="' . backpack_url('member') . '/' . $this->id . '/report-member" class="btn btn-sm btn-link"><i class="la la-chart-bar"></i> Report Member</a>';
-    }
-
     public function registerMember(){
         if($this->member_id == null){
-            return '<a href="' . backpack_url('member') . '/' . $this->id . '/create-member" class="btn btn-sm btn-link"><i class="la la-user-plus"></i> Register Member</a>';
+            // user/{id}/member/create
+            return '<a href="' . backpack_url('user') . '/' . $this->id . '/member/create" class="btn btn-sm btn-link"><i class="la la-user-plus"></i> Register Member</a>';
         }else{
             return '<a href="#" class="btn btn-sm btn-link text-disable"><i class="la la-user-edit"></i> Already Registered</a>';
         }
@@ -75,7 +67,7 @@ class User extends Authenticatable
     */
 
     public function member(){
-        return $this->hasOne(Member::class, 'id', 'member_id');
+        return $this->belongsTo(Member::class, 'member_id', 'id');
     }
 
     /*
