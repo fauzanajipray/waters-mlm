@@ -26,10 +26,10 @@ class LevelRequestUpdate extends FormRequest
     {
         return [
             'description' => 'required',
-            'minimum_downline' => 'required|numeric',
-            'minimum_sold_by_downline' => 'required|numeric',
-            'minimum_sold' => 'required|numeric',
-            'ordering_level' => 'required|numeric',
+            'minimum_downline' => 'required|numeric|min:0',
+            'minimum_sold_by_downline' => 'required|numeric|min:0',
+            'minimum_sold' => 'required|numeric|min:0',
+            'ordering_level' => 'required|numeric|min:0',
             'bp_percentage' => 'required|numeric|between:0,100',
             'bs_percentage' => 'required|numeric|between:0,100',
             'or_percentage' => 'required|numeric|between:0,100',
