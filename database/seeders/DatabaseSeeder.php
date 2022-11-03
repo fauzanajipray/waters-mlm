@@ -43,7 +43,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'benny@gmail.com',
             'password' => bcrypt('qwerty'),
             'name' => 'Benny',
-            'member_id' => 2,
+            // 'member_id' => 2,
         ]);
 
         User::updateOrCreate([
@@ -52,7 +52,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'andi@gmail.com',
             'password' => bcrypt('qwerty'),
             'name' => 'Andi',
-            'member_id' => 3,
+            // 'member_id' => 3,
         ]);
 
         User::updateOrCreate([
@@ -69,7 +69,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'fauzan@gmail.com',
             'password' => bcrypt('qwerty'),
             'name' => 'Fauzan',
-            'member_id' => 4,
+            // 'member_id' => 4,
         ]);
     }
 

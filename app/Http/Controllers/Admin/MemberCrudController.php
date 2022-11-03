@@ -263,11 +263,6 @@ class MemberCrudController extends CrudController
 
     }
 
-    public function destroy($id)
-    {
-        return 1;
-    }
-
     public function downloadCardMember($id) {
         $user = User::where('id', $id)->firstOrFail();
 

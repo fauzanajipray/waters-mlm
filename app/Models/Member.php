@@ -4,13 +4,14 @@ namespace App\Models;
 
 use Backpack\CRUD\app\Models\Traits\CrudTrait;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use Intervention\Image\ImageManagerStatic as Image;
 use Illuminate\Support\Facades\Storage;
 
 class Member extends Model
 {
-    use CrudTrait;
+    use CrudTrait, SoftDeletes;
 
     /*
     |--------------------------------------------------------------------------
