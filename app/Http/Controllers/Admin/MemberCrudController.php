@@ -325,7 +325,6 @@ class MemberCrudController extends CrudController
         DB::beginTransaction();
         try {
             $checkMember = Member::where('member_numb', $requests['member_numb'])->first();
-            dd($checkMember);
             if($checkMember){
                 $requests['member_numb'] = $this->generateMemberNumber();
             }
