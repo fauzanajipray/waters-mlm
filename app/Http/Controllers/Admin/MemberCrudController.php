@@ -294,8 +294,8 @@ class MemberCrudController extends CrudController
     }
 
     protected function generateMemberNumber(){
-        $member = Member::orderBy('member_numb', 'desc')->first();
-        $lastMemberNumb = $member->member_numb ?? 0;
+        $lastMember = Member::withTrashed()->orderBy('id', 'desc')->first();
+        $lastMemberNumb = $lastMember->member_numb ?? 0;
         $memberNumb = explode('-', $lastMemberNumb)[1] + 1;
         $memberNumb = 'M-' . str_pad($memberNumb, 3, '0', STR_PAD_LEFT);
         return $memberNumb;
@@ -325,6 +325,7 @@ class MemberCrudController extends CrudController
         DB::beginTransaction();
         try {
             $checkMember = Member::where('member_numb', $requests['member_numb'])->first();
+            dd($checkMember);
             if($checkMember){
                 $requests['member_numb'] = $this->generateMemberNumber();
             }
