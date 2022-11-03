@@ -201,17 +201,14 @@ class TransactionCrudController extends CrudController
             'type' => 'number_format',
             'label' => 'Quantity',
         ]);
-
     }
     
     protected function generateCode() {
-        // TODO : Ganti Format Urutan
-        $code = 'TRX-'.date('Ymd').'-'.rand(1000, 9999);
-        $check = Transaction::where('code', $code)->first();
-        if($check) {
-            $this->generateCode();
-        }
-        return $code;
+        $lastTransaction = Transaction::withTrashed()->orderBy('id', 'desc')->first();
+        $lastTransactionCode = $lastTransaction->code ?? 'TRX-000000-0000';
+        $transactionCode = explode('-', $lastTransactionCode)[2] + 1;
+        $transactionCode = 'TRX-' . date('ymd') . '-' . str_pad($transactionCode, 4, '0', STR_PAD_LEFT);
+        return $transactionCode;
     }
 
     public function store(Request $request)
@@ -235,7 +232,6 @@ class TransactionCrudController extends CrudController
             $requests['created_by'] = backpack_user()->id;
             $requests['updated_by'] = backpack_user()->id;
             $requests['status'] = 'pending';
-            // dd($requests);
             $transaction = Transaction::create($requests);
             // show a success message
             Alert::success(trans('backpack::crud.insert_success'))->flash();

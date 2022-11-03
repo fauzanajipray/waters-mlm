@@ -295,7 +295,7 @@ class MemberCrudController extends CrudController
 
     protected function generateMemberNumber(){
         $lastMember = Member::withTrashed()->orderBy('id', 'desc')->first();
-        $lastMemberNumb = $lastMember->member_numb ?? 0;
+        $lastMemberNumb = $lastMember->member_numb ?? 'M-000';
         $memberNumb = explode('-', $lastMemberNumb)[1] + 1;
         $memberNumb = 'M-' . str_pad($memberNumb, 3, '0', STR_PAD_LEFT);
         return $memberNumb;
