@@ -294,9 +294,4 @@ class TransactionCrudController extends CrudController
 
         return redirect($this->crud->route);
     }
-
-    public function destroy($id)
-    {
-        return 1;
-    }
 }
