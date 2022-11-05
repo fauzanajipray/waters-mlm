@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\UserRequest;
 use App\Http\Requests\UserRequestUpdate;
+use App\Models\User;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Illuminate\Http\Request;
@@ -42,11 +43,11 @@ class UserCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-       $this->crud->column('name');
-       $this->crud->column('email');
+        $this->crud->column('name');
+        $this->crud->column('email');
 
         // TODO: Add Register Member Button
-        // $this->crud->addButtonFromModelFunction('line', 'register_member', 'registerMember', 'beginning');
+        $this->crud->addButtonFromModelFunction('line', 'register_member', 'registerMember', 'beginning');
     }
 
     /**
@@ -57,16 +58,18 @@ class UserCrudController extends CrudController
      */
     protected function setupCreateOperation()
     {
-       $this->crud->setValidation(UserRequest::class);
-
-       $this->crud->field('name');
-       $this->crud->field('email');
-       $this->crud->field('password');
-       $this->crud->addField([
-            'name' => 'password_confirmation',
-            'type' => 'password',
-            'label' => 'Confirm Password',
+        $this->crud->setValidation(UserRequest::class);
+    
+        $this->crud->field('name');
+        $this->crud->field('email');
+        $this->crud->field('password');
+        $this->crud->addField([
+             'name' => 'password_confirmation',
+             'type' => 'password',
+             'label' => 'Confirm Password',
         ]);
+        $this->crud->addColumn('data');  
+        
     }
 
     /**
@@ -113,6 +116,7 @@ class UserCrudController extends CrudController
     }
 
     protected function update(Request $request) {
+        dd($request->all());
         $this->crud->setValidation(UserRequestUpdate::class);
         $this->crud->setRequest($this->crud->validateRequest());
         if($request->password) {

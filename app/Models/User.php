@@ -9,11 +9,12 @@ use Backpack\CRUD\app\Models\Traits\CrudTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Spatie\Permission\Traits\HasRoles;
 use Venturecraft\Revisionable\RevisionableTrait;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, CrudTrait, SoftDeletes, RevisionableTrait;
+    use HasApiTokens, HasFactory, Notifiable, CrudTrait, SoftDeletes, RevisionableTrait, HasRoles;
 
     /**
      * The attributes that are mass assignable.
