@@ -104,5 +104,7 @@ class ProductCrudController extends CrudController
     protected function setupShowOperation()
     {
         $this->setupListOperation();
+        $this->crud->column('updated_at');
+        $this->crud->column('created_at');
     }
 }

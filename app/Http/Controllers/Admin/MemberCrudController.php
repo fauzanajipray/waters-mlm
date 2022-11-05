@@ -202,6 +202,8 @@ class MemberCrudController extends CrudController
             'prefix' => 'storage/',
             'height' => '200px',
         ]);
+        $this->crud->column('updated_at');
+        $this->crud->column('created_at');
     }
 
     public function store()
