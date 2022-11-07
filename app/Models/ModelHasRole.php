@@ -4,12 +4,10 @@ namespace App\Models;
 
 use Backpack\CRUD\app\Models\Traits\CrudTrait;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Venturecraft\Revisionable\RevisionableTrait;
 
-class Transaction extends Model
+class ModelHasRole extends Model
 {
-    use CrudTrait, SoftDeletes, RevisionableTrait;
+    use CrudTrait;
 
     /*
     |--------------------------------------------------------------------------
@@ -17,11 +15,15 @@ class Transaction extends Model
     |--------------------------------------------------------------------------
     */
 
-    protected $table = 'transactions';
+    protected $table = 'model_has_roles';
     // protected $primaryKey = 'id';
     // public $timestamps = false;
     protected $guarded = ['id'];
-    // protected $fillable = [];
+    protected $fillable = [
+        'role_id',
+        'model_type',
+        'model_id',
+    ];
     // protected $hidden = [];
     // protected $dates = [];
 
@@ -36,26 +38,6 @@ class Transaction extends Model
     | RELATIONS
     |--------------------------------------------------------------------------
     */
-
-    public function product()
-    {
-        return $this->belongsTo(Product::class, 'product_id');
-    }
-
-    public function level()
-    {
-        return $this->belongsTo(Level::class, 'level_id');
-    }
-
-    public function createdBy()
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function updatedBy()
-    {
-        return $this->belongsTo(User::class, 'updated_by');
-    }
 
     /*
     |--------------------------------------------------------------------------

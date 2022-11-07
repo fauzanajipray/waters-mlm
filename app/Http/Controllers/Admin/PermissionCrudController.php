@@ -26,13 +26,13 @@ class PermissionCrudController extends CrudController
      */
     public function setup()
     {
-        CRUD::setModel(\App\Models\User::class);
-        CRUD::setRoute(config('backpack.base.route_prefix') . '/permission');
-        CRUD::setEntityNameStrings('Permission', 'Permissions');
+        $this->crud->setModel(\App\Models\User::class);
+        $this->crud->setRoute(config('backpack.base.route_prefix') . '/permission');
+        $this->crud->setEntityNameStrings('Permission', 'Permissions');
     }
 
     public function getColumns(){
-        CRUD::column('name')->orderable(false)->searchLogic(false)->value(function($entry){
+        $this->crud->column('name')->orderable(false)->searchLogic(false)->value(function($entry){
             if($entry->id == 1){
                 return 'Read Transaction';
             }
@@ -60,8 +60,8 @@ class PermissionCrudController extends CrudController
         $this->getColumns();
         /**
          * Columns can be defined using the fluent syntax or array syntax:
-         * - CRUD::column('price')->type('number');
-         * - CRUD::addColumn(['name' => 'price', 'type' => 'number']); 
+         * - $this->crud->column('price')->type('number');
+         * - $this->crud->addColumn(['name' => 'price', 'type' => 'number']); 
          */
     }
 
@@ -80,14 +80,14 @@ class PermissionCrudController extends CrudController
      */
     protected function setupCreateOperation()
     {
-        CRUD::setValidation(PermissionRequest::class);
+        $this->crud->setValidation(PermissionRequest::class);
 
         
 
         /**
          * Fields can be defined using the fluent syntax or array syntax:
-         * - CRUD::field('price')->type('number');
-         * - CRUD::addField(['name' => 'price', 'type' => 'number'])); 
+         * - $this->crud->field('price')->type('number');
+         * - $this->crud->addField(['name' => 'price', 'type' => 'number'])); 
          */
     }
 

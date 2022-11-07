@@ -94,7 +94,6 @@ class MemberCrudController extends CrudController
         ]);
 
         // TODO : Add this buttons
-        // $this->crud->removeButton('create');
         // $this->crud->addButtonFromModelFunction('line', 'cardMember', 'cardMember', 'beginning');
         // $this->crud->addButtonFromModelFunction('line', 'reportMember', 'reportMember', 'beginning');
     }
@@ -202,6 +201,8 @@ class MemberCrudController extends CrudController
             'prefix' => 'storage/',
             'height' => '200px',
         ]);
+        $this->crud->column('updated_at');
+        $this->crud->column('created_at');
     }
 
     public function store()
@@ -214,18 +215,7 @@ class MemberCrudController extends CrudController
             if($checkMember){
                 $requests['member_numb'] = $this->generateMemberNumber();
             }
-
-            // Create Member 
             $member = Member::create($requests);
-            // TODO : Create User
-            // $user = User::create([
-            //     'name' => $requests['name'],
-            //     'email' => $requests['email'],
-            //     'password' => Hash::make('12345678'),
-            //     'member_id' => $member->id,
-            //     // 'role' => 'member', // TODO: Add Role
-            // ]);
-
             DB::commit();
             Alert::success(trans('backpack::crud.insert_success'))->flash();
             return redirect($this->crud->route);
@@ -246,12 +236,6 @@ class MemberCrudController extends CrudController
             // Update Member 
             $member = Member::find($requests['id']);
             $member->update($requests);
-            //Update User
-            // TODO : Update User
-            // $user->update([
-            //     'name' => $requests['name'],
-            //     'email' => $requests['email'],
-            // ]);
             DB::commit();
             Alert::success('Member has been updated successfully')->flash();
             return redirect($this->crud->route);
@@ -298,6 +282,10 @@ class MemberCrudController extends CrudController
         $lastMemberNumb = $lastMember->member_numb ?? 'M-000';
         $memberNumb = explode('-', $lastMemberNumb)[1] + 1;
         $memberNumb = 'M-' . str_pad($memberNumb, 3, '0', STR_PAD_LEFT);
+        $check = Member::where('member_numb', $memberNumb)->first();
+        if($check){
+            $memberNumb = $this->generateMemberNumber();
+        }
         return $memberNumb;
     }
 
@@ -311,7 +299,7 @@ class MemberCrudController extends CrudController
         $this->data['user'] = User::where('id', $id)->firstOrFail();
         $this->data['upline'] = User::with('member')->where('id', backpack_user()->id)->firstOrFail()->member;
         $this->data['uplines'] = Member::select('name', 'id', 'member_numb')->get();
-        return view('vendor.backpack.crud.create-member', $this->data);
+        return view('member.create-member', $this->data);
     }
 
     public function postCreateMember(Request $request, $id){

@@ -9,10 +9,12 @@ use Backpack\CRUD\app\Models\Traits\CrudTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Spatie\Permission\Traits\HasRoles;
+use Venturecraft\Revisionable\RevisionableTrait;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, CrudTrait, SoftDeletes;
+    use HasApiTokens, HasFactory, Notifiable, CrudTrait, SoftDeletes, RevisionableTrait, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -24,6 +26,7 @@ class User extends Authenticatable
         'email',
         'password',
         'member_id',
+        'role_id',
     ];
 
     /**
@@ -56,7 +59,7 @@ class User extends Authenticatable
             // user/{id}/member/create
             return '<a href="' . backpack_url('user') . '/' . $this->id . '/member/create" class="btn btn-sm btn-link"><i class="la la-user-plus"></i> Register Member</a>';
         }else{
-            return '<a href="#" class="btn btn-sm btn-link text-disable"><i class="la la-user-edit"></i> Already Registered</a>';
+            return '<a href="'. backpack_url('member') . '/' . $this->member_id .'/show" class="btn btn-sm btn-link text-disable"><i class="la la-user-edit"></i> Already Registered</a>';
         }
     }
 
@@ -69,6 +72,11 @@ class User extends Authenticatable
     public function member(){
         return $this->belongsTo(Member::class, 'member_id', 'id');
     }
+
+    public function role()
+    {
+        return $this->belongsTo('App\Models\Role', 'role_id', 'id');
+    } 
 
     /*
     |--------------------------------------------------------------------------

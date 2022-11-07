@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Backpack\CRUD\app\Models\Traits\CrudTrait;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Venturecraft\Revisionable\RevisionableTrait;
 
 class Role extends Model
 {
-    use CrudTrait;
+    use CrudTrait, RevisionableTrait, SoftDeletes;
 
     /*
     |--------------------------------------------------------------------------
@@ -34,6 +36,13 @@ class Role extends Model
     | RELATIONS
     |--------------------------------------------------------------------------
     */
+    public function users() {
+        return $this->belongsToMany(User::class, 'model_has_roles', 'role_id', 'model_id');
+    }
+
+    public function permissions() {
+        return $this->belongsToMany(Permission::class, 'role_has_permissions', 'role_id', 'permission_id');
+    }
 
     /*
     |--------------------------------------------------------------------------

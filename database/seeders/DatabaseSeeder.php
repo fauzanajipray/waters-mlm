@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
+        $this->call(RoleSeeder::class);
         $this->user();
         $this->product();
         $this->level();
@@ -27,50 +28,62 @@ class DatabaseSeeder extends Seeder
 
     private function user()
     {
-        User::updateOrCreate([
+        $user = User::updateOrCreate([
             'email' => 'kevin@rectmedia.com',
-            'member_id' => 1,
+            // 'member_id' => 1,
         ], [
             'email' => 'kevin@rectmedia.com',
             'password' => bcrypt('qwerty'),
             'name' => 'Kevin',
-            'member_id' => 1,
+            'role_id' => 1,
+            // 'member_id' => 1,
         ]);
+        $user->assignRole('Super Admin');
 
-        User::updateOrCreate([
+        $user = User::updateOrCreate([
             'email' => 'benny@gmail.com'
         ], [
             'email' => 'benny@gmail.com',
             'password' => bcrypt('qwerty'),
             'name' => 'Benny',
+            'role_id' => 2,
             // 'member_id' => 2,
         ]);
+        $user->assignRole('Admin');
+        
 
-        User::updateOrCreate([
+        $user = User::updateOrCreate([
             'email' => 'andi@gmail.com'
         ], [
             'email' => 'andi@gmail.com',
             'password' => bcrypt('qwerty'),
             'name' => 'Andi',
+            'role_id' => 2,
             // 'member_id' => 3,
         ]);
+        $user->assignRole('Admin');
 
-        User::updateOrCreate([
+        $user = User::updateOrCreate([
             'email' => 'budi@gmail.com'
         ], [
             'email' => 'budi@gmail.com',
             'password' => bcrypt('qwerty'),
-            'name' => 'Budi'
+            'name' => 'Budi',
+            'role_id' => 2,
         ]);
+        $user->assignRole('Admin');
 
-        User::updateOrCreate([
+        $user = User::updateOrCreate([
             'email' => 'fauzan@gmail.com'
         ], [
             'email' => 'fauzan@gmail.com',
             'password' => bcrypt('qwerty'),
             'name' => 'Fauzan',
+            'role_id' => 1,
             // 'member_id' => 4,
         ]);
+        $user->assignRole('Super Admin');
+        
     }
 
     private function product()
@@ -102,7 +115,6 @@ class DatabaseSeeder extends Seeder
             'price' => 3000000
         ]);
     }
-
 
     private function level()
     {

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\RoleRequest;
+use App\Models\Permission;
+use App\Models\Role;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
@@ -14,9 +16,9 @@ use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 class RoleCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
-    use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
+    // use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
-    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
+    // use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
 
     /**
@@ -26,62 +28,12 @@ class RoleCrudController extends CrudController
      */
     public function setup()
     {
-        CRUD::setModel(\App\Models\User::class);
-        CRUD::setRoute(config('backpack.base.route_prefix') . '/role');
-        CRUD::setEntityNameStrings('Role', 'Roles');
-    }
-
-    public function getColumns($forShow = false){
-        CRUD::column('name')->orderable(false)->searchLogic(false)->value(function($entry){
-            if($entry->id == 1){
-                return 'Super Admin';
-            }
-            else if($entry->id == 2){
-                return 'Admin';
-            }
-            else if($entry->id == 3){
-                return 'Member';
-            }
-            else if($entry->id == 4){
-                return 'Guest';
-            }
-        });
-        if($forShow){
-            CRUD::column('permissions')->type('table')->columns(['no' => 'No', 'name' => 'Name'])->value(function($entry){
-                $permissions = [
-                    [
-                        'no' => 1,
-                        'name' => 'Read Transaction'
-                    ],
-                    [
-                        'no' => 2,
-                        'name' => 'Create Transaction'
-                    ],
-                    [
-                        'no' => 3,
-                        'name' => 'Update Transaction'
-                    ],
-                    [
-                        'no' => 4,
-                        'name' => 'Delete Transaction'
-                    ]
-                ];
-                if($entry->id == 1){
-                    return $permissions;
-                }
-                else if($entry->id == 2){
-                    array_splice($permissions, -1, 1);
-                    return $permissions;
-                }
-                else if($entry->id == 3){
-                    array_splice($permissions, -2, 2);
-                    return $permissions;
-                }
-                else if($entry->id == 4){
-                    array_splice($permissions, - 3, 3);
-                    return $permissions;
-                }
-            });
+        $this->crud->setModel(\App\Models\Role::class);
+        $this->crud->setRoute(config('backpack.base.route_prefix') . '/role');
+        $this->crud->setEntityNameStrings('role', 'roles');
+        if (backpack_user()->hasAnyRole(['Member']))
+        {
+            $this->crud->denyAccess('list');
         }
     }
 
@@ -93,15 +45,36 @@ class RoleCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        $this->getColumns();
-    }
-
-
-    protected function setupShowOperation(){
-        $this->crud->set('show.setFromDb', false);
-        $this->getColumns(true);
-        $this->crud->column($this->crud->model->getCreatedAtColumn())->type('datetime');
-        $this->crud->column($this->crud->model->getUpdatedAtColumn())->type('datetime');
+        $this->crud->column('name');        
+        $this->crud->query->withCount('users');
+        $this->crud->addColumn([
+            'label'     => 'Users',
+            'type'      => 'text',
+            'name'      => 'users_count',
+            'wrapper'   => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('user?role='.$entry->getKey());
+                },
+            ],
+            'suffix'    => ' '.strtolower(trans('backpack::permissionmanager.users')),
+        ]);        
+        if (config('backpack.permissionmanager.multiple_guards')) {
+            $this->crud->addColumn([
+                'name'  => 'guard_name',
+                'label' => trans('backpack::permissionmanager.guard_type'),
+                'type'  => 'text',
+            ]);
+        }
+        $this->crud->addColumn([
+            // n-n relationship (with pivot table)
+            'label'     => mb_ucfirst(trans('backpack::permissionmanager.permission_plural')),
+            'type'      => 'select_multiple',
+            'name'      => 'permissions', // the method that defines the relationship in your Model
+            'entity'    => 'permissions', // the method that defines the relationship in your Model
+            'attribute' => 'name', // foreign key attribute that is shown to user
+            'model'     => 'App\Models\Permissions', // foreign key model
+            'pivot'     => true, // on create&update, do you need to add/delete pivot table entries?
+        ]);
     }
 
     /**
@@ -112,22 +85,15 @@ class RoleCrudController extends CrudController
      */
     protected function setupCreateOperation()
     {
-        CRUD::setValidation(RoleRequest::class);
+        $this->crud->setValidation(RoleRequest::class);
 
-        
-        CRUD::field('name');
-
-        CRUD::field('permissions')->type('select2_from_array')->allows_multiple(true)->options([
-            1 => 'Read Transaction',
-            2 => 'Create Transaction',
-            3 => 'Update Transaction',
-            4 => 'Delete Transaction',
-        ]);
+        $this->crud->field('name');
+        $this->crud->field('guard_name');
 
         /**
          * Fields can be defined using the fluent syntax or array syntax:
-         * - CRUD::field('price')->type('number');
-         * - CRUD::addField(['name' => 'price', 'type' => 'number'])); 
+         * - $this->crud->field('price')->type('number');
+         * - $this->crud->addField(['name' => 'price', 'type' => 'number'])); 
          */
     }
 
@@ -139,61 +105,38 @@ class RoleCrudController extends CrudController
      */
     protected function setupUpdateOperation()
     {
-        $this->setupCreateOperation();
+        $this->addFields();
     }
 
-    public function store()
+    private function addFields()
     {
-        // show a success message
-        \Alert::success(trans('backpack::crud.insert_success'))->flash();
+        $this->crud->addField([
+            'name'  => 'name',
+            'label' => trans('backpack::permissionmanager.name'),
+            'type'  => 'text',
+            'attributes' => [
+                'readonly' => 'readonly',
+            ],
+        ]);
 
-        return redirect($this->crud->route);
-    }
-
-    public function edit($id)
-    {
-        $this->crud->hasAccessOrFail('update');
-        // get entry ID from Request (makes sure its the last ID for nested resources)
-        $id = $this->crud->getCurrentEntryId() ?? $id;
-        // get the info for that entry
-
-        $this->data['entry'] = $this->crud->getEntryWithLocale($id);
-        $this->crud->setOperationSetting('fields', $this->crud->getUpdateFields());
-
-        $this->data['crud'] = $this->crud;
-        $this->data['saveAction'] = $this->crud->getSaveAction();
-        $this->data['title'] = $this->crud->getTitle() ?? trans('backpack::crud.edit').' '.$this->crud->entity_name;
-        $this->data['id'] = $id;
-
-        $names = ['Super Admin', 'Admin', 'Member', 'Guest'];
-        $this->crud->modifyField('name', ['value' => $names[$this->data['entry']->id - ($this->data['entry']->id > 0 ? 1 : 0)] ?? '']);
-
-        $permissions = [1, 2, 3, 4];
-        if($this->data['entry']->id == 2){
-            array_splice($permissions, -1, 1);
+        if (config('backpack.permissionmanager.multiple_guards')) {
+            $this->crud->addField([
+                'name'    => 'guard_name',
+                'label'   => trans('backpack::permissionmanager.guard_type'),
+                'type'    => 'select_from_array',
+                'options' => $this->getGuardTypes(),
+            ]);
         }
-        else if($this->data['entry']->id == 3){
-            array_splice($permissions, -2, 2);
-        }
-        else if($this->data['entry']->id == 4){
-            array_splice($permissions, - 3, 3);
-        }
-        $this->crud->modifyField('permissions', ['value' => $permissions]);
 
-        // load the view from /resources/views/vendor/backpack/crud/ if it exists, otherwise load the one in the package
-        return view($this->crud->getEditView(), $this->data);
+        $this->crud->addField([
+            'label'     => 'Permissions',
+            'type'      => 'checklist',
+            'name'      => 'permissions',
+            'entity'    => 'permissions',
+            'attribute' => 'name',
+            'model'     => 'App\Models\Permission',
+            'pivot'     => true,
+        ]);
     }
 
-    public function update()
-    {
-        // show a success message
-        \Alert::success(trans('backpack::crud.update_success'))->flash();
-
-        return redirect($this->crud->route);
-    }
-
-    public function destroy($id)
-    {
-        return 1;
-    }
 }
