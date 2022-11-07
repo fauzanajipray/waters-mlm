@@ -45,7 +45,7 @@
               <input type="hidden" value="{{$user->email}}" name="email" >
               <div class="form-group col-md-12">
                 <label >Upline</label>
-                <select name="upline_id" id="" class="form-control">
+                <select name="upline_id" id="upline_id" class="form-control">
                   @foreach ($uplines as $upline)
                     <option value="{{$upline->id}}">{{$upline->member_numb}} | {{$upline->name}}</option>
                   @endforeach
@@ -53,7 +53,7 @@
               </div>
               <div class="form-group col-md-12">
                 <label >No. Member</label>
-                <input type="text" class="form-control" name="upline" value="{{ $upline->member_numb }}" readonly>  
+                <input type="text" class="form-control" name="member_numb" value="{{ $upline->member_numb }}" readonly>  
               </div>
               <div class="form-group col-md-12">
                 <label>Level</label>
@@ -75,7 +75,7 @@
               </div>
               <div class="form-group col-md-12">
                 <label>Gender</label>
-                <select name="gender" class="form-control @error('gender') is-invalid @enderror">
+                <select name="gender" id="gender" class="form-control @error('gender') is-invalid @enderror">
                   <option value="">-</option>
                   <option value="M" @if(old('gender')) selected @endif>Male</option> 
                   <option value="F" @if(old('gender')) selected @endif>Female</option>
@@ -98,25 +98,13 @@
                     <div class="invalid-feedback d-block">{{ $message }}</div>
                   @enderror
               </div>
-              <div class="form-group col-md-12">
+              {{-- <div class="form-group col-md-12">
                 <label>Photo Member</label>
-                {{-- <div class="row">
-                  <div class="col-sm-6" data-handle="previewArea" style="margin-bottom: 20px;">
-                      <img data-handle="mainImage" src="">
-                  </div>
-                </div>
-                <div class="btn-group">
-                  <div class="btn btn-light btn-sm btn-file">
-                      Choose file <input type="file" accept="image/*" data-handle="uploadImage"  class="form-control">
-                      <input type="hidden" data-handle="hiddenImage" name="image" data-value-prefix="" value="">
-                  </div>
-                  <button class="btn btn-light btn-sm" data-handle="remove" type="button"><i class="la la-trash"></i></button>
-                </div> --}}
                 <input type="file" class="form-control" name="photo_url" >
                   @error('photo_member')
                     <div class="invalid-feedback d-block">{{ $message }}</div>
                   @enderror
-              </div>
+              </div> --}}
 
             </div><!-- /.card-body -->
           </div><!-- /.card -->
@@ -139,58 +127,17 @@
 
 @push('after_styles')
 <link href="http://127.0.0.1:8001/packages/cropperjs/dist/cropper.min.css" rel="stylesheet" type="text/css" />                
-{{-- <style>
-  .image .btn-group {
-      margin-top: 10px;
-  }
-  img {
-      max-width: 100%; /
-  }
-  .img-container, .img-preview {
-      width: 100%;
-      text-align: center;
-  }
-  .img-preview {
-      float: left;
-      margin-right: 10px;
-      margin-bottom: 10px;
-      overflow: hidden;
-  }
-  .preview-lg {
-      width: 263px;
-      height: 148px;
-  }
-
-  .btn-file {
-      position: relative;
-      overflow: hidden;
-  }
-  .btn-file input[type=file] {
-      position: absolute;
-      top: 0;
-      right: 0;
-      min-width: 100%;
-      min-height: 100%;
-      font-size: 100px;
-      text-align: right;
-      filter: alpha(opacity=0);
-      opacity: 0;
-      outline: none;
-      background: white;
-      cursor: inherit;
-      display: block;
-  }
-</style> --}}
-@endpush
-
-@push('after_styles')
-
-@endpush
-
-@push('before_scripts')
-
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="{{ asset('packages/select2-bootstrap-theme/dist/select2-bootstrap.min.css') }}" />
 @endpush
 
 @push('after_scripts')
-
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+  $(document).ready(function() {
+    $('#upline_id').select2({
+      theme: "bootstrap",
+    });
+  });
+</script>
 @endpush
