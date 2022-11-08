@@ -268,7 +268,10 @@ class TransactionCrudController extends CrudController
     {
         $requests = $request->all();
         $this->crud->validateRequest($requests);
-        $member = Member::find($requests['member_id']);
+        $member = Member::with(['upline' => function($query) {
+            $query->with('upline');
+        }])->find($requests['member_id']);
+
         $product = Product::find($requests['product_id']);
         DB::beginTransaction();
         try {
@@ -310,8 +313,9 @@ class TransactionCrudController extends CrudController
             'bonus_percent' => $levelNow->bp_percentage,
             'bonus' => $requests['total_price'] * $levelNow->bp_percentage / 100,
         ]);
+
         /* Bonus Sponsor */
-        $upline = $member->with('upline')->first();
+        $upline = $member->upline;
         if ($upline) {
             $uplineLevel = Level::where('id', $upline->level_id)->first();
             BonusHistory::create([
@@ -323,24 +327,26 @@ class TransactionCrudController extends CrudController
                 'bonus_percent' => $uplineLevel->bs_percentage,
                 'bonus' => $requests['total_price'] * $uplineLevel->bs_percentage / 100,
             ]);
-        }
-        /* Bonus Overriding */
-        $upline2 = $upline->with('upline')->first();
-        if ($upline2) {
-            // Cek apakah pernah melakukan transaksi
-            $upline2Transaction = Transaction::where('member_id', $upline2->id)->first(); 
-            if($upline2Transaction) {
-                $upline2Level = Level::where('id', $upline2->level_id)->first();
-                BonusHistory::create([
-                    'member_id' => $upline2->id,
-                    'member_numb' => $upline2->member_numb,
-                    'transaction_id' => $requests['transaction_id'],
-                    'level_id' => $upline2->level_id,
-                    'bonus_type' => "OR",
-                    'bonus_percent' => $upline2Level->or_percentage,
-                    'bonus' => $requests['total_price'] * $upline2Level->or_percentage / 100,
-                ]);
+
+            /* Bonus Overriding */
+            $upline2 = $upline->upline ?? null;
+            if ($upline2) {
+                // Cek apakah pernah melakukan transaksi
+                $upline2Transaction = Transaction::where('member_id', $upline2->id)->first(); 
+                if($upline2Transaction) {
+                    $upline2Level = Level::where('id', $upline2->level_id)->first();
+                    BonusHistory::create([
+                        'member_id' => $upline2->id,
+                        'member_numb' => $upline2->member_numb,
+                        'transaction_id' => $requests['transaction_id'],
+                        'level_id' => $upline2->level_id,
+                        'bonus_type' => "OR",
+                        'bonus_percent' => $upline2Level->or_percentage,
+                        'bonus' => $requests['total_price'] * $upline2Level->or_percentage / 100,
+                    ]);
+                }
             }
         }
+        
     }
 }

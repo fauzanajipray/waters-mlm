@@ -38,6 +38,10 @@ class BonusHistory extends Model
         return $this->belongsTo(Transaction::class, 'transaction_id');
     }
     
+    public function member(){
+        return $this->belongsTo(Member::class, 'member_id');
+    }
+    
     /*
     |--------------------------------------------------------------------------
     | SCOPES

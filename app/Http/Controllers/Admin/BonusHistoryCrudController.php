@@ -16,7 +16,7 @@ class BonusHistoryCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     // use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
     // use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
-    // use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
+    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
 
     /**
@@ -39,7 +39,19 @@ class BonusHistoryCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        $this->crud->column('member_id');
+        $this->crud->addColumn([
+            'label' => 'Member',
+            'type' => 'relationship',
+            'name' => 'member',
+            'entity' => 'member',
+            'attribute' => 'name',
+            'model' => 'App\Models\Member',
+            'wrapper' => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('member/'.$related_key.'/show');
+                },
+            ],
+        ]);
         $this->crud->addColumn([
             'label' => 'Transaction',
             'type' => 'relationship',
