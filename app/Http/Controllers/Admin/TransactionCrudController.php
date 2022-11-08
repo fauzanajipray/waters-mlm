@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
 use App\Http\Requests\TransactionRequest;
+use App\Models\BonusHistory;
+use App\Models\Level;
 use App\Models\Member;
 use App\Models\Product;
 use App\Models\Transaction;
@@ -102,7 +104,6 @@ class TransactionCrudController extends CrudController
         $this->crud->removeButton('update');
     }
 
-
     protected function setupShowOperation(){
         $this->setupListOperation();
         $this->crud->addColumns([
@@ -160,7 +161,8 @@ class TransactionCrudController extends CrudController
                 'todayBtn' => 'linked',
                 'format'   => 'dd-mm-yyyy',
                 'language' => 'en'
-            ],]);
+            ],
+        ]);
         $this->crud->addField([
             'name' => 'product_id',
             'type' => 'select2_from_array',
@@ -202,6 +204,57 @@ class TransactionCrudController extends CrudController
             'label' => 'Quantity',
         ]);
     }
+
+    public function edit($id)
+    {   
+        $this->crud->hasAccessOrFail('update');
+
+        $this->data['entry'] = $this->crud->getEntry($id);
+        $this->data['crud'] = $this->crud;
+        $this->data['fields'] = $this->crud->getUpdateFields($id);
+        $this->data['saveAction'] = $this->crud->getSaveAction();
+        $this->data['id'] = $id;
+
+        $this->crud->modifyField('qty', [
+            'value' => optional($this->data['entry'])->qty_sold ?? 1,
+        ]);
+        $this->crud->modifyField('code', [
+            'value' => optional($this->data['entry'])->code ?? $this->generateCode(),
+        ]);
+        $this->crud->modifyField('transaction_date', [
+            'value' => optional($this->data['entry'])->transaction_date ?? date('Y-m-d'),
+        ]);
+        return view('crud::edit', $this->data);
+    }
+
+    public function create(Request $request)
+    {
+        $this->crud->hasAccessOrFail('create');
+        
+        $this->data['crud'] = $this->crud;
+        $this->data['fields'] = $this->crud->getCreateFields();
+        $this->data['saveAction'] = $this->crud->getSaveAction();
+        $this->crud->modifyField('transaction_date', [
+            'value' => date('Y-m-d'),
+        ]);
+        if ($request->query('member_id')) {
+            $this->crud->modifyField('member_id', [
+                'value' => $request->query('member_id'),
+            ]);
+        }
+        $this->crud->modifyField('qty', [
+            'value' => 1,
+        ]);
+        return view('crud::create', $this->data);
+    }
+    
+    public function update()
+    {
+        // show a success message
+        Alert::success(trans('backpack::crud.update_success'))->flash();
+
+        return redirect($this->crud->route);
+    }
     
     protected function generateCode() {
         $lastTransaction = Transaction::withTrashed()->orderBy('id', 'desc')->first();
@@ -233,61 +286,61 @@ class TransactionCrudController extends CrudController
             $requests['updated_by'] = backpack_user()->id;
             $requests['status'] = 'pending';
             $transaction = Transaction::create($requests);
-            // show a success message
+            $requests['transaction_id'] = $transaction->id;
+            $this->calculateBonus($requests, $member);
             Alert::success(trans('backpack::crud.insert_success'))->flash();
-            // save the redirect choice for next time
             DB::commit();
             return redirect($this->crud->route);
         } catch (\Exception $e) {
             DB::rollback();
-            Alert::error($e->getMessage())->flash();
-            return redirect()->back();
+            Alert::error("Something when wrong")->flash();
+            return redirect()->back()->withInput()->withErrors($e->getMessage());
         }
     }
 
-    public function edit($id)
-    {   
-        $this->crud->hasAccessOrFail('update');
-
-        $this->data['entry'] = $this->crud->getEntry($id);
-        $this->data['crud'] = $this->crud;
-        $this->data['fields'] = $this->crud->getUpdateFields($id);
-        $this->data['saveAction'] = $this->crud->getSaveAction();
-        $this->data['id'] = $id;
-
-        $this->crud->modifyField('qty', [
-            'value' => optional($this->data['entry'])->qty_sold ?? 1,
+    private function calculateBonus($requests, $member){
+        /* Bonus Penjualan Pribadi */
+        $levelNow = Level::where('id', $member->level_id)->first();
+        BonusHistory::create([
+            'member_id' => $member->id,
+            'member_numb' => $member->member_numb,
+            'transaction_id' => $requests['transaction_id'],
+            'level_id' => $member->level_id,
+            'bonus_type' => "BP",
+            'bonus_percent' => $levelNow->bp_percentage,
+            'bonus' => $requests['total_price'] * $levelNow->bp_percentage / 100,
         ]);
-        $this->crud->modifyField('code', [
-            'value' => optional($this->data['entry'])->code ?? $this->generateCode(),
-        ]);
-        $this->crud->modifyField('transaction_date', [
-            'value' => optional($this->data['entry'])->transaction_date ?? date('Y-m-d'),
-        ]);
-        return view('crud::edit', $this->data);
-    }
-
-    public function create()
-    {
-        $this->crud->hasAccessOrFail('create');
-
-        $this->data['crud'] = $this->crud;
-        $this->data['fields'] = $this->crud->getCreateFields();
-        $this->data['saveAction'] = $this->crud->getSaveAction();
-        $this->crud->modifyField('transaction_date', [
-            'value' => date('Y-m-d'),
-        ]);
-        $this->crud->modifyField('qty', [
-            'value' => 1,
-        ]);
-        return view('crud::create', $this->data);
-    }
-
-    public function update()
-    {
-        // show a success message
-        Alert::success(trans('backpack::crud.update_success'))->flash();
-
-        return redirect($this->crud->route);
+        /* Bonus Sponsor */
+        $upline = $member->with('upline')->first();
+        if ($upline) {
+            $uplineLevel = Level::where('id', $upline->level_id)->first();
+            BonusHistory::create([
+                'member_id' => $upline->id,
+                'member_numb' => $upline->member_numb,
+                'transaction_id' => $requests['transaction_id'],
+                'level_id' => $upline->level_id,
+                'bonus_type' => "BS",
+                'bonus_percent' => $uplineLevel->bs_percentage,
+                'bonus' => $requests['total_price'] * $uplineLevel->bs_percentage / 100,
+            ]);
+        }
+        /* Bonus Overriding */
+        $upline2 = $upline->with('upline')->first();
+        if ($upline2) {
+            // Cek apakah pernah melakukan transaksi
+            $upline2Transaction = Transaction::where('member_id', $upline2->id)->first(); 
+            if($upline2Transaction) {
+                $upline2Level = Level::where('id', $upline2->level_id)->first();
+                BonusHistory::create([
+                    'member_id' => $upline2->id,
+                    'member_numb' => $upline2->member_numb,
+                    'transaction_id' => $requests['transaction_id'],
+                    'level_id' => $upline2->level_id,
+                    'bonus_type' => "OR",
+                    'bonus_percent' => $upline2Level->or_percentage,
+                    'bonus' => $requests['total_price'] * $upline2Level->or_percentage / 100,
+                ]);
+            }
+        }
     }
 }

@@ -191,7 +191,7 @@
             {
                 id: 4,
                 name: 'Tono',
-                level: 'L1',
+                level: 'L2',
                 imageUrl: "{{backpack_url('images/profile.jpg')}}",
                 url: "{{backpack_url('member/1/show')}}",
                 parentId: 3,

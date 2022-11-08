@@ -44,6 +44,10 @@ class Member extends Model
         return '<a href="' . backpack_url('member') . '/' . $this->id . '/report-member" class="btn btn-sm btn-link"><i class="la la-chart-bar"></i> Report Member</a>';
     }
 
+    public function addTransaction(){
+        return '<a href="' . backpack_url('transaction') . '/create?member_id=' . $this->id . '" class="btn btn-sm btn-link"><i class="la la-plus"></i> Add Transaction</a>';
+    }
+
     /*
     |--------------------------------------------------------------------------
     | RELATIONS
@@ -56,6 +60,10 @@ class Member extends Model
 
     public function level(){
         return $this->belongsTo('App\Models\Level', 'level_id', 'id');
+    }
+
+    public function upline(){
+        return $this->belongsTo('App\Models\Member', 'upline_id', 'id');
     }
 
     /*

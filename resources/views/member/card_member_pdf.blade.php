@@ -18,16 +18,16 @@
                     <tr>
                         <td style="width:30%;padding-right:12px">
                             @php
-                                  $base64Image = base64_encode(file_get_contents(public_path('images/profile.jpg')));
+                                  $base64Image = base64_encode(file_get_contents(public_path($imageUrl)));
                                   echo '<img src="data:image/jpg;base64,' . $base64Image . '" style="width:100%;height:auto;" />';
                             @endphp
                         </td>
                         <td style="width:70%;vertical-align:top;">
-                            <div style="border-bottom: 1px solid black;border-bottom-style:dotted;"><b>{{\Str::limit($user->name, 30)}}</b></div>
+                            <div style="border-bottom: 1px solid black;border-bottom-style:dotted;"><b>{{\Str::limit($member->name, 30)}}</b></div>
                             <small style="font-size:10px;">Authorized Distributor</small>
-                            <div style="border-bottom: 1px solid black;border-bottom-style:dotted;margin-top:8px"><b>{{$member['no_member'] ?? '-'}}</b></div>
+                            <div style="border-bottom: 1px solid black;border-bottom-style:dotted;margin-top:8px"><b>{{$member['member_numb'] ?? '-'}}</b></div>
                             <small style="font-size:10px;">Unique Number</small>
-                            <div style="margin-top:8px;text-align:right">KTP / SIM : <span style="border-bottom: 1px solid black;border-bottom-style:dotted;font-weight:bold">{{$member['ktp_sim'] ?? '-'}}</span></div>
+                            <div style="margin-top:8px;text-align:right">KTP / SIM : <span style="border-bottom: 1px solid black;border-bottom-style:dotted;font-weight:bold">{{$member['id_card'] ?? '-'}}</span></div>
                             <table style="width:100%;margin-top:24px;">
                                 <tr>
                                     <td style="width:70%;">

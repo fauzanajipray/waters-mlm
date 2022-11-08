@@ -94,8 +94,9 @@ class MemberCrudController extends CrudController
         ]);
 
         // TODO : Add this buttons
-        // $this->crud->addButtonFromModelFunction('line', 'cardMember', 'cardMember', 'beginning');
-        // $this->crud->addButtonFromModelFunction('line', 'reportMember', 'reportMember', 'beginning');
+        $this->crud->addButtonFromModelFunction('line', 'cardMember', 'cardMember', 'beginning');
+        $this->crud->addButtonFromModelFunction('line', 'reportMember', 'reportMember', 'beginning');
+        $this->crud->addButtonFromModelFunction('line', 'addTransaction', 'addTransaction', 'beginning');
     }
 
     /**
@@ -143,6 +144,19 @@ class MemberCrudController extends CrudController
                 'disabled' => 'disabled'
             ],
         ]);
+
+        // $this->crud->addField([
+        //     'name' => 'level_id',
+        //     'type' => 'select2',
+        //     'label' => 'Level',
+        //     'entity' => 'level',
+        //     'attribute' => 'name',
+        //     'model' => Level::class,
+        //     'options'   => (function ($query) {
+        //         return $query->orderBy('id', 'ASC')->get();
+        //     }),
+        // ]);
+
         $this->crud->field('id_card')->label('ID Card')->type('number');
         $this->crud->field('name');
         $this->crud->addField([
@@ -244,21 +258,22 @@ class MemberCrudController extends CrudController
             Alert::error('Error ', $e->getMessage())->flash();
             return redirect()->back()->withInput();
         }
-
     }
 
     public function downloadCardMember($id) {
-        $user = User::where('id', $id)->firstOrFail();
-
-        $noMember = optional($this->crud->members[$userid - 1] ?? null)['no_member'] ?? '-';
-        $title = "Card Member ({$noMember} - {$user->name})";
-        $pdf = PDF::loadView('member.card_member_pdf', ['user' => $user, 'title' => $title, 'member' => optional($this->crud->members[$user->id - 1] ?? null)]);
+        $member = Member::where('id', $id)->firstOrFail();
+        $imageUrl = ($member->photo_url) ? 'storage/'.$member->photo_url : 'images/profile.jpg';
+        $title = "Card Member ($member->member_numb - $member->name)";
+        $pdf = PDF::loadView('member.card_member_pdf', [
+            'title' => $title, 
+            'member' => $member,
+            'imageUrl' => $imageUrl,
+        ]);
         return $pdf->download($title . ".pdf");
     }
 
     public function reportMember($id){
         $user = User::where('id', $id)->firstOrFail();
-
         $noMember = optional($this->crud->members[$user->id - 1] ?? null)['no_member'] ?? '-';
         return view('member.report_member', ['title' => "Report Member ({$noMember} - {$user->name})", 'user' => $user]);
     }
@@ -277,7 +292,8 @@ class MemberCrudController extends CrudController
         ]);
     }
 
-    protected function generateMemberNumber(){
+    protected function generateMemberNumber()
+    {
         $lastMember = Member::withTrashed()->orderBy('id', 'desc')->first();
         $lastMemberNumb = $lastMember->member_numb ?? 'M-000';
         $memberNumb = explode('-', $lastMemberNumb)[1] + 1;
@@ -289,12 +305,12 @@ class MemberCrudController extends CrudController
         return $memberNumb;
     }
 
-    public function getCreateMember($id) {
+    public function getCreateMember($id) 
+    {
         $this->crud->setOperation('createMember');
         $this->data['crud'] = $this->crud;
         $this->data['title'] = 'Add '.$this->crud->entity_name;
         $this->data['member_numb'] = $this->generateMemberNumber();
-        // $this->data['id'] = $id;
         $this->data['level'] = Level::find(1);
         $this->data['user'] = User::where('id', $id)->firstOrFail();
         $this->data['upline'] = User::with('member')->where('id', backpack_user()->id)->firstOrFail()->member;
@@ -302,7 +318,8 @@ class MemberCrudController extends CrudController
         return view('member.create-member', $this->data);
     }
 
-    public function postCreateMember(Request $request, $id){
+    public function postCreateMember(Request $request, $id) 
+    {
         $requests = $request->all();
         $validator = Validator::make($requests, (new MemberRequest)->rules());
 
