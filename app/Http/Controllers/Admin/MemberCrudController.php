@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\MemberRequest;
+use App\Models\BonusHistory;
 use App\Models\Level;
 use App\Models\Member;
 use App\Models\User;
@@ -41,27 +42,6 @@ class MemberCrudController extends CrudController
         $this->crud->setEntityNameStrings('member', 'members');
     }
 
-    protected function getUplineGroup(){
-        $downlineInGroup = [];
-        $mainMember = User::with('member')->where('id', backpack_user()->id)->firstOrFail()->member->toArray();
-        // add to downlineGroup
-        $downlineInGroup[$mainMember['id']] = $mainMember['member_numb'] . ' - ' . $mainMember['name'];
-        // get downline
-        $downline = Member::where('upline_id', $mainMember['id'])->get()->toArray();
-        // add to downlineGroup
-        foreach($downline as $d){
-            $downlineInGroup[$d['id']] = $d['member_numb'] . ' - ' . $d['name'];
-        }
-        // get downline from downline
-        foreach($downline as $d){
-            $downline2 = Member::where('upline_id', $d['id'])->get()->toArray();
-            foreach($downline2 as $d2){
-                $downlineInGroup[$d2['id']] = $d2['member_numb'] . ' - ' . $d2['name'];
-            }
-        }
-        return $downlineInGroup;
-    }
-
     /**
      * Define what happens when the List operation is loaded.
      * 
@@ -94,8 +74,9 @@ class MemberCrudController extends CrudController
         ]);
 
         // TODO : Add this buttons
-        // $this->crud->addButtonFromModelFunction('line', 'cardMember', 'cardMember', 'beginning');
-        // $this->crud->addButtonFromModelFunction('line', 'reportMember', 'reportMember', 'beginning');
+        $this->crud->addButtonFromModelFunction('line', 'cardMember', 'cardMember', 'beginning');
+        $this->crud->addButtonFromModelFunction('line', 'reportMember', 'reportMember', 'beginning');
+        $this->crud->addButtonFromModelFunction('line', 'addTransaction', 'addTransaction', 'beginning');
     }
 
     /**
@@ -143,6 +124,19 @@ class MemberCrudController extends CrudController
                 'disabled' => 'disabled'
             ],
         ]);
+
+        // $this->crud->addField([
+        //     'name' => 'level_id',
+        //     'type' => 'select2',
+        //     'label' => 'Level',
+        //     'entity' => 'level',
+        //     'attribute' => 'name',
+        //     'model' => Level::class,
+        //     'options'   => (function ($query) {
+        //         return $query->orderBy('id', 'ASC')->get();
+        //     }),
+        // ]);
+
         $this->crud->field('id_card')->label('ID Card')->type('number');
         $this->crud->field('name');
         $this->crud->addField([
@@ -244,23 +238,99 @@ class MemberCrudController extends CrudController
             Alert::error('Error ', $e->getMessage())->flash();
             return redirect()->back()->withInput();
         }
-
     }
 
     public function downloadCardMember($id) {
-        $user = User::where('id', $id)->firstOrFail();
-
-        $noMember = optional($this->crud->members[$userid - 1] ?? null)['no_member'] ?? '-';
-        $title = "Card Member ({$noMember} - {$user->name})";
-        $pdf = PDF::loadView('member.card_member_pdf', ['user' => $user, 'title' => $title, 'member' => optional($this->crud->members[$user->id - 1] ?? null)]);
+        $member = Member::with('level')->where('id', $id)->firstOrFail();
+        $imageUrl = ($member->photo_url) ? 'storage/'.$member->photo_url : 'images/profile.jpg';
+        $title = "Card Member ($member->member_numb - $member->name)";
+        $level = $member->level->name;
+        $pdf = PDF::loadView('member.card_member_pdf', [
+            'title' => $title, 
+            'member' => $member,
+            'imageUrl' => $imageUrl,
+            'level' => $level,
+        ]);
         return $pdf->download($title . ".pdf");
     }
 
-    public function reportMember($id){
-        $user = User::where('id', $id)->firstOrFail();
+    public function reportMember(Request $request, $id){
+        $members = $this->getMemberInGroup($id);
+        $dataMember = [];
+        foreach ($members as $member) {
+            // Count Bonus
+            $BP = BonusHistory::where('member_id', $member['id'])
+                ->where('bonus_type', 'BP')
+                ->sum('bonus');
+            $BS = BonusHistory::where('member_id', $member['id'])
+                ->where('bonus_type', 'BS')
+                ->sum('bonus');
+            $OR = BonusHistory::where('member_id', $member['id'])
+                ->where('bonus_type', 'OR')
+                ->sum('bonus');
+            $total = $BP + $BS + $OR;
+            
+            $data = [
+                'id' => $member['id'],
+                'name' => $member['name'],
+                'level' => $member['level']['name'],
+                'url' => backpack_url('member/'.$member['id'].'/show'),
+                'imageUrl' => ($member['photo_url']) ? backpack_url('storage/'.$member['photo_url']) : backpack_url('images/profile.jpg'),
+                'parentId' => $member['upline_id'] ?? "",
+                'height' => 175,
+                '_directSubordinates' => 0,
+                '_totalSubordinates' => 0,
+                'member_numb' => $member['member_numb'],
+                'total' => $total,
+                'contents' => '<p class="mb-0">Total Bonus : <b>Rp. '.$total.'</b></p>
+                <p class="mb-0" hidden>Total Omset : <b>Rp .-</b></p>
+                <p class="mb-0" hidden>B. Omset : <b>Rp. -</b></p>
+                <p class="mb-0">B. Pribadi : <b>Rp. '.number_format($BP).'</b></p>
+                <p class="mb-0">B. Sponsor : <b>Rp. '.number_format($BS).'</b></p>
+                <p class="mb-0">Overriding : <b>Rp. '.number_format($BS).'</b></p>'
+            ];
+            array_push($dataMember, $data);
+        }
+        $dataMember[0]['parentId'] = "";
+        $title = "Report Member (".$dataMember[0]['member_numb']." - ".$dataMember[0]['name'].")";
+        $user = User::where('id', 1)->firstOrFail();
+        return view('member.report_member', [ 
+            'title' => $title,
+            'user' => $user,
+            'dataMember' => json_encode($dataMember),
+        ]);
+    }
 
-        $noMember = optional($this->crud->members[$user->id - 1] ?? null)['no_member'] ?? '-';
-        return view('member.report_member', ['title' => "Report Member ({$noMember} - {$user->name})", 'user' => $user]);
+    protected function getMemberGroup($id){
+        $downlineInGroup = [];
+        $mainMember = User::with('member')->where('id', $id)->firstOrFail()->member->toArray();
+        // add to downlineGroup
+        $downlineInGroup[$mainMember['id']] = $mainMember['member_numb'] . ' - ' . $mainMember['name'];
+        // get downline
+        $downline = Member::where('upline_id', $mainMember['id'])->get()->toArray();
+        // add to downlineGroup
+        foreach($downline as $d){
+            $downlineInGroup[$d['id']] = $d['member_numb'] . ' - ' . $d['name'];
+        }
+        // get downline from downline
+        foreach($downline as $d){
+            $downline2 = Member::where('upline_id', $d['id'])->get()->toArray();
+            foreach($downline2 as $d2){
+                $downlineInGroup[$d2['id']] = $d2['member_numb'] . ' - ' . $d2['name'];
+            }
+        }
+        return $downlineInGroup;
+    }
+
+    public function getMemberInGroup($id, $data = []){
+        $mainMember = Member::with(['level:id,name'])->where('id', $id)->firstOrFail()->toArray();
+        $downline = Member::where('upline_id', $mainMember['id'])->get()->toArray();
+        $data[$mainMember['id']] = $mainMember;
+        foreach($downline as $d){
+            $data[$d['id']] = $d;
+            $data = $this->getMemberInGroup($d['id'], $data);
+        }
+        return $data;
     }
 
     protected function setupModerateRoutes($segment, $routeName, $controller)
@@ -277,7 +347,8 @@ class MemberCrudController extends CrudController
         ]);
     }
 
-    protected function generateMemberNumber(){
+    protected function generateMemberNumber()
+    {
         $lastMember = Member::withTrashed()->orderBy('id', 'desc')->first();
         $lastMemberNumb = $lastMember->member_numb ?? 'M-000';
         $memberNumb = explode('-', $lastMemberNumb)[1] + 1;
@@ -289,12 +360,12 @@ class MemberCrudController extends CrudController
         return $memberNumb;
     }
 
-    public function getCreateMember($id) {
+    public function getCreateMember($id) 
+    {
         $this->crud->setOperation('createMember');
         $this->data['crud'] = $this->crud;
         $this->data['title'] = 'Add '.$this->crud->entity_name;
         $this->data['member_numb'] = $this->generateMemberNumber();
-        // $this->data['id'] = $id;
         $this->data['level'] = Level::find(1);
         $this->data['user'] = User::where('id', $id)->firstOrFail();
         $this->data['upline'] = User::with('member')->where('id', backpack_user()->id)->firstOrFail()->member;
@@ -302,7 +373,8 @@ class MemberCrudController extends CrudController
         return view('member.create-member', $this->data);
     }
 
-    public function postCreateMember(Request $request, $id){
+    public function postCreateMember(Request $request, $id) 
+    {
         $requests = $request->all();
         $validator = Validator::make($requests, (new MemberRequest)->rules());
 

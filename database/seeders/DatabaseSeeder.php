@@ -258,21 +258,4 @@ class DatabaseSeeder extends Seeder
             'upline_id' => 1
         ]);
     }
-
-
-    // private function transaction()
-    // {
-    //     Member::updateOrCreate([
-    //         'code' => 'TR-001',
-    //     ], [
-    //         'member_numb' => 'M-004',
-    //         'name' => 'Angela Mahaletou',
-    //         'level_id' => 1,
-    //         'gender' => 'F',
-    //         'phone' => '08212938292',
-    //         'email' => 'amahal@wt.com',
-    //         'address' => 'Jalan Beku', 
-    //         'upline_id' => 1
-    //     ]);
-    // }
 }

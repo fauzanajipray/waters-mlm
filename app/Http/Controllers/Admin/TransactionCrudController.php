@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
 use App\Http\Requests\TransactionRequest;
+use App\Models\BonusHistory;
+use App\Models\Level;
 use App\Models\Member;
 use App\Models\Product;
 use App\Models\Transaction;
@@ -102,7 +104,6 @@ class TransactionCrudController extends CrudController
         $this->crud->removeButton('update');
     }
 
-
     protected function setupShowOperation(){
         $this->setupListOperation();
         $this->crud->addColumns([
@@ -160,7 +161,8 @@ class TransactionCrudController extends CrudController
                 'todayBtn' => 'linked',
                 'format'   => 'dd-mm-yyyy',
                 'language' => 'en'
-            ],]);
+            ],
+        ]);
         $this->crud->addField([
             'name' => 'product_id',
             'type' => 'select2_from_array',
@@ -202,48 +204,6 @@ class TransactionCrudController extends CrudController
             'label' => 'Quantity',
         ]);
     }
-    
-    protected function generateCode() {
-        $lastTransaction = Transaction::withTrashed()->orderBy('id', 'desc')->first();
-        $lastTransactionCode = $lastTransaction->code ?? 'TRX-000000-0000';
-        $transactionCode = explode('-', $lastTransactionCode)[2] + 1;
-        $transactionCode = 'TRX-' . date('ymd') . '-' . str_pad($transactionCode, 4, '0', STR_PAD_LEFT);
-        return $transactionCode;
-    }
-
-    public function store(Request $request)
-    {
-        $requests = $request->all();
-        $this->crud->validateRequest($requests);
-        $member = Member::find($requests['member_id']);
-        $product = Product::find($requests['product_id']);
-        DB::beginTransaction();
-        try {
-            $requests['code'] = $this->generateCode();
-            $requests['id_card'] = $member->id_card;
-            $requests['member_name'] = $member->name;
-            $requests['member_numb'] = $member->member_numb;
-            $requests['level_id'] = $member->level_id;
-            $requests['product_name'] = $product->name;
-            $requests['product_model'] = $product->model;
-            $requests['qty_sold'] = $requests['qty'];
-            $requests['unit_price'] = $product->price;
-            $requests['total_price'] = $requests['qty'] * $product->price;
-            $requests['created_by'] = backpack_user()->id;
-            $requests['updated_by'] = backpack_user()->id;
-            $requests['status'] = 'pending';
-            $transaction = Transaction::create($requests);
-            // show a success message
-            Alert::success(trans('backpack::crud.insert_success'))->flash();
-            // save the redirect choice for next time
-            DB::commit();
-            return redirect($this->crud->route);
-        } catch (\Exception $e) {
-            DB::rollback();
-            Alert::error($e->getMessage())->flash();
-            return redirect()->back();
-        }
-    }
 
     public function edit($id)
     {   
@@ -267,27 +227,126 @@ class TransactionCrudController extends CrudController
         return view('crud::edit', $this->data);
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $this->crud->hasAccessOrFail('create');
-
+        
         $this->data['crud'] = $this->crud;
         $this->data['fields'] = $this->crud->getCreateFields();
         $this->data['saveAction'] = $this->crud->getSaveAction();
         $this->crud->modifyField('transaction_date', [
             'value' => date('Y-m-d'),
         ]);
+        if ($request->query('member_id')) {
+            $this->crud->modifyField('member_id', [
+                'value' => $request->query('member_id'),
+            ]);
+        }
         $this->crud->modifyField('qty', [
             'value' => 1,
         ]);
         return view('crud::create', $this->data);
     }
-
+    
     public function update()
     {
         // show a success message
         Alert::success(trans('backpack::crud.update_success'))->flash();
 
         return redirect($this->crud->route);
+    }
+    
+    protected function generateCode() {
+        $lastTransaction = Transaction::withTrashed()->orderBy('id', 'desc')->first();
+        $lastTransactionCode = $lastTransaction->code ?? 'TRX-000000-0000';
+        $transactionCode = explode('-', $lastTransactionCode)[2] + 1;
+        $transactionCode = 'TRX-' . date('ymd') . '-' . str_pad($transactionCode, 4, '0', STR_PAD_LEFT);
+        return $transactionCode;
+    }
+
+    public function store(Request $request)
+    {
+        $requests = $request->all();
+        $this->crud->validateRequest($requests);
+        $member = Member::with(['upline' => function($query) {
+            $query->with('upline');
+        }])->find($requests['member_id']);
+
+        $product = Product::find($requests['product_id']);
+        DB::beginTransaction();
+        try {
+            $requests['code'] = $this->generateCode();
+            $requests['id_card'] = $member->id_card;
+            $requests['member_name'] = $member->name;
+            $requests['member_numb'] = $member->member_numb;
+            $requests['level_id'] = $member->level_id;
+            $requests['product_name'] = $product->name;
+            $requests['product_model'] = $product->model;
+            $requests['qty_sold'] = $requests['qty'];
+            $requests['unit_price'] = $product->price;
+            $requests['total_price'] = $requests['qty'] * $product->price;
+            $requests['created_by'] = backpack_user()->id;
+            $requests['updated_by'] = backpack_user()->id;
+            $requests['status'] = 'pending';
+            $transaction = Transaction::create($requests);
+            $requests['transaction_id'] = $transaction->id;
+            $this->calculateBonus($requests, $member);
+            Alert::success(trans('backpack::crud.insert_success'))->flash();
+            DB::commit();
+            return redirect($this->crud->route);
+        } catch (\Exception $e) {
+            DB::rollback();
+            Alert::error("Something when wrong")->flash();
+            return redirect()->back()->withInput()->withErrors($e->getMessage());
+        }
+    }
+
+    private function calculateBonus($requests, $member){
+        /* Bonus Penjualan Pribadi */
+        $levelNow = Level::where('id', $member->level_id)->first();
+        BonusHistory::create([
+            'member_id' => $member->id,
+            'member_numb' => $member->member_numb,
+            'transaction_id' => $requests['transaction_id'],
+            'level_id' => $member->level_id,
+            'bonus_type' => "BP",
+            'bonus_percent' => $levelNow->bp_percentage,
+            'bonus' => $requests['total_price'] * $levelNow->bp_percentage / 100,
+        ]);
+
+        /* Bonus Sponsor */
+        $upline = $member->upline;
+        if ($upline) {
+            $uplineLevel = Level::where('id', $upline->level_id)->first();
+            BonusHistory::create([
+                'member_id' => $upline->id,
+                'member_numb' => $upline->member_numb,
+                'transaction_id' => $requests['transaction_id'],
+                'level_id' => $upline->level_id,
+                'bonus_type' => "BS",
+                'bonus_percent' => $uplineLevel->bs_percentage,
+                'bonus' => $requests['total_price'] * $uplineLevel->bs_percentage / 100,
+            ]);
+
+            /* Bonus Overriding */
+            $upline2 = $upline->upline ?? null;
+            if ($upline2) {
+                // Cek apakah pernah melakukan transaksi
+                $upline2Transaction = Transaction::where('member_id', $upline2->id)->first(); 
+                if($upline2Transaction) {
+                    $upline2Level = Level::where('id', $upline2->level_id)->first();
+                    BonusHistory::create([
+                        'member_id' => $upline2->id,
+                        'member_numb' => $upline2->member_numb,
+                        'transaction_id' => $requests['transaction_id'],
+                        'level_id' => $upline2->level_id,
+                        'bonus_type' => "OR",
+                        'bonus_percent' => $upline2Level->or_percentage,
+                        'bonus' => $requests['total_price'] * $upline2Level->or_percentage / 100,
+                    ]);
+                }
+            }
+        }
+        
     }
 }
