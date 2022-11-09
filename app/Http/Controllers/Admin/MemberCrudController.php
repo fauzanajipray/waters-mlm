@@ -287,7 +287,7 @@ class MemberCrudController extends CrudController
                 <p class="mb-0" hidden>B. Omset : <b>Rp. -</b></p>
                 <p class="mb-0">B. Pribadi : <b>Rp. '.number_format($BP).'</b></p>
                 <p class="mb-0">B. Sponsor : <b>Rp. '.number_format($BS).'</b></p>
-                <p class="mb-0">Overriding : <b>Rp. '.number_format($BS).'</b></p>'
+                <p class="mb-0">Overriding : <b>Rp. '.number_format($OR).'</b></p>'
             ];
             array_push($dataMember, $data);
         }
