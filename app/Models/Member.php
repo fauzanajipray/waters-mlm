@@ -66,6 +66,10 @@ class Member extends Model
         return $this->belongsTo('App\Models\Member', 'upline_id', 'id');
     }
 
+    public function bonus(){
+        return $this->hasMany('App\Models\BonusHistory', 'member_id', 'id');
+    }
+
     /*
     |--------------------------------------------------------------------------
     | SCOPES

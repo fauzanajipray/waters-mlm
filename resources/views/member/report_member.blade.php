@@ -22,7 +22,7 @@
 @section('content')
 <div class="row">
     <div class="col-md-6">
-        <div class="form-group required">
+        <div class="form-group required" hidden>
             <label>Month - Year</label>
             <input type="hidden" name="month_year" value="{{Carbon\Carbon::now()->startOfMonth()->format('Y-m-d')}}">
             <div class="input-group date">
@@ -136,93 +136,7 @@
     <script src="{{asset('packages/d3/d3.flextree.2.1.2.js')}}"></script>
     <script>
         var chart;
-        var dataFlattened = [
-            {
-                id: 1,
-                name: 'Kevin D',
-                level: 'L3',
-                imageUrl: "{{backpack_url('images/profile.jpg')}}",
-                url: "{{backpack_url('member/1/show')}}",
-                parentId: "",
-                height: 175,
-                _directSubordinates:2,
-                _totalSubordinates:4, 
-                contents: `<p class="mb-0">Total Bonus : <b>Rp 11,000,000</b></p>
-                <p class="mb-0">Total Omset : <b>Rp 200,000,000</b></p>
-                <p class="mb-0">B. Omset : <b>Rp 2,500,000</b></p>
-                <p class="mb-0">B. Pribadi : <b>Rp 4,000,0000</b></p>
-                <p class="mb-0">B. Sponsor : <b>Rp 3,000,0000</b></p>
-                <p class="mb-0">Overriding : <b>Rp 1,500,0000</b></p>`
-            }, 
-            {
-                id: 2,
-                name: 'Budi',
-                level: 'L2',
-                imageUrl: "{{backpack_url('images/profile.jpg')}}",
-                url: "{{backpack_url('member/1/show')}}",
-                parentId: 1,
-                height: 175,
-                _directSubordinates:1,
-                _totalSubordinates:1, 
-                contents: `<p class="mb-0">Total Bonus : <b>Rp 4,000,000</b></p>
-                <p class="mb-0">Total Omset : <b>Rp 50,000,000</b></p>
-                <p class="mb-0">B. Omset : <b>Rp -</b></p>
-                <p class="mb-0">B. Pribadi : <b>Rp 2,000,0000</b></p>
-                <p class="mb-0">B. Sponsor : <b>Rp 1,500,0000</b></p>
-                <p class="mb-0">Overriding : <b>Rp 1,000,0000</b></p>`
-            }, 
-            {
-                id: 3,
-                name: 'Andi',
-                level: 'L2',
-                imageUrl: "{{backpack_url('images/profile.jpg')}}",
-                url: "{{backpack_url('member/1/show')}}",
-                parentId: 1,
-                height: 175,
-                _directSubordinates:1,
-                _totalSubordinates:1, 
-                contents: `<p class="mb-0">Total Bonus : <b>Rp 4,000,000</b></p>
-                <p class="mb-0">Total Omset : <b>Rp 50,000,000</b></p>
-                <p class="mb-0">B. Omset : <b>Rp -</b></p>
-                <p class="mb-0">B. Pribadi : <b>Rp 2,000,0000</b></p>
-                <p class="mb-0">B. Sponsor : <b>Rp 1,500,0000</b></p>
-                <p class="mb-0">Overriding : <b>Rp 1,000,0000</b></p>`
-            }, 
-            {
-                id: 4,
-                name: 'Tono',
-                level: 'L2',
-                imageUrl: "{{backpack_url('images/profile.jpg')}}",
-                url: "{{backpack_url('member/1/show')}}",
-                parentId: 3,
-                height: 175,
-                _directSubordinates:0,
-                _totalSubordinates:0, 
-                contents: `<p class="mb-0">Total Bonus : <b>Rp 2,000,000</b></p>
-                <p class="mb-0">Total Omset : <b>Rp 25,000,000</b></p>
-                <p class="mb-0">B. Omset : <b>Rp -</b></p>
-                <p class="mb-0">B. Pribadi : <b>Rp 1,000,0000</b></p>
-                <p class="mb-0">B. Sponsor : <b>Rp 1,000,0000</b></p>
-                <p class="mb-0">Overriding : <b>Rp 7,000,0000</b></p>`
-            }, 
-            {
-                id: 5,
-                name: 'Joko',
-                level: 'L1',
-                imageUrl: "{{backpack_url('images/profile.jpg')}}",
-                url: "{{backpack_url('member/1/show')}}",
-                parentId: 2,
-                height: 175,
-                _directSubordinates:0,
-                _totalSubordinates:0, 
-                contents: `<p class="mb-0">Total Bonus : <b>Rp 2,000,000</b></p>
-                <p class="mb-0">Total Omset : <b>Rp 25,000,000</b></p>
-                <p class="mb-0">B. Omset : <b>Rp -</b></b></p>
-                <p class="mb-0">B. Pribadi : <b>Rp 1,000,0000</b></p>
-                <p class="mb-0">B. Sponsor : <b>Rp 1,000,0000</b></p>
-                <p class="mb-0">Overriding : <b>Rp 7,000,0000</b></p>`
-            }, 
-        ];
+        var dataFlattened = {!! $dataMember !!};
         chart = new d3.OrgChart()
         .container('.chart-container')
         .data(dataFlattened)

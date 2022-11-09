@@ -24,7 +24,7 @@
                         </td>
                         <td style="width:70%;vertical-align:top;">
                             <div style="border-bottom: 1px solid black;border-bottom-style:dotted;"><b>{{\Str::limit($member->name, 30)}}</b></div>
-                            <small style="font-size:10px;">Authorized Distributor</small>
+                            <small style="font-size:10px;">{{ $level }}</small>
                             <div style="border-bottom: 1px solid black;border-bottom-style:dotted;margin-top:8px"><b>{{$member['member_numb'] ?? '-'}}</b></div>
                             <small style="font-size:10px;">Unique Number</small>
                             <div style="margin-top:8px;text-align:right">KTP / SIM : <span style="border-bottom: 1px solid black;border-bottom-style:dotted;font-weight:bold">{{$member['id_card'] ?? '-'}}</span></div>
