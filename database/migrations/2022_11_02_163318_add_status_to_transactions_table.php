@@ -13,9 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('transactions', function (Blueprint $table) {
-            $table->enum('status', ['pending', 'success', 'failed'])->default('pending')->after('transaction_date');
-        });
+        // Schema::table('transactions', function (Blueprint $table) {
+        //     $table->enum('status', ['pending', 'success', 'failed'])->default('pending')->after('transaction_date');
+        // });
     }
 
     /**
@@ -25,8 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('transactions', function (Blueprint $table) {
-            $table->dropColumn('status');
-        });
+        // Schema::table('transactions', function (Blueprint $table) {
+        //     $table->dropColumn('status');
+        // });
     }
 };
