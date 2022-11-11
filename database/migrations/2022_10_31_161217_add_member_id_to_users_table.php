@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('member_id')->nullable()->after('id')->unique();
+            // $table->string('member_id')->nullable()->after('id')->unique();
             $table->softDeletes()->after('remember_token');
         });
     }
@@ -26,9 +26,9 @@ return new class extends Migration
      */
     public function down()
     {   
-        Schema::disableForeignKeyConstraints();
+        // Schema::disableForeignKeyConstraints();
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('member_id');
+            // $table->dropColumn('member_id');
             $table->dropSoftDeletes();
         });
     }
