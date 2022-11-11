@@ -22,7 +22,7 @@ class MemberSeeder extends Seeder
             'member_numb' => 'M-001',
             'id_card' => '12345',
             'name' => 'Kevin Andianto',
-            'level_id' => 2,
+            'level_id' => 1,
             'gender' => 'M',
             'phone' => '08291029320',
             'email' => 'kevin@rectmedia.com',
@@ -129,7 +129,7 @@ class MemberSeeder extends Seeder
             'phone' => '08212938296',
             'email' => 'monkeyluffy@gmail.com',
             'address' => 'Jalan Arjuna',
-            'upline_id' => 5
+            'upline_id' => 2
         ]);
 
         Member::updateOrCreate([
@@ -144,7 +144,67 @@ class MemberSeeder extends Seeder
             'phone' => '08212938297',
             'email' => 'rzoro@gmail.com',
             'address' => 'Jalan Arjuna',
-            'upline_id' => 8
+            'upline_id' => 2
+        ]);
+
+        Member::updateOrCreate([
+            'id' => 10,
+            'member_numb' => 'M-010',
+        ], [
+            'member_numb' => 'M-010',
+            'id_card' => '12354',
+            'name' => 'Sanji',
+            'level_id' => 2,
+            'gender' => 'M',
+            'phone' => '08212938298',
+            'email' => 'sanji@gmail.com',
+            'address' => 'Jalan Arjuna',
+            'upline_id' => 2
+        ]);
+
+        Member::updateOrCreate([
+            'id' => 11,
+            'member_numb' => 'M-011',
+        ], [
+            'member_numb' => 'M-011',
+            'id_card' => '12355',
+            'name' => 'Usopp',
+            'level_id' => 1, 
+            'gender' => 'M',
+            'phone' => '08212938299',
+            'email' => 'usopp@gmail.com',
+            'address' => 'Jalan Arjuna',
+            'upline_id' => 3
+        ]);
+
+        Member::updateOrCreate([
+            'id' => 12,
+            'member_numb' => 'M-012',
+        ], [
+            'member_numb' => 'M-012',
+            'id_card' => '12356',
+            'name' => 'Nami',
+            'level_id' => 1,
+            'gender' => 'F',
+            'phone' => '08212938298',
+            'email' => 'nami@gmail.com',
+            'address' => 'Jalan Arjuna',
+            'upline_id' => 3
+        ]);
+
+        Member::updateOrCreate([
+            'id' => 13,
+            'member_numb' => 'M-013',
+        ], [
+            'member_numb' => 'M-013',
+            'id_card' => '12355',
+            'name' => 'Tony Tony Chopper',
+            'level_id' => 2,
+            'gender' => 'M',
+            'phone' => '08212938299',
+            'email' => 'chopper@gmail.com',
+            'address' => 'Jalan Arjuna',
+            'upline_id' => 3
         ]);
     }
 }

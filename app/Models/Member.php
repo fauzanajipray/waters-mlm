@@ -69,6 +69,18 @@ class Member extends Model
     public function bonus(){
         return $this->hasMany('App\Models\BonusHistory', 'member_id', 'id');
     }
+    
+    public function transactions(){
+        return $this->hasMany('App\Models\Transaction', 'member_id', 'id');
+    }
+
+    public function downlines(){
+        return $this->hasMany('App\Models\Member', 'upline_id', 'id');
+    }
+
+    public function logProductSold(){
+        return $this->hasMany('App\Models\LogProductSold', 'member_id', 'id');
+    }
 
     /*
     |--------------------------------------------------------------------------

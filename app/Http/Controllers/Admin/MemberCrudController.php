@@ -177,6 +177,8 @@ class MemberCrudController extends CrudController
                 'readonly' => 'readonly',
             ],
         ])->afterField('upline_id');
+        $this->crud->removeField('level_id');
+        $this->crud->removeField('level_name');
     }
     
     /**

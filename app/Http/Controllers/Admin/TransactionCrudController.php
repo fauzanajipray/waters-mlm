@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
 use App\Http\Requests\TransactionRequest;
+use App\Http\Traits\TransactionTrait;
 use App\Models\BonusHistory;
 use App\Models\Level;
+use App\Models\LevelUpHistories;
+use App\Models\LogProductSold;
 use App\Models\Member;
 use App\Models\Product;
 use App\Models\Transaction;
@@ -28,6 +31,7 @@ class TransactionCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
+    use \App\Http\Traits\TransactionTrait;
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
@@ -255,21 +259,15 @@ class TransactionCrudController extends CrudController
 
         return redirect($this->crud->route);
     }
-    
-    protected function generateCode() {
-        $lastTransaction = Transaction::withTrashed()->orderBy('id', 'desc')->first();
-        $lastTransactionCode = $lastTransaction->code ?? 'TRX-000000-0000';
-        $transactionCode = explode('-', $lastTransactionCode)[2] + 1;
-        $transactionCode = 'TRX-' . date('ymd') . '-' . str_pad($transactionCode, 4, '0', STR_PAD_LEFT);
-        return $transactionCode;
-    }
 
     public function store(Request $request)
     {
         $requests = $request->all();
         $this->crud->validateRequest($requests);
         $member = Member::with(['upline' => function($query) {
-            $query->with('upline');
+            $query->with(['upline' => function($query) {
+                $query->with('level');
+            }]);
         }])->find($requests['member_id']);
 
         $product = Product::find($requests['product_id']);
@@ -289,8 +287,18 @@ class TransactionCrudController extends CrudController
             $requests['updated_by'] = backpack_user()->id;
             $requests['status'] = 'pending';
             $transaction = Transaction::create($requests);
+            // Save Log Product Sold
+            for($i = 0; $i < $requests['qty']; $i++) {
+                LogProductSold::create([
+                    'transaction_id' => $transaction->id,
+                    'product_id' => $product->id,
+                    'member_id' => $member->id,
+                    'transaction_date' => $transaction->transaction_date,
+                ]);
+            }
             $requests['transaction_id'] = $transaction->id;
             $this->calculateBonus($requests, $member);
+            $this->levelUpMember($member->id);
             Alert::success(trans('backpack::crud.insert_success'))->flash();
             DB::commit();
             return redirect($this->crud->route);
@@ -299,54 +307,5 @@ class TransactionCrudController extends CrudController
             Alert::error("Something when wrong")->flash();
             return redirect()->back()->withInput()->withErrors($e->getMessage());
         }
-    }
-
-    private function calculateBonus($requests, $member){
-        /* Bonus Penjualan Pribadi */
-        $levelNow = Level::where('id', $member->level_id)->first();
-        BonusHistory::create([
-            'member_id' => $member->id,
-            'member_numb' => $member->member_numb,
-            'transaction_id' => $requests['transaction_id'],
-            'level_id' => $member->level_id,
-            'bonus_type' => "BP",
-            'bonus_percent' => $levelNow->bp_percentage,
-            'bonus' => $requests['total_price'] * $levelNow->bp_percentage / 100,
-        ]);
-
-        /* Bonus Sponsor */
-        $upline = $member->upline;
-        if ($upline) {
-            $uplineLevel = Level::where('id', $upline->level_id)->first();
-            BonusHistory::create([
-                'member_id' => $upline->id,
-                'member_numb' => $upline->member_numb,
-                'transaction_id' => $requests['transaction_id'],
-                'level_id' => $upline->level_id,
-                'bonus_type' => "BS",
-                'bonus_percent' => $uplineLevel->bs_percentage,
-                'bonus' => $requests['total_price'] * $uplineLevel->bs_percentage / 100,
-            ]);
-
-            /* Bonus Overriding */
-            $upline2 = $upline->upline ?? null;
-            if ($upline2) {
-                // Cek apakah pernah melakukan transaksi
-                $upline2Transaction = Transaction::where('member_id', $upline2->id)->first(); 
-                if($upline2Transaction) {
-                    $upline2Level = Level::where('id', $upline2->level_id)->first();
-                    BonusHistory::create([
-                        'member_id' => $upline2->id,
-                        'member_numb' => $upline2->member_numb,
-                        'transaction_id' => $requests['transaction_id'],
-                        'level_id' => $upline2->level_id,
-                        'bonus_type' => "OR",
-                        'bonus_percent' => $upline2Level->or_percentage,
-                        'bonus' => $requests['total_price'] * $upline2Level->or_percentage / 100,
-                    ]);
-                }
-            }
-        }
-        
     }
 }

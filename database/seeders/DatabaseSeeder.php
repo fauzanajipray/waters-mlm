@@ -118,16 +118,22 @@ class DatabaseSeeder extends Seeder
 
     private function level()
     {
+        /**
+         * Notes :
+         * - BP = Bonus Penjualan
+         * - BS ganti GM = Bonus Sponsor -> Goldmine (Bonus dari downline level 1)
+         * - OR = Overriding (Bonus dari downline level 2)
+         */
         Level::updateOrCreate([
             'code' => 'BC',
             'name' => 'Business Consultant'
         ], [
             'code' => 'BC',
             'name' => 'Business Consultant',
-            'description' => 'lorem ipsum dolor sit amet',
+            'description' => 'desc',
             'minimum_downline' => 0,
             'minimum_sold_by_downline' => 0,
-            'minimum_sold' => 1, // minimum sold untuk mendapatkan GM dan OR
+            'minimum_sold' => 1, // minimum sold untuk mendapatkan GM (Goldmine) dan OR (Overriding)
             'ordering_level' => 1,
             'bp_percentage' => 18, // in percent
             'bs_percentage' => 0,  // in percent
@@ -140,7 +146,7 @@ class DatabaseSeeder extends Seeder
         ], [
             'code' => 'TL',
             'name' => 'Team Leader',
-            'description' => 'lorem ipsum dolor sit amet',
+            'description' => 'desc',
             'minimum_downline' => 3, // minimum downline untuk mendapatkan TL
             'minimum_sold_by_downline' => 1, // minimum sold by downline untuk mendapatkan TL
             'minimum_sold' => 1, // minimum sold untuk mendapatkan GM dan OR
@@ -196,6 +202,22 @@ class DatabaseSeeder extends Seeder
             'bp_percentage' => 23, // in percent (18+5)
             'bs_percentage' => 5,  // in percent
             'or_percentage' => 1.5,// in percent
+        ]);
+
+        Level::updateOrCreate([
+            'code' => 'GD',
+            'name' => 'Group Director'
+        ], [
+            'code' => 'GD',
+            'name' => 'Group Director',
+            'description' => 'desc',
+            'minimum_downline' => 6, // minimum downline 6 berlevel SD untuk mendapatkan GD
+            'minimum_sold_by_downline' => 0, // minimum sold by downline untuk mendapatkan GD
+            'minimum_sold' => 1, // minimum sold untuk mendapatkan GM dan OR
+            'ordering_level' => 6,
+            'bp_percentage' => 26, // in percent (18+8)
+            'bs_percentage' => 5,  // in percent
+            'or_percentage' => 2,// in percent
         ]);
     }
 }
