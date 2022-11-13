@@ -38,7 +38,7 @@ trait TransactionTrait {
         if ($upline) {
             $uplineProductSold = LogProductSold::where('member_id', $upline->id)->count();
             $uplineLevel = Level::where('id', $upline->level_id)->first();
-            if ($uplineProductSold >= $upline->level->minimum_sold && $uplineLevel->bs_percenetage > 0) {  // Cek apakah pernah melakukan transaksi
+            if ($uplineProductSold >= $upline->level->minimum_sold && $uplineLevel->bs_percentage > 0) {  // Cek apakah pernah melakukan transaksi
                 // TODO : Tanya Minimal transaksi atau jual produk
                 BonusHistory::create([
                     'member_id' => $upline->id,
