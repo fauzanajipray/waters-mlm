@@ -85,10 +85,6 @@ class MemberCrudController extends CrudController
     protected function setupCreateOperation()
     {
         $level = Level::find(1);
-        $members = Member::all()->map(function($member){
-            $member->name = $member->member_numb . ' - ' . $member->name;
-            return $member;
-        });
         $countMember = Member::count();
         $this->crud->setValidation(($countMember > 0) ? MemberRequest::class : MemberRequestNoUpline::class);
         $this->crud->addField([
@@ -98,13 +94,11 @@ class MemberCrudController extends CrudController
         ]);
         $this->crud->addField([
             'name' => 'upline_id',
-            'label' => 'Upline',
-            'type' => 'select2_from_array',
-            'options' => $members->pluck('name', 'id')->toArray(),
-            'allows_null' => false,
-            'attributes' => [
-                'disabled' => ($countMember > 0) ? false : true,
-            ],
+            'type' => 'Upline',
+            'type' => 'select2_from_ajax',
+            'entity' => 'upline',
+            'attribute' => 'text',
+            'data_source' => url('api/members'),
         ]);
         $this->crud->addField([
             'name' => 'member_numb',
@@ -125,19 +119,6 @@ class MemberCrudController extends CrudController
                 'disabled' => 'disabled'
             ],
         ]);
-
-        // $this->crud->addField([
-        //     'name' => 'level_id',
-        //     'type' => 'select2',
-        //     'label' => 'Level',
-        //     'entity' => 'level',
-        //     'attribute' => 'name',
-        //     'model' => Level::class,
-        //     'options'   => (function ($query) {
-        //         return $query->orderBy('id', 'ASC')->get();
-        //     }),
-        // ]);
-
         $this->crud->field('id_card')->label('ID Card')->type('number');
         $this->crud->field('name');
         $this->crud->addField([
@@ -168,18 +149,33 @@ class MemberCrudController extends CrudController
      */
     protected function setupUpdateOperation()
     {
+        $members = Member::all()->map(function($member){
+            $member->name = $member->member_numb . ' - ' . $member->name;
+            return $member;
+        });
         $this->setupCreateOperation();
         $this->crud->removeField('member_numb');
+        $this->crud->removeField('upline_id');
         $this->crud->addField([
             'name' => 'member_numb',
             'label' => 'No. Member',
             'type' => 'text',
             'attributes' => [
                 'readonly' => 'readonly',
+                'disabled' => 'disabled',
             ],
-        ])->afterField('upline_id');
+        ])->beforeField('id_card');
+        $this->crud->addField([
+            'name' => 'upline_id',
+            'type' => 'Upline',
+            'type' => 'select2_from_array',
+            'options' => $members->pluck('name', 'id'),
+            'attributes' => [
+                'disabled' => 'disabled'
+            ],
+        ])->beforeField('member_numb');
         $this->crud->removeField('level_id');
-        $this->crud->removeField('level_name');
+        $this->crud->removeField('level_name');        
     }
     
     /**
