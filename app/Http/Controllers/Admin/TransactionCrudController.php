@@ -4,10 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
 use App\Http\Requests\TransactionRequest;
-use App\Http\Traits\TransactionTrait;
-use App\Models\BonusHistory;
 use App\Models\Level;
-use App\Models\LevelUpHistories;
 use App\Models\LogProductSold;
 use App\Models\Member;
 use App\Models\Product;
@@ -15,7 +12,6 @@ use App\Models\Transaction;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Prologue\Alerts\Facades\Alert;
 
@@ -145,17 +141,6 @@ class TransactionCrudController extends CrudController
             $item->name = $item->name . ' | ' . $item->model . ' | ' . 'Rp ' . formatNumber($item->price);
             return $item;
         });
-        // $users = User::with('member')->whereHas('member')->orderBy('name', 'ASC')->get();
-        // $users = $users->map(function($item){
-        //     $item->name = $item->member->member_numb . ' - ' . $item->name;
-        //     return $item;
-        // });
-
-        $members = Member::select('id', 'member_numb', 'name')->orderBy('name', 'ASC')->get();
-        $members = $members->map(function($item){
-            $item->name = $item->member_numb . ' - ' . $item->name;
-            return $item;
-        });
 
         $this->crud->addField([
             'name' => 'transaction_date',
@@ -176,10 +161,10 @@ class TransactionCrudController extends CrudController
         ]);
         $this->crud->addField([
             'name' => 'member_id',
-            'type' => 'select2_from_array',
-            'label' => 'Member',
-            'options' => $members->pluck('name', 'id')->toArray(),
-            'allows_null' => false,
+            'type' => 'select2_from_ajax',
+            'entity' => 'member',
+            'attribute' => 'text',
+            'data_source' => url('api/members'),
         ]);
         $this->crud->field('qty')->type('number_format');
     }
