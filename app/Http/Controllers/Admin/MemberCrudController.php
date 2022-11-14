@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\MemberRequest;
 use App\Http\Requests\MemberRequestNoUpline;
+use App\Http\Requests\MemberRequestUpdate;
 use App\Http\Traits\MemberTrait;
 use App\Models\Level;
 use App\Models\Member;
@@ -154,6 +155,7 @@ class MemberCrudController extends CrudController
             return $member;
         });
         $this->setupCreateOperation();
+        $this->crud->setValidation(MemberRequestUpdate::class);
         $this->crud->removeField('member_numb');
         $this->crud->removeField('upline_id');
         $this->crud->addField([
@@ -162,7 +164,6 @@ class MemberCrudController extends CrudController
             'type' => 'text',
             'attributes' => [
                 'readonly' => 'readonly',
-                'disabled' => 'disabled',
             ],
         ])->beforeField('id_card');
         $this->crud->addField([
@@ -223,7 +224,6 @@ class MemberCrudController extends CrudController
     {   
         $this->crud->validateRequest();
         $requests = request()->all();
-        $user = User::where('member_id', $requests['id'])->first();
         DB::beginTransaction();
         try {
             // Update Member 
@@ -238,5 +238,4 @@ class MemberCrudController extends CrudController
             return redirect()->back()->withInput();
         }
     }
-
 }

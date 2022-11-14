@@ -32,7 +32,6 @@ class MemberRequestUpdate extends FormRequest
             'id_card' => 'required|min:5|max:255',
             'gender' => 'required|min:1|in:M,F',
             'email' => 'required|min:5|max:255|email',
-            'upline_id' => 'required|exists:members,id',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ];
     }
