@@ -57,6 +57,10 @@ class Transaction extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
+    public function member() {
+        return $this->belongsTo(Member::class, 'member_id');
+    }
+
     /*
     |--------------------------------------------------------------------------
     | SCOPES
