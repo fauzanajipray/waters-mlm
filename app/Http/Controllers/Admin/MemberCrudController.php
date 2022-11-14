@@ -65,6 +65,11 @@ class MemberCrudController extends CrudController
         $this->crud->column('email');
         $this->crud->column('address');
         $this->crud->addColumn([
+            'name' => 'expired_at',
+            'label' => 'Expired At',
+            'type' => 'date',
+        ]);
+        $this->crud->addColumn([
             'name' => 'photo_url',
             'label' => 'Photo Member',
             'type' => 'image',

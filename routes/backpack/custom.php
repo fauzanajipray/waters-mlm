@@ -27,4 +27,5 @@ Route::group([
     Route::crud('level', 'LevelCrudController');
     Route::crud('bonus-history', 'BonusHistoryCrudController');
     Route::crud('level-up-histories', 'LevelUpHistoriesCrudController');
+    Route::crud('activation-payments', 'ActivationPaymentsCrudController');
 }); // this should be the absolute last line of this file

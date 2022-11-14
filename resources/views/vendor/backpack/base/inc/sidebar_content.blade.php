@@ -4,8 +4,9 @@
 <li class="nav-item"><a class="nav-link" href="{{ backpack_url('member') }}"><i class="nav-icon la la-id-card"></i> Members</a></li>
 <li class="nav-item"><a class="nav-link" href="{{ backpack_url('level') }}"><i class="nav-icon la la-chart-line"></i> Levels</a></li>
 <li class="nav-item"><a class="nav-link" href="{{ backpack_url('transaction') }}"><i class="nav-icon la la-dollar"></i> Transactions</a></li>
-<li class="nav-item"><a class="nav-link" href="{{ backpack_url('bonus-history') }}"><i class="nav-icon la la-money-bill"></i> Bonus Histories</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ backpack_url('bonus-history') }}"><i class="nav-icon la la-hand-holding-usd"></i> Bonus Histories</a></li>
 <li class="nav-item"><a class="nav-link" href="{{ backpack_url('level-up-histories') }}"><i class="nav-icon la la-level-up-alt"></i> Level Up Histories</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ backpack_url('activation-payments') }}"><i class="nav-icon la la-money-bill"></i> Payments</a></li>
 <!-- Users, Roles, Permissions -->
 <li class="nav-item nav-dropdown">
   <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon la la-users"></i> Authentication</a>

@@ -87,6 +87,13 @@ class Member extends Model
     | SCOPES
     |--------------------------------------------------------------------------
     */
+    public function scopeIsActive() {
+        return $this->where('expired_at', '>=', date('Y-m-d'));
+    }
+
+    public function scopeIsNotActive() {
+        return $this->where('expired_at', '<', date('Y-m-d'))->orWhere('expired_at', null);
+    }
 
     /*
     |--------------------------------------------------------------------------

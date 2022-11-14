@@ -68,7 +68,7 @@ class ProductCrudController extends CrudController
         ]);
         $this->crud->field('name')->label('Name');
         $this->crud->field('model')->label('Model');
-        $this->crud->field('price')->label('Price')->type('number_format')->prefix('Rp');
+        $this->crud->field('price')->label('Price')->type('number_format')->prefix('Rp. ');
     }
 
     /**
