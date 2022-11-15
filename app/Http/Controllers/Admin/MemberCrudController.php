@@ -67,7 +67,7 @@ class MemberCrudController extends CrudController
         $this->crud->addColumn([
             'name' => 'expired_at',
             'label' => 'Expired At',
-            'type' => 'date',
+            'type' => 'datetime',
         ]);
         $this->crud->addColumn([
             'name' => 'photo_url',
@@ -190,7 +190,8 @@ class MemberCrudController extends CrudController
      * @see https://backpackforlaravel.com/docs/crud-operation-show
      * @return void
      */
-    protected function setupShowOperation() {
+    protected function setupShowOperation() 
+    {
         $this->setupListOperation();
         $this->crud->removeColumn('photo_url');
         $this->crud->addColumn([

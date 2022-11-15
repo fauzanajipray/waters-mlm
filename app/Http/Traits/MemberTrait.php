@@ -7,6 +7,7 @@ use App\Models\Level;
 use App\Models\Member;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -14,21 +15,30 @@ use Illuminate\Support\Facades\Validator;
 use Prologue\Alerts\Facades\Alert;
 
 trait MemberTrait {
-    public function downloadCardMember($id) {
+    public function downloadCardMember($id) 
+    {
         $member = Member::with('level')->where('id', $id)->firstOrFail();
         $imageUrl = ($member->photo_url) ? 'storage/'.$member->photo_url : 'images/profile.jpg';
         $title = "Card Member ($member->member_numb - $member->name)";
         $level = $member->level->name;
+        // expired date for human
+        ($this->isActiveMember($member)) ? $expiredDate = Carbon::parse($member->expired_at)->format('d M Y') : $expiredDate = 'Expired';
+        if($expiredDate == 'Expired') {
+            Alert::error('Member Expired')->flash();
+            return redirect()->back();
+        } 
         $pdf = PDF::loadView('member.card_member_pdf', [
             'title' => $title, 
             'member' => $member,
             'imageUrl' => $imageUrl,
             'level' => $level,
+            'expiredDate' => $expiredDate,
         ]);
         return $pdf->download($title . ".pdf");
     }
 
-    public function reportMember(Request $request, $id){
+    public function reportMember(Request $request, $id)
+    {
         $members = $this->getMemberInGroup($id);
         $dataMember = [];
         foreach ($members as $member) {
@@ -75,7 +85,8 @@ trait MemberTrait {
         ]);
     }
 
-    protected function getMemberGroup($id){
+    protected function getMemberGroup($id)
+    {
         $downlineInGroup = [];
         $mainMember = User::with('member')->where('id', $id)->firstOrFail()->member->toArray();
         // add to downlineGroup
@@ -96,7 +107,8 @@ trait MemberTrait {
         return $downlineInGroup;
     }
 
-    public function getMemberInGroup($id, $data = []){
+    public function getMemberInGroup($id, $data = [])
+    {
         $mainMember = Member::with(['level:id,name'])->where('id', $id)->firstOrFail()->toArray();
         $downline = Member::where('upline_id', $mainMember['id'])->get()->toArray();
         $data[$mainMember['id']] = $mainMember;
@@ -179,6 +191,14 @@ trait MemberTrait {
 
             return redirect()->back()->withInput();
         }
+    }
+
+    private function isActiveMember($member) 
+    {
+        if ($member->expired_at < Carbon::now()) {
+            return false;
+        }
+        return true;
     }
 }
 

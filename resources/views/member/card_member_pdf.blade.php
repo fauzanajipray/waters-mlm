@@ -24,7 +24,7 @@
                         </td>
                         <td style="width:70%;vertical-align:top;">
                             <div style="border-bottom: 1px solid black;border-bottom-style:dotted;"><b>{{\Str::limit($member->name, 30)}}</b></div>
-                            <small style="font-size:10px;">{{ $level }}</small>
+                            <small style="font-size:10px;">Authorized Distributor</small>
                             <div style="border-bottom: 1px solid black;border-bottom-style:dotted;margin-top:8px"><b>{{$member['member_numb'] ?? '-'}}</b></div>
                             <small style="font-size:10px;">Unique Number</small>
                             <div style="margin-top:8px;text-align:right">KTP / SIM : <span style="border-bottom: 1px solid black;border-bottom-style:dotted;font-weight:bold">{{$member['id_card'] ?? '-'}}</span></div>
@@ -35,7 +35,7 @@
                                         <small style="font-size:10px;display:block">The Management</small>
                                     </td>
                                     <td style="width:30%;text-align:right">
-                                        <span style="border-bottom: 1px solid black;border-bottom-style:dotted;font-size:12px;font-weight:bold">{{$member['expired'] ?? '-'}}</span>
+                                        <span style="border-bottom: 1px solid black;border-bottom-style:dotted;font-size:12px;font-weight:bold">{{ $expiredDate }}</span>
                                         <small style="font-size:10px;display:block">Date of Expiry</small>
                                     </td>
                                 </tr>

@@ -42,30 +42,6 @@ class TransactionCrudController extends CrudController
 
     }
 
-    public function getColumns(){
-        $this->crud->column('date')->label('Date')
-        ->value(function($entry){
-            return optional($this->crud->transactions[$entry->id - 1] ?? null)['date'] ?? null;
-        });
-        $this->crud->column('product_name')->label('Product Name')
-        ->value(function($entry){
-            return optional($this->crud->transactions[$entry->id - 1] ?? null)['product_name'] ?? null;
-        });
-        $this->crud->column('member_name')->label('Member Name')
-        ->value(function($entry){
-            return optional($this->crud->transactions[$entry->id - 1] ?? null)['member_name'] ?? null;
-        });
-        $this->crud->column('qty')->label('Qty')->value(function($entry){
-            return formatNumber(optional($this->crud->transactions[$entry->id - 1] ?? null)['qty'] ?? null);
-        });
-        $this->crud->column('price')->label('Price')->value(function($entry){
-            return 'Rp '. formatNumber(optional($this->crud->transactions[$entry->id - 1] ?? null)['price'] ?? null);
-        });
-        $this->crud->column('total_price')->label('Total Price')  ->value(function($entry){
-            return 'Rp '. formatNumber(optional($this->crud->transactions[$entry->id - 1] ?? null)['total_price'] ?? null);
-        });
-    }
-
     /**
      * Define what happens when the List operation is loaded.
      * 
