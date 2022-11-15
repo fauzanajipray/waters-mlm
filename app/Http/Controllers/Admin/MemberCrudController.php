@@ -104,7 +104,7 @@ class MemberCrudController extends CrudController
             'type' => 'select2_from_ajax',
             'entity' => 'upline',
             'attribute' => 'text',
-            'data_source' => url('api/members'),
+            'data_source' => url('api/members/only-actived'),
         ]);
         $this->crud->addField([
             'name' => 'member_numb',

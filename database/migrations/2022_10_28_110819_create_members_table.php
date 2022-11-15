@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->string('email')->nullable();
             $table->string('address')->nullable();
-            $table->date('expired_at')->nullable();
+            $table->dateTime('expired_at')->nullable();
             $table->string('photo_url')->nullable();
             $table->unsignedBigInteger('upline_id')->nullable();
             $table->foreign('upline_id')->references('id')->on('members')->onDelete('restrict')->onUpdate('cascade');

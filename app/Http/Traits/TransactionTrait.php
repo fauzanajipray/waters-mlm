@@ -7,6 +7,7 @@ use App\Models\LevelUpHistories;
 use App\Models\LogProductSold;
 use App\Models\Member;
 use App\Models\Transaction;
+use Carbon\Carbon;
 use Prologue\Alerts\Facades\Alert;
 
 trait TransactionTrait {
@@ -23,22 +24,24 @@ trait TransactionTrait {
     {
         /* Bonus Penjualan Pribadi */
         $levelNow = Level::where('id', $member->level_id)->first();
-        BonusHistory::create([
-            'member_id' => $member->id,
-            'member_numb' => $member->member_numb,
-            'transaction_id' => $requests['transaction_id'],
-            'level_id' => $member->level_id,
-            'bonus_type' => "BP",
-            'bonus_percent' => $levelNow->bp_percentage,
-            'bonus' => $requests['total_price'] * $levelNow->bp_percentage / 100,
-        ]);
+        if ($this->isActiveMember($member)) {
+            BonusHistory::create([
+                'member_id' => $member->id,
+                'member_numb' => $member->member_numb,
+                'transaction_id' => $requests['transaction_id'],
+                'level_id' => $member->level_id,
+                'bonus_type' => "BP",
+                'bonus_percent' => $levelNow->bp_percentage,
+                'bonus' => $requests['total_price'] * $levelNow->bp_percentage / 100,
+            ]);
+        } 
 
         /* Bonus Sponsor */
         $upline = $member->upline;
         if ($upline) {
             $uplineProductSold = LogProductSold::where('member_id', $upline->id)->count();
             $uplineLevel = Level::where('id', $upline->level_id)->first();
-            if ($uplineProductSold >= $upline->level->minimum_sold && $uplineLevel->bs_percentage > 0) {  // Cek apakah pernah melakukan transaksi
+            if ($uplineProductSold >= $upline->level->minimum_sold && $uplineLevel->bs_percentage > 0 && $this->isActiveMember($upline)) {  // Cek apakah pernah melakukan transaksi
                 // TODO : Tanya Minimal transaksi atau jual produk
                 BonusHistory::create([
                     'member_id' => $upline->id,
@@ -56,7 +59,7 @@ trait TransactionTrait {
                 // Cek apakah pernah melakukan transaksi
                 $uplineProductSold = LogProductSold::where('member_id', $upline2->id)->count();
                 $upline2Level = Level::where('id', $upline2->level_id)->first();
-                if($uplineProductSold >= $upline2->level->minimum_sold && $upline2Level->or_percentage > 0) {
+                if($uplineProductSold >= $upline2->level->minimum_sold && $upline2Level->or_percentage > 0 && $this->isActiveMember($upline2)) {
                     BonusHistory::create([
                         'member_id' => $upline2->id,
                         'member_numb' => $upline2->member_numb,
@@ -69,10 +72,9 @@ trait TransactionTrait {
                 } 
             }
         }
-        
     }
 
-    protected function levelUpMember($id, $isCheckAgain = false, $historyLevelUp = [], $cek = 0) 
+    protected function levelUpMember($id, $isCheckAgain = false, $historyLevelUp = []) 
     {
         /* Logic kenaikan level member */
         $member = Member::with(['upline' => function($query) {
@@ -100,35 +102,43 @@ trait TransactionTrait {
         $downlineCountLevelNow = $removeDownline['downlineCountLevelNow'];
 
         if ($downlineCountLevelNow >= $minimumDownlineNext) {
-            $uplineMember = Member::find($uplineMember->id);
-            $uplineMember->level_id = $levelNext->id; // Naik Level
-            $uplineMember->update();
-            $levelHistory = LevelUpHistories::with('level')->create([
-                'member_id' => $uplineMember->id,
-                'old_level_id' => $uplineLevel->id,
-                'new_level_id' => $uplineMember->level_id,
-                'old_level_code' => $uplineLevel->code,
-                'new_level_code' => $uplineMember->level->code,
-            ]);
-            Alert::info('Member '.$uplineMember->name.' level up to '.$uplineMember->level->name)->flash();
-            $historyLevelUp[] = 'Member '.$uplineMember->name.' level up to '.$uplineMember->level->name; 
+            if ($this->isActiveMember($uplineMember)){
+                $uplineMember = Member::find($uplineMember->id);
+                $uplineMember->level_id = $levelNext->id; // Naik Level
+                $uplineMember->update();
+                $levelHistory = LevelUpHistories::with('level')->create([
+                    'member_id' => $uplineMember->id,
+                    'old_level_id' => $uplineLevel->id,
+                    'new_level_id' => $uplineMember->level_id,
+                    'old_level_code' => $uplineLevel->code,
+                    'new_level_code' => $uplineMember->level->code,
+                ]);
+                Alert::info('Member '.$uplineMember->name.' level up to '.$uplineMember->level->name)->flash();
+                $historyLevelUp[] = 'Member '.$uplineMember->name.' level up to '.$uplineMember->level->name; 
+    
+                /* check apakah bisa level up lagi */
+                $levelNow = Level::where('id', $levelHistory->new_level_id)->first();
+                $levelNext = Level::where('ordering_level', $levelNow->ordering_level + 1)->first();
+                if(!$levelNext) { return ; }
 
-            /* check apakah bisa level up lagi */
-            $levelNow = Level::where('id', $levelHistory->new_level_id)->first();
-            $levelNext = Level::where('ordering_level', $levelNow->ordering_level + 1)->first();
-            if(!$levelNext) {                 
-                return ; 
+                $minimumDownlineNext = $levelNext->minimum_downline;
+                $minimumSoldByDownlineNext = $levelNext->minimum_sold_by_downline;
+                $removedDownline = $this->removeDownlineWhereTransaction($downline, $minimumSoldByDownlineNext, $levelNow);
+                $downline = $removedDownline['downline'];
+                $downlineCountLevelNow = $removedDownline['downlineCountLevelNow'];
+                if ($downlineCountLevelNow >= $minimumDownlineNext) {
+                    $this->levelUpMember($uplineMember->id, true, $historyLevelUp);
+                }
+            } 
+            else {
+                // For Testing purpose
+                // Alert::error('Member '.$uplineMember->name.' is not active')->flash();
+                // $historyLevelUp[] = 'Member '.$uplineMember->name.' tidak bisa level up karena tidak aktif';
             }
-            $minimumDownlineNext = $levelNext->minimum_downline;
-            $minimumSoldByDownlineNext = $levelNext->minimum_sold_by_downline;
-            $removedDownline = $this->removeDownlineWhereTransaction($downline, $minimumSoldByDownlineNext, $levelNow);
-            $downline = $removedDownline['downline'];
-            $downlineCountLevelNow = $removedDownline['downlineCountLevelNow'];
-
-            if ($downlineCountLevelNow >= $minimumDownlineNext) {
-                $this->levelUpMember($uplineMember->id, true, $historyLevelUp);
-            }
-            $this->levelUpMember($uplineMember->id, false, $historyLevelUp, $cek +1);
+            $this->levelUpMember($uplineMember->id, false, $historyLevelUp);
+        }
+        if($historyLevelUp) {
+            // dd($historyLevelUp);
         }
     }
 
@@ -159,5 +169,13 @@ trait TransactionTrait {
             "downline" => $downline, 
             "downlineCountLevelNow" => $downlineCountLevelNow,
         ];
+    }
+
+    private function isActiveMember($member) 
+    {
+        if ($member->expired_at < Carbon::now()) {
+            return false;
+        }
+        return true;
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Backpack\CRUD\app\Models\Traits\CrudTrait;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
@@ -87,8 +88,8 @@ class Member extends Model
     | SCOPES
     |--------------------------------------------------------------------------
     */
-    public function scopeIsActive() {
-        return $this->where('expired_at', '>=', date('Y-m-d'));
+    public function scopeActive() {
+        return $this->where('expired_at', '>=', Carbon::now());
     }
 
     public function scopeIsNotActive() {

@@ -20,3 +20,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::get('/members', [App\Http\Controllers\Api\MemberController::class, 'index']);
 Route::get('/members/not-activated', [App\Http\Controllers\Api\MemberController::class, 'notActivated']);
+Route::get('/members/only-actived', [App\Http\Controllers\Api\MemberController::class, 'onlyActive']);
