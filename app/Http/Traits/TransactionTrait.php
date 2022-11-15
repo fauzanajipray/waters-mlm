@@ -69,39 +69,40 @@ trait TransactionTrait {
                 } 
             }
         }
+        
     }
 
-    protected function levelUpMember($id, $level = 0, $isCheckAgain = false, $historyLevelUp = []) 
+    protected function levelUpMember($id, $isCheckAgain = false, $historyLevelUp = [], $cek = 0) 
     {
         /* Logic kenaikan level member */
         $member = Member::with(['upline' => function($query) {
             $query->with([
                 'upline' => function($query) { $query->with('level'); }, 
-                'downlines' => function($query) { $query->with(['level', 'logProductSold']); }
+                'downlines' => function($query) { $query->with(['level', 'logProductSold']); },
+                'level'
             ]);
-        }])->find($id);
+        }, 'level'])->find($id);
         $uplineMember = $member->upline;
-        if ($isCheckAgain){
-            $uplineMember = $member;
-        }
+        if ($isCheckAgain){ $uplineMember = $member; }
         if (!$uplineMember) return ;
-        // Alert::info("check level Up Member {$uplineMember->name}")->flash();
+        
         $uplineLevel = Level::where('id', $uplineMember->level_id)->first();
         $levelNext =  Level::where('ordering_level', $uplineLevel->ordering_level + 1)->first();
         if(!$levelNext) return ;
         $levels = Level::orderBy('ordering_level', 'asc')->get();
-        $minimumDownlineNext = $levels[$level+1]->minimum_downline;
-        $minimumSoldByDownlineNext = $levels[$level+1]->minimum_sold_by_downline;
+        $minimumDownlineNext = $levels[$uplineLevel->ordering_level]->minimum_downline;
+        $minimumSoldByDownlineNext = $levels[$uplineLevel->ordering_level]->minimum_sold_by_downline;
         $downline = $this->getDownline($uplineMember->id, $uplineLevel);
         if(!$downline){ return ; }
-
+        
         $removeDownline = $this->removeDownlineWhereTransaction($downline, $minimumSoldByDownlineNext, $uplineLevel);
         $downline = $removeDownline['downline'];
         $downlineCountLevelNow = $removeDownline['downlineCountLevelNow'];
 
         if ($downlineCountLevelNow >= $minimumDownlineNext) {
-            $uplineMember->level_id = $uplineMember->level_id + 1; // Naik Level
-            $uplineMember->save();
+            $uplineMember = Member::find($uplineMember->id);
+            $uplineMember->level_id = $levelNext->id; // Naik Level
+            $uplineMember->update();
             $levelHistory = LevelUpHistories::with('level')->create([
                 'member_id' => $uplineMember->id,
                 'old_level_id' => $uplineLevel->id,
@@ -110,23 +111,24 @@ trait TransactionTrait {
                 'new_level_code' => $uplineMember->level->code,
             ]);
             Alert::info('Member '.$uplineMember->name.' level up to '.$uplineMember->level->name)->flash();
-            // TODO : Tambahkan ke history level up - Hapus nanti
             $historyLevelUp[] = 'Member '.$uplineMember->name.' level up to '.$uplineMember->level->name; 
-            // check apakah bisa level up lagi
+
+            /* check apakah bisa level up lagi */
             $levelNow = Level::where('id', $levelHistory->new_level_id)->first();
             $levelNext = Level::where('ordering_level', $levelNow->ordering_level + 1)->first();
+            if(!$levelNext) {                 
+                return ; 
+            }
             $minimumDownlineNext = $levelNext->minimum_downline;
             $minimumSoldByDownlineNext = $levelNext->minimum_sold_by_downline;
             $removedDownline = $this->removeDownlineWhereTransaction($downline, $minimumSoldByDownlineNext, $levelNow);
             $downline = $removedDownline['downline'];
             $downlineCountLevelNow = $removedDownline['downlineCountLevelNow'];
+
             if ($downlineCountLevelNow >= $minimumDownlineNext) {
-                $this->levelUpMember($uplineMember->id, $level, true, $historyLevelUp);
+                $this->levelUpMember($uplineMember->id, true, $historyLevelUp);
             }
-            $this->levelUpMember($uplineMember->id, $level + 1, false, $historyLevelUp);
-        }
-        if($historyLevelUp){ 
-            // dd($historyLevelUp, $uplineMember); 
+            $this->levelUpMember($uplineMember->id, false, $historyLevelUp, $cek +1);
         }
     }
 

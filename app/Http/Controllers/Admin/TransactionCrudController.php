@@ -165,6 +165,7 @@ class TransactionCrudController extends CrudController
             'entity' => 'member',
             'attribute' => 'text',
             'data_source' => url('api/members'),
+            'delay' => 500
         ]);
         $this->crud->field('qty')->type('number_format');
     }
@@ -289,6 +290,7 @@ class TransactionCrudController extends CrudController
             return redirect($this->crud->route);
         } catch (\Exception $e) {
             DB::rollback();
+            dd($e->getMessage());
             Alert::error("Something when wrong")->flash();
             return redirect()->back()->withInput()->withErrors($e->getMessage());
         }
