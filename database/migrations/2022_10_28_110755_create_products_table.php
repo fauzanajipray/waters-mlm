@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('model');
+            $table->string('capacity', 20)->nullable();
             $table->integer('price');
             $table->softDeletes();
             $table->timestamps();

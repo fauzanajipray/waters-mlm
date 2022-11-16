@@ -94,6 +94,7 @@ class DatabaseSeeder extends Seeder
         ], [
             'name' => 'Product 1',
             'model' => 'Model 1',
+            'capacity' => "22L",
             'price' => 2500000
         ]);
 
@@ -103,6 +104,7 @@ class DatabaseSeeder extends Seeder
         ], [
             'name' => 'Product 1',
             'model' => 'Model 2',
+            'capacity' => "20L",
             'price' => 2700000
         ]);
 
@@ -112,6 +114,7 @@ class DatabaseSeeder extends Seeder
         ], [
             'name' => 'Product B',
             'model' => 'Model A',
+            'capacity' => "20L",
             'price' => 3000000
         ]);
     }

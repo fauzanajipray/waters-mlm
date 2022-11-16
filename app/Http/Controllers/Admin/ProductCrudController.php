@@ -44,6 +44,7 @@ class ProductCrudController extends CrudController
         $this->crud->firstCellNonFlex = true;
         $this->crud->column('name')->label('Name');
         $this->crud->column('model');
+        $this->crud->column('capacity');
         $this->crud->column('price')->label('Netto Price')->prefix('Rp. ')->type('number_format');
     }
 
@@ -58,6 +59,7 @@ class ProductCrudController extends CrudController
         $this->crud->setValidation([
             'name' => 'required|min:5|max:255',
             'price' => 'required|numeric',
+            'capacity' => 'nullable|string|max:20',
             'model' => ['required', 'min:5', 'max:255', function($attribute, $value, $fail) {
                 $name = request()->input('name');
                 $product = Product::select(['name', 'model'])->where('name', $name)->where('model', $value)->first();
@@ -68,6 +70,7 @@ class ProductCrudController extends CrudController
         ]);
         $this->crud->field('name')->label('Name');
         $this->crud->field('model')->label('Model');
+        $this->crud->field('capacity')->label('Capacity');
         $this->crud->field('price')->label('Netto Price')->type('number_format')->prefix('Rp. ');
     }
 
