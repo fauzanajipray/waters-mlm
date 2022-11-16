@@ -21,29 +21,46 @@
 
 @section('content')
 <div class="row">
-    <div class="col-md-6">
-        <div class="form-group required" hidden>
-            <label>Month - Year</label>
-            <input type="hidden" name="month_year" value="{{Carbon\Carbon::now()->startOfMonth()->format('Y-m-d')}}">
-            <div class="input-group date">
-                <input 
-                class="form-control"
-                    data-bs-datepicker="{{json_encode([
-                        'minViewMode' => 'months', 
-                        'maxViewMode' =>  'years',
-                        'startView' => 'months', 
-                        'format' => 'M yyyy'])}}"
-                    type="text"
-                    id="monthYear"
-                    >
-                <div class="input-group-append">
-                    <span class="input-group-text">
-                        <span class="la la-calendar"></span>
-                    </span>
+    <div class="col-md-12">
+        <form action="" method="get" id="form">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group required" >
+                        <label>Month - Year</label>
+                        <input type="hidden" name="month_year" value="{{ $monthYear->startOfMonth()->format('Y-m-d') }}">
+                        <div class="input-group date">
+                            <input 
+                            class="form-control"
+                                data-bs-datepicker="{{json_encode([
+                                    'minViewMode' => 'months', 
+                                    'maxViewMode' =>  'years',
+                                    'startView' => 'months', 
+                                    'format' => 'MM yyyy'])}}"
+                                type="text"
+                                id="monthYear"
+                                >
+                            <div class="input-group-append">
+                                <span class="input-group-text">
+                                    <span class="la la-calendar"></span>
+                                </span>
+                            </div>
+                        </div> 
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group required" >
+                        <label>Level</label>
+                        <input type="number" name="total_downline_level" class="form-control" value="{{ $totalDownlineLevel }}" id="levels">
+                    </div>
                 </div>
             </div>
-        </div>
+        </form>
     </div>
+    {{-- <div class="col">
+        
+        <input type="submit" class="btn btn-primary form-control" value="Submit">
+        
+    </div> --}}
     <div class="col-md-8 offset-md-2">
         <div class="card">
             <div class="card-body">
@@ -55,82 +72,28 @@
 @endsection
 
 @push('after_styles')
-  <link rel="stylesheet" href="{{ asset('packages/bootstrap-datepicker/dist/css/bootstrap-datepicker3.css') }}">
+    <link rel="stylesheet" href="{{ asset('packages/bootstrap-datepicker/dist/css/bootstrap-datepicker3.css') }}">
 @endpush
 
 @push('after_scripts')
+    {{-- MONTH YEAR PICKER --}}    
     <script src="{{ asset('packages/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js') }}"></script>
     <script>
-        if (jQuery.ui) {
-            var datepicker = $.fn.datepicker.noConflict();
-            $.fn.bootstrapDP = datepicker;
-        } else {
-            $.fn.bootstrapDP = $.fn.datepicker;
-        }
-
-        var dateFormat=function(){var a=/d{1,4}|m{1,4}|yy(?:yy)?|([HhMsTt])\1?|[LloSZ]|"[^"]*"|'[^']*'/g,b=/\b(?:[PMCEA][SDP]T|(?:Pacific|Mountain|Central|Eastern|Atlantic) (?:Standard|Daylight|Prevailing) Time|(?:GMT|UTC)(?:[-+]\d{4})?)\b/g,c=/[^-+\dA-Z]/g,d=function(a,b){for(a=String(a),b=b||2;a.length<b;)a="0"+a;return a};return function(e,f,g){var h=dateFormat;if(1!=arguments.length||"[object String]"!=Object.prototype.toString.call(e)||/\d/.test(e)||(f=e,e=void 0),e=e?new Date(e):new Date,isNaN(e))throw SyntaxError("invalid date");f=String(h.masks[f]||f||h.masks.default),"UTC:"==f.slice(0,4)&&(f=f.slice(4),g=!0);var i=g?"getUTC":"get",j=e[i+"Date"](),k=e[i+"Day"](),l=e[i+"Month"](),m=e[i+"FullYear"](),n=e[i+"Hours"](),o=e[i+"Minutes"](),p=e[i+"Seconds"](),q=e[i+"Milliseconds"](),r=g?0:e.getTimezoneOffset(),s={d:j,dd:d(j),ddd:h.i18n.dayNames[k],dddd:h.i18n.dayNames[k+7],m:l+1,mm:d(l+1),mmm:h.i18n.monthNames[l],mmmm:h.i18n.monthNames[l+12],yy:String(m).slice(2),yyyy:m,h:n%12||12,hh:d(n%12||12),H:n,HH:d(n),M:o,MM:d(o),s:p,ss:d(p),l:d(q,3),L:d(q>99?Math.round(q/10):q),t:n<12?"a":"p",tt:n<12?"am":"pm",T:n<12?"A":"P",TT:n<12?"AM":"PM",Z:g?"UTC":(String(e).match(b)||[""]).pop().replace(c,""),o:(r>0?"-":"+")+d(100*Math.floor(Math.abs(r)/60)+Math.abs(r)%60,4),S:["th","st","nd","rd"][j%10>3?0:(j%100-j%10!=10)*j%10]};return f.replace(a,function(a){return a in s?s[a]:a.slice(1,a.length-1)})}}();dateFormat.masks={default:"ddd mmm dd yyyy HH:MM:ss",shortDate:"m/d/yy",mediumDate:"mmm d, yyyy",longDate:"mmmm d, yyyy",fullDate:"dddd, mmmm d, yyyy",shortTime:"h:MM TT",mediumTime:"h:MM:ss TT",longTime:"h:MM:ss TT Z",isoDate:"yyyy-mm-dd",isoTime:"HH:MM:ss",isoDateTime:"yyyy-mm-dd'T'HH:MM:ss",isoUtcDateTime:"UTC:yyyy-mm-dd'T'HH:MM:ss'Z'"},dateFormat.i18n={dayNames:["Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],monthNames:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec","January","February","March","April","May","June","July","August","September","October","November","December"]},Date.prototype.format=function(a,b){return dateFormat(this,a,b)};
-
-        function bpFieldInitDatePickerElement(element) {
-            var $fake = element,
-                $field = $fake.closest('.input-group').parent().find('input[type="hidden"]'),
-            $customConfig = $.extend({
-                format: 'dd M yyyy',
-                autoclose: true,
-            }, $fake.data('bs-datepicker'));
-            $picker = $fake.bootstrapDP($customConfig);
-
-            var $existingVal = $field.val();
-            if( $existingVal && $existingVal.length ){
-                // Passing an ISO-8601 date string (YYYY-MM-DD) to the Date constructor results in
-                // varying behavior across browsers. Splitting and passing in parts of the date
-                // manually gives us more defined behavior.
-                // See https://stackoverflow.com/questions/2587345/why-does-date-parse-give-incorrect-results
-                var parts = $existingVal.split('-');
-                var year = parts[0];
-                var month = parts[1] - 1; // Date constructor expects a zero-indexed month
-                var day = parts[2];
-                preparedDate = new Date(year, month, day);
-                $fake.val(preparedDate);
-                $picker.bootstrapDP('update', preparedDate);
-            }
-
-            // prevent users from typing their own date
-            // since the js plugin does not support it
-            // $fake.on('keydown', function(e){
-            //     e.preventDefault();
-            //     return false;
-            // });
-
-            var prevVal = $field.val();
-            $picker.on('show hide change', function(e){
-                if( e.date ){
-                    var sqlDate = e.format('yyyy-mm-dd');
-                } else {
-                    try {
-                        var sqlDate = $fake.val();
-
-                        if( $customConfig.format === 'dd/mm/yyyy' ){
-                            sqlDate = new Date(sqlDate.split('/')[2], sqlDate.split('/')[1] - 1, sqlDate.split('/')[0]).format('yyyy-mm-dd');
-                        }
-                    } catch(e){
-                        if( $fake.val() ){
-                            new Noty({
-                                type: "error",
-                                text: "<strong>Whoops!</strong><br>Sorry we did not recognise that date format, please make sure it uses a yyyy mm dd combination"
-                                }).show();
-                        }
-                    }
-                }
-                $field.val(sqlDate);
-                var newVal = sqlDate;
-                if(e.type == 'hide' && prevVal != newVal){
-                  prevVal = newVal;
-                  monthlySales();
-                }
-            });
-        }
-        bpFieldInitDatePickerElement($('#monthYear'));
+        if(jQuery.ui){var e=$.fn.datepicker.noConflict();$.fn.bootstrapDP=e}else $.fn.bootstrapDP=$.fn.datepicker;var dateFormat=function(){var e=/d{1,4}|m{1,4}|yy(?:yy)?|([HhMsTt])\1?|[LloSZ]|"[^"]*"|'[^']*'/g,t=/\b(?:[PMCEA][SDP]T|(?:Pacific|Mountain|Central|Eastern|Atlantic) (?:Standard|Daylight|Prevailing) Time|(?:GMT|UTC)(?:[-+]\d{4})?)\b/g,a=/[^-+\dA-Z]/g,d=function(e,t){for(e=String(e),t=t||2;e.length<t;)e="0"+e;return e};return function(n,r,m){var y=dateFormat;if(1!=arguments.length||"[object String]"!=Object.prototype.toString.call(n)||/\d/.test(n)||(r=n,n=void 0),n=n?new Date(n):new Date,isNaN(n))throw SyntaxError("invalid date");"UTC:"==(r=String(y.masks[r]||r||y.masks.default)).slice(0,4)&&(r=r.slice(4),m=!0);var o=m?"getUTC":"get",i=n[o+"Date"](),s=n[o+"Day"](),l=n[o+"Month"](),u=n[o+"FullYear"](),c=n[o+"Hours"](),p=n[o+"Minutes"](),h=n[o+"Seconds"](),M=n[o+"Milliseconds"](),_=m?0:n.getTimezoneOffset(),f={d:i,dd:d(i),ddd:y.i18n.dayNames[s],dddd:y.i18n.dayNames[s+7],m:l+1,mm:d(l+1),mmm:y.i18n.monthNames[l],mmmm:y.i18n.monthNames[l+12],yy:String(u).slice(2),yyyy:u,h:c%12||12,hh:d(c%12||12),H:c,HH:d(c),M:p,MM:d(p),s:h,ss:d(h),l:d(M,3),L:d(M>99?Math.round(M/10):M),t:c<12?"a":"p",tt:c<12?"am":"pm",T:c<12?"A":"P",TT:c<12?"AM":"PM",Z:m?"UTC":(String(n).match(t)||[""]).pop().replace(a,""),o:(_>0?"-":"+")+d(100*Math.floor(Math.abs(_)/60)+Math.abs(_)%60,4),S:["th","st","nd","rd"][i%10>3?0:(i%100-i%10!=10)*i%10]};return r.replace(e,function(e){return e in f?f[e]:e.slice(1,e.length-1)})}}();function bpFieldInitDatePickerElement(e){var t=e,a=t.closest(".input-group").parent().find('input[type="hidden"]'),d=$.extend({format:"dd M yyyy",autoclose:!0},t.data("bs-datepicker"));$picker=t.bootstrapDP(d);var n=a.val();if(n&&n.length){var r=n.split("-"),m=r[0],y=r[1]-1,o=r[2];preparedDate=new Date(m,y,o),t.val(preparedDate),$picker.bootstrapDP("update",preparedDate)}var i=a.val();$picker.on("show hide change",function(e){if(e.date)var n=e.format("yyyy-mm-dd");else try{var n=t.val();"dd/mm/yyyy"===d.format&&(n=new Date(n.split("/")[2],n.split("/")[1]-1,n.split("/")[0]).format("yyyy-mm-dd"))}catch(r){t.val()&&new Noty({type:"error",text:"<strong>Whoops!</strong><br>Sorry we did not recognise that date format, please make sure it uses a yyyy mm dd combination"}).show()}a.val(n);var m=n;"hide"==e.type&&i!=m&&(i=m,monthlySales())})}dateFormat.masks={default:"ddd mmm dd yyyy HH:MM:ss",shortDate:"m/d/yy",mediumDate:"mmm d, yyyy",longDate:"mmmm d, yyyy",fullDate:"dddd, mmmm d, yyyy",shortTime:"h:MM TT",mediumTime:"h:MM:ss TT",longTime:"h:MM:ss TT Z",isoDate:"yyyy-mm-dd",isoTime:"HH:MM:ss",isoDateTime:"yyyy-mm-dd'T'HH:MM:ss",isoUtcDateTime:"UTC:yyyy-mm-dd'T'HH:MM:ss'Z'"},dateFormat.i18n={dayNames:["Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],monthNames:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec","January","February","March","April","May","June","July","August","September","October","November","December"]},Date.prototype.format=function(e,t){return dateFormat(this,e,t)},bpFieldInitDatePickerElement($("#monthYear"));
     </script>
+    <script>
+        // every time montYear change submit form
+        (function(){
+            $('#monthYear').change(function(){
+                $('#form').submit();
+            });
+            $('#levels').change(function(){
+                $('#form').submit();
+            });
+        })();
+    </script>
+    
+    {{-- CHART --}}
     <script src="{{asset('packages/d3/d3.v7.min.js')}}"></script>
     <script src="{{asset('packages/d3/d3.org.chart.js')}}"></script>
     <script src="{{asset('packages/d3/d3.flextree.2.1.2.js')}}"></script>

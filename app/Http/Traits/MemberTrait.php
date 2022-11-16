@@ -39,20 +39,36 @@ trait MemberTrait {
 
     public function reportMember(Request $request, $id)
     {
-        $members = $this->getMemberInGroup($id);
+        $totalDownlineLevel = ($request->input('total_downline_level')) ? $request->input('total_downline_level') : 2;
+        if($totalDownlineLevel <= 0) {
+            Alert::error('Total Downline Level must be greater than 0')->flash();
+            return redirect()->back();
+        }
+        if($request->input('month_year')) {
+            $monthYear = $request->input('month_year');
+            $monthYear = Carbon::parse($monthYear);
+        } else {
+            $monthYear = Carbon::now();
+        }
+        $members = $this->getMemberInGroup($id, $totalDownlineLevel);
         $dataMember = [];
         foreach ($members as $member) {
             // Count Bonus
             $BP = BonusHistory::where('member_id', $member['id'])
                 ->where('bonus_type', 'BP')
+                ->monthYear($monthYear)
                 ->sum('bonus');
-            $BS = BonusHistory::where('member_id', $member['id'])
+            $GM = BonusHistory::where('member_id', $member['id'])
                 ->where('bonus_type', 'BS')
+                ->monthYear($monthYear)
                 ->sum('bonus');
             $OR = BonusHistory::where('member_id', $member['id'])
                 ->where('bonus_type', 'OR')
+                ->monthYear($monthYear)
                 ->sum('bonus');
-            $total = $BP + $BS + $OR;
+            $total = $BP + $GM + $OR;
+            // $memberActive = ($this->isActiveMember($member)) ? 'Active' : 'Expired';
+
             
             $data = [
                 'id' => $member['id'],
@@ -70,7 +86,7 @@ trait MemberTrait {
                 <p class="mb-0" hidden>Total Omset : <b>Rp .-</b></p>
                 <p class="mb-0" hidden>B. Omset : <b>Rp. -</b></p>
                 <p class="mb-0">B. Pribadi : <b>Rp. '.number_format($BP).'</b></p>
-                <p class="mb-0">B. Sponsor : <b>Rp. '.number_format($BS).'</b></p>
+                <p class="mb-0">Goldmine : <b>Rp. '.number_format($GM).'</b></p>
                 <p class="mb-0">Overriding : <b>Rp. '.number_format($OR).'</b></p>'
             ];
             array_push($dataMember, $data);
@@ -82,6 +98,8 @@ trait MemberTrait {
             'title' => $title,
             'user' => $user,
             'dataMember' => json_encode($dataMember),
+            'monthYear' => $monthYear,
+            'totalDownlineLevel' => $totalDownlineLevel,
         ]);
     }
 
@@ -107,14 +125,17 @@ trait MemberTrait {
         return $downlineInGroup;
     }
 
-    public function getMemberInGroup($id, $data = [])
+    public function getMemberInGroup($id, $totalDownlineLevel, $data = [])
     {
         $mainMember = Member::with(['level:id,name'])->where('id', $id)->firstOrFail()->toArray();
         $downline = Member::where('upline_id', $mainMember['id'])->get()->toArray();
         $data[$mainMember['id']] = $mainMember;
-        foreach($downline as $d){
-            $data[$d['id']] = $d;
-            $data = $this->getMemberInGroup($d['id'], $data);
+        if($totalDownlineLevel > 0){
+            foreach($downline as $d){
+                $data[$d['id']] = $d;
+                $members = $this->getMemberInGroup($d['id'], $totalDownlineLevel - 1, $data);
+                $data = $members;
+            }
         }
         return $data;
     }
