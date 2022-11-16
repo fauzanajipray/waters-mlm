@@ -56,11 +56,17 @@ class TransactionCrudController extends CrudController
         $this->crud->addColumns([
             'code',
             'transaction_date', 
-            'member_numb', 
+            [
+                'name' => 'member_numb',
+                'label' => 'Unique Number',
+            ], 
             'member_name', 
             'product_name', 
             'qty_sold', 
-            'unit_price', 
+            [
+                'name' => 'unit_price',
+                'label' => 'Netto Price',
+            ], 
             'total_price', 
             'id_card',
             'member_id',

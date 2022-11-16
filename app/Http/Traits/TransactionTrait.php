@@ -16,7 +16,7 @@ trait TransactionTrait {
         $lastTransaction = Transaction::withTrashed()->orderBy('id', 'desc')->first();
         $lastTransactionCode = $lastTransaction->code ?? 'TRX-000000-0000';
         $transactionCode = explode('-', $lastTransactionCode)[2] + 1;
-        $transactionCode = 'TRX-' . date('ymd') . '-' . str_pad($transactionCode, 4, '0', STR_PAD_LEFT);
+        $transactionCode = 'INV-' . date('ymd') . '-' . str_pad($transactionCode, 4, '0', STR_PAD_LEFT);
         return $transactionCode;
     }
 

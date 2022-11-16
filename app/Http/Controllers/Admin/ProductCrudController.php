@@ -44,7 +44,7 @@ class ProductCrudController extends CrudController
         $this->crud->firstCellNonFlex = true;
         $this->crud->column('name')->label('Name');
         $this->crud->column('model');
-        $this->crud->column('price')->label('Price')->prefix('Rp. ')->type('number_format');
+        $this->crud->column('price')->label('Netto Price')->prefix('Rp. ')->type('number_format');
     }
 
     /**
@@ -68,7 +68,7 @@ class ProductCrudController extends CrudController
         ]);
         $this->crud->field('name')->label('Name');
         $this->crud->field('model')->label('Model');
-        $this->crud->field('price')->label('Price')->type('number_format')->prefix('Rp. ');
+        $this->crud->field('price')->label('Netto Price')->type('number_format')->prefix('Rp. ');
     }
 
     /**
