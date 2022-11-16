@@ -33,6 +33,10 @@ class MemberRequestUpdate extends FormRequest
             'gender' => 'required|min:1|in:M,F',
             'email' => 'required|min:5|max:255|email',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'join_date' => 'required|date',
+            'bop' => 'required|date',
+            'id_card_type' => 'required|in:KTP,SIM',
+            'postal_code' => 'required|min:1|max:255',
         ];
     }
 

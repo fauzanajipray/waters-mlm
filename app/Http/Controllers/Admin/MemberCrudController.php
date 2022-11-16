@@ -79,7 +79,7 @@ class MemberCrudController extends CrudController
         // TODO : Add this buttons
         $this->crud->addButtonFromModelFunction('line', 'cardMember', 'cardMember', 'beginning');
         $this->crud->addButtonFromModelFunction('line', 'reportMember', 'reportMember', 'beginning');
-        $this->crud->addButtonFromModelFunction('line', 'addTransaction', 'addTransaction', 'beginning');
+        // $this->crud->addButtonFromModelFunction('line', 'addTransaction', 'addTransaction', 'beginning');
     }
 
     /**
@@ -125,6 +125,15 @@ class MemberCrudController extends CrudController
                 'disabled' => 'disabled'
             ],
         ]);
+        $this->crud->addField([
+            'name' => 'id_card_type',
+            'label' => 'ID Card Type',
+            'type' => 'select_from_array',
+            'options' => [
+                'KTP' => 'KTP',
+                'SIM' => 'SIM',
+            ],
+        ]);
         $this->crud->field('id_card')->label('ID Card')->type('number');
         $this->crud->field('name');
         $this->crud->addField([
@@ -133,9 +142,17 @@ class MemberCrudController extends CrudController
             'type' => 'select_from_array',
             'options' => ['M' => 'Male', 'F' => 'Female'],
         ]);
+        $this->crud->field('dob')->label('Date of Birth')->type('date');
+        $this->crud->field('phone');
         $this->crud->field('phone')->type('number');
         $this->crud->field('email')->type('email');
         $this->crud->field('address')->type('textarea');
+        $this->crud->field('postal_code');
+        $this->crud->addField([
+            'name' => 'join_date',
+            'label' => 'Join Date',
+            'type' => 'date',
+        ]);
         $this->crud->addField([
             'name' => 'photo_url',
             'label' => 'Photo Member',
@@ -170,7 +187,7 @@ class MemberCrudController extends CrudController
             'attributes' => [
                 'readonly' => 'readonly',
             ],
-        ])->beforeField('id_card');
+        ])->beforeField('id_card_type');
         $this->crud->addField([
             'name' => 'upline_id',
             'type' => 'Upline',
@@ -194,6 +211,20 @@ class MemberCrudController extends CrudController
     {
         $this->setupListOperation();
         $this->crud->removeColumn('photo_url');
+        $this->crud->addColumn([
+            'name' => 'dob',
+            'label' => 'Date of Birth',
+            'type' => 'date',
+        ])->afterColumn('name');
+        $this->crud->addColumn([
+            'name' => 'postal_code',
+            'label' => 'Postal Code',
+        ])->afterColumn('dob');
+        $this->crud->addColumn([
+            'name' => 'join_date',
+            'label' => 'Join Date',
+            'type' => 'date',
+        ]);
         $this->crud->addColumn([
             'name' => 'photo_url',
             'label' => 'Photo Member',

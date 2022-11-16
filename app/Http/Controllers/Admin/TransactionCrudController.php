@@ -50,14 +50,12 @@ class TransactionCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        // $this->getColumns();
         $this->crud->viewAfterContent = ['image_preview_helper'];
         $this->crud->firstCellNonFlex = true;
 
         $this->crud->addColumns([
             'code',
             'transaction_date', 
-            // 'status',
             'member_numb', 
             'member_name', 
             'product_name', 

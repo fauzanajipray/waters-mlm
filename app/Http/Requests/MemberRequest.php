@@ -35,6 +35,10 @@ class MemberRequest extends FormRequest
             'upline_id' => 'required|exists:members,id',
             'level_id' => 'required|exists:levels,id',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'join_date' => 'required|date',
+            'bop' => 'required|date',
+            'id_card_type' => 'required|in:KTP,SIM',
+            'postal_code' => 'required|min:1|max:255',
         ];
     }
 

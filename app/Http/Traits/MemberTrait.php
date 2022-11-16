@@ -140,20 +140,6 @@ trait MemberTrait {
         return $data;
     }
 
-    protected function setupModerateRoutes($segment, $routeName, $controller)
-    {
-        Route::get('user/{id}/'.$segment.'/create', [
-            'as'        => $routeName.'.getCreateMember',
-            'uses'      => $controller.'@getCreateMember',
-            'operation' => 'createMember',
-        ]);
-        Route::post('user/{id}/'.$segment.'/create', [
-            'as'        => $routeName.'.postCreateMember',
-            'uses'      => $controller.'@postCreateMember',
-            'operation' => 'createMember',
-        ]);
-    }
-
     protected function generateMemberNumber()
     {
         $lastMember = Member::withTrashed()->orderBy('id', 'desc')->first();
@@ -165,53 +151,6 @@ trait MemberTrait {
             $memberNumb = $this->generateMemberNumber();
         }
         return $memberNumb;
-    }
-
-    public function getCreateMember($id) 
-    {
-        $this->crud->setOperation('createMember');
-        $this->data['crud'] = $this->crud;
-        $this->data['title'] = 'Add '.$this->crud->entity_name;
-        $this->data['member_numb'] = $this->generateMemberNumber();
-        $this->data['level'] = Level::find(1);
-        $this->data['user'] = User::where('id', $id)->firstOrFail();
-        $this->data['upline'] = User::with('member')->where('id', backpack_user()->id)->firstOrFail()->member;
-        $this->data['uplines'] = Member::select('name', 'id', 'member_numb')->get();
-        return view('member.create-member', $this->data);
-    }
-
-    public function postCreateMember(Request $request, $id) 
-    {
-        $requests = $request->all();
-        $validator = Validator::make($requests, (new MemberRequest)->rules());
-
-        if ($validator->fails()) {
-            Alert::error("Validation Error")->flash();
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
-        DB::beginTransaction();
-        try {
-            $checkMember = Member::where('member_numb', $requests['member_numb'])->first();
-            if($checkMember){
-                $requests['member_numb'] = $this->generateMemberNumber();
-            }
-            // Create Member
-            $member = Member::create($requests);
-            // Update User
-            $user = User::where('id', $id)->firstOrFail();
-            $user->update([
-                'member_id' => $member->id,
-                'name' => $requests['name']
-            ]);
-            Alert::success('Register Member success')->flash();
-            DB::commit();
-            return redirect()->route('member.index');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Alert::error('Error, '.$e->getMessage())->flash();
-
-            return redirect()->back()->withInput();
-        }
     }
 
     private function isActiveMember($member) 

@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Member;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
 class MemberSeeder extends Seeder
@@ -27,6 +27,9 @@ class MemberSeeder extends Seeder
             'phone' => '08291029320',
             'email' => 'kevin@rectmedia.com',
             'address' => 'Jalan Shukumura', 
+            'join_date' => Carbon::now(),
+            'dob' => fake()->date(),
+            'postal_code' => fake()->numberBetween(10000, 99999),
             'upline_id' => null
         ]);
         Member::updateOrCreate([
@@ -41,6 +44,9 @@ class MemberSeeder extends Seeder
             'phone' => '082123456',
             'email' => 'benny@gmail.com',
             'address' => 'Jalan Pramuka', 
+            'join_date' => Carbon::now(),
+            'dob' => fake()->date(),
+            'postal_code' => fake()->numberBetween(10000, 99999),
             'upline_id' => 1
         ]);
         Member::updateOrCreate([
@@ -55,6 +61,9 @@ class MemberSeeder extends Seeder
             'phone' => '082129832232',
             'email' => 'andi@gmail.com',
             'address' => 'Jalan Manggis', 
+            'join_date' => Carbon::now(),
+            'dob' => fake()->date(),
+            'postal_code' => fake()->numberBetween(10000, 99999),
             'upline_id' => 1
         ]);
         // Member::updateOrCreate([
@@ -129,6 +138,9 @@ class MemberSeeder extends Seeder
             'phone' => '08212938296',
             'email' => 'monkeyluffy@gmail.com',
             'address' => 'Jalan Arjuna',
+            'join_date' => Carbon::now(),
+            'dob' => fake()->date(),
+            'postal_code' => fake()->numberBetween(10000, 99999),
             'upline_id' => 2
         ]);
 
@@ -144,6 +156,9 @@ class MemberSeeder extends Seeder
             'phone' => '08212938297',
             'email' => 'rzoro@gmail.com',
             'address' => 'Jalan Arjuna',
+            'join_date' => Carbon::now(),
+            'dob' => fake()->date(),
+            'postal_code' => fake()->numberBetween(10000, 99999),
             'upline_id' => 2
         ]);
 
@@ -174,6 +189,9 @@ class MemberSeeder extends Seeder
             'phone' => '08212938299',
             'email' => 'usopp@gmail.com',
             'address' => 'Jalan Arjuna',
+            'join_date' => Carbon::now(),
+            'dob' => fake()->date(),
+            'postal_code' => fake()->numberBetween(10000, 99999),
             'upline_id' => 3
         ]);
 
@@ -189,6 +207,9 @@ class MemberSeeder extends Seeder
             'phone' => '08212938298',
             'email' => 'nami@gmail.com',
             'address' => 'Jalan Arjuna',
+            'join_date' => Carbon::now(),
+            'dob' => fake()->date(),
+            'postal_code' => fake()->numberBetween(10000, 99999),
             'upline_id' => 3
         ]);
 
