@@ -41,16 +41,16 @@ trait TransactionTrait {
         if ($upline) {
             $uplineProductSold = LogProductSold::where('member_id', $upline->id)->count();
             $uplineLevel = Level::where('id', $upline->level_id)->first();
-            if ($uplineProductSold >= $upline->level->minimum_sold && $uplineLevel->bs_percentage > 0 && $this->isActiveMember($upline)) {  // Cek apakah pernah melakukan transaksi
+            if ($uplineProductSold >= $upline->level->minimum_sold && $uplineLevel->gm_percentage > 0 && $this->isActiveMember($upline)) {  // Cek apakah pernah melakukan transaksi
                 // TODO : Tanya Minimal transaksi atau jual produk
                 BonusHistory::create([
                     'member_id' => $upline->id,
                     'member_numb' => $upline->member_numb,
                     'transaction_id' => $requests['transaction_id'],
                     'level_id' => $upline->level_id,
-                    'bonus_type' => "BS",
-                    'bonus_percent' => $uplineLevel->bs_percentage,
-                    'bonus' => $requests['total_price'] * $uplineLevel->bs_percentage / 100,
+                    'bonus_type' => "GM",
+                    'bonus_percent' => $uplineLevel->gm_percentage,
+                    'bonus' => $requests['total_price'] * $uplineLevel->gm_percentage / 100,
                 ]);
             }
             /* Bonus Overriding */

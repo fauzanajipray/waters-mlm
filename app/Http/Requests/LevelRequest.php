@@ -33,7 +33,7 @@ class LevelRequest extends FormRequest
             'minimum_sold' => 'required|numeric|min:0',
             'ordering_level' => 'required|numeric|min:0',
             'bp_percentage' => 'required|numeric|between:0,100',
-            'bs_percentage' => 'required|numeric|between:0,100',
+            'gm_percentage' => 'required|numeric|between:0,100',
             'or_percentage' => 'required|numeric|between:0,100',
         ];
     }

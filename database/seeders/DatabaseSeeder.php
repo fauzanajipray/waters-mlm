@@ -124,7 +124,7 @@ class DatabaseSeeder extends Seeder
         /**
          * Notes :
          * - BP = Bonus Penjualan
-         * - BS ganti GM = Bonus Sponsor -> Goldmine (Bonus dari downline level 1)
+         * - GM = Goldmine (Bonus dari downline level 1)
          * - OR = Overriding (Bonus dari downline level 2)
          */
         Level::updateOrCreate([
@@ -139,7 +139,7 @@ class DatabaseSeeder extends Seeder
             'minimum_sold' => 1, // minimum sold untuk mendapatkan GM (Goldmine) dan OR (Overriding)
             'ordering_level' => 1,
             'bp_percentage' => 18, // in percent
-            'bs_percentage' => 0,  // in percent
+            'gm_percentage' => 0,  // in percent
             'or_percentage' => 0,// in percent
         ]);
 
@@ -155,7 +155,7 @@ class DatabaseSeeder extends Seeder
             'minimum_sold' => 1, // minimum sold untuk mendapatkan GM dan OR
             'ordering_level' => 2,
             'bp_percentage' => 18, // in percent (18)
-            'bs_percentage' => 2,  // in percent
+            'gm_percentage' => 2,  // in percent
             'or_percentage' => 0.5,// in percent
         ]);
 
@@ -171,7 +171,7 @@ class DatabaseSeeder extends Seeder
             'minimum_sold' => 1, // minimum sold untuk mendapatkan GM dan OR
             'ordering_level' => 3, 
             'bp_percentage' => 20, // in percent (18+2)
-            'bs_percentage' => 3,  // in percent
+            'gm_percentage' => 3,  // in percent
             'or_percentage' => 1,// in percent
         ]);
 
@@ -183,11 +183,11 @@ class DatabaseSeeder extends Seeder
             'name' => 'Group Manager',
             'description' => 'desc',
             'minimum_downline' => 6, // minimum downline berlevel SM untuk mendapatkan GM
-            'minimum_sold_by_downline' => 0, // minimum sold by downline untuk mendapatkan GM
+            'minimum_sold_by_downline' => 4, // minimum sold by downline untuk mendapatkan GM
             'minimum_sold' => 1, // minimum sold untuk mendapatkan GM dan OR
             'ordering_level' => 4,
             'bp_percentage' => 21, // in percent (18+3)
-            'bs_percentage' => 4,  // in percent
+            'gm_percentage' => 4,  // in percent
             'or_percentage' => 1,// in percent
         ]);
 
@@ -199,11 +199,11 @@ class DatabaseSeeder extends Seeder
             'name' => 'Sales Director',
             'description' => 'desc ',
             'minimum_downline' => 6, // minimum downline 6 berlevel GM untuk mendapatkan SD
-            'minimum_sold_by_downline' => 0, // minimum sold by downline untuk mendapatkan SD
+            'minimum_sold_by_downline' => 4, // minimum sold by downline untuk mendapatkan SD
             'minimum_sold' => 1, // minimum sold untuk mendapatkan GM dan OR
             'ordering_level' => 5,
             'bp_percentage' => 23, // in percent (18+5)
-            'bs_percentage' => 5,  // in percent
+            'gm_percentage' => 5,  // in percent
             'or_percentage' => 1.5,// in percent
         ]);
 
@@ -215,11 +215,11 @@ class DatabaseSeeder extends Seeder
             'name' => 'Group Director',
             'description' => 'desc',
             'minimum_downline' => 6, // minimum downline 6 berlevel SD untuk mendapatkan GD
-            'minimum_sold_by_downline' => 0, // minimum sold by downline untuk mendapatkan GD
+            'minimum_sold_by_downline' => 4, // minimum sold by downline untuk mendapatkan GD
             'minimum_sold' => 1, // minimum sold untuk mendapatkan GM dan OR
             'ordering_level' => 6,
             'bp_percentage' => 26, // in percent (18+8)
-            'bs_percentage' => 5,  // in percent
+            'gm_percentage' => 5,  // in percent
             'or_percentage' => 2,// in percent
         ]);
     }

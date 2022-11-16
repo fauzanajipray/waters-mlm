@@ -48,9 +48,9 @@ class LevelCrudController extends CrudController
         $this->crud->column('minimum_sold_by_downline');
         $this->crud->column('minimum_sold');
         $this->crud->column('ordering_level');
-        $this->crud->column('bp_percentage');
-        $this->crud->column('bs_percentage');
-        $this->crud->column('or_percentage');
+        $this->crud->column('bp_percentage')->label('BP Percentage');
+        $this->crud->column('gm_percentage')->label('GM Percentage');
+        $this->crud->column('or_percentage')->label('OR Percentage');
     }
 
     /**
@@ -70,9 +70,9 @@ class LevelCrudController extends CrudController
         $this->crud->field('minimum_sold_by_downline');
         $this->crud->field('minimum_sold');
         $this->crud->field('ordering_level');
-        $this->crud->field('bp_percentage')->type('number');
-        $this->crud->field('bs_percentage')->type('number');
-        $this->crud->field('or_percentage')->type('number');
+        $this->crud->field('bp_percentage')->type('number')->label('BP Percentage');
+        $this->crud->field('gm_percentage')->type('number')->label('GM Percentage');
+        $this->crud->field('or_percentage')->type('number')->label('OR Percentage');
     }
 
     /**
@@ -89,5 +89,17 @@ class LevelCrudController extends CrudController
             'code' => ['required', Rule::unique('levels')->ignore($this->crud->getCurrentEntryId())],
             'name' => ['required', Rule::unique('levels')->ignore($this->crud->getCurrentEntryId())],
         ]);
+    }
+
+    /**
+     * Define what happens when the Show operation is loaded.
+     * 
+     * @see https://backpackforlaravel.com/docs/crud-operation-show
+     * @return void
+     */
+    protected function setupShowOperation()
+    {
+        $this->setupListOperation();
+        $this->crud->addColumns(['updated_at', 'created_at']);
     }
 }

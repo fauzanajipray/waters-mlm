@@ -23,7 +23,7 @@ return new class extends Migration
             $table->integer('minimum_sold')->nullable(); // min. sale to upgrade level
             $table->integer('ordering_level')->default(0);
             $table->double('bp_percentage')->default(0); // sold by current level
-            $table->double('bs_percentage')->default(0); // sold by direct downline
+            $table->double('gm_percentage')->default(0); // sold by direct downline
             $table->double('or_percentage')->default(0); // sold by group downline
             $table->softDeletes();
             $table->timestamps();

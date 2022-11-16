@@ -59,7 +59,7 @@ trait MemberTrait {
                 ->monthYear($monthYear)
                 ->sum('bonus');
             $GM = BonusHistory::where('member_id', $member['id'])
-                ->where('bonus_type', 'BS')
+                ->where('bonus_type', 'GM')
                 ->monthYear($monthYear)
                 ->sum('bonus');
             $OR = BonusHistory::where('member_id', $member['id'])
