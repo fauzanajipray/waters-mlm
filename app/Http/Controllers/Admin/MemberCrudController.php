@@ -8,7 +8,6 @@ use App\Http\Requests\MemberRequestUpdate;
 use App\Http\Traits\MemberTrait;
 use App\Models\Level;
 use App\Models\Member;
-use App\Models\User;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Illuminate\Support\Facades\DB;
@@ -60,6 +59,28 @@ class MemberCrudController extends CrudController
             'attribute' => 'name' ,
             'model' => Level::class,
         ]);
+        $this->crud->addColumn([
+            'name' => 'member_type',
+            'label' => 'Type',
+            'allows_null' => false,
+            'wrapper' => [
+                'element' => 'span',
+                'class' => function ($crud, $column, $entry, $related_key) {
+                    switch ($entry->member_type) {
+                        case 'REGULAR':
+                            return 'badge badge-primary';
+                        case 'STOKIST':
+                            return 'badge badge-success';
+                        case 'CABANG':
+                            return 'badge badge-warning';
+                        case 'NSI':
+                            return 'badge badge-danger';
+                        default:
+                            return 'badge badge-secondary';
+                    }
+                },
+            ],
+        ]);
         $this->crud->column('gender');
         $this->crud->column('phone');
         $this->crud->column('email');
@@ -106,6 +127,12 @@ class MemberCrudController extends CrudController
             'attribute' => 'text',
             'data_source' => url('api/members/only-actived'),
         ]);
+        $this->crud->field('member_type')->label('Member Type')->type('select_from_array')->options([
+            'REGULAR' => 'REGULAR',
+            'NSI' => 'NSI',
+            'STOKIST' => 'STOKIST',
+            'CABANG' => 'CABANG',
+        ])->allows_null(false);
         $this->crud->addField([
             'name' => 'member_numb',
             'label' => 'No. Member',
@@ -159,8 +186,10 @@ class MemberCrudController extends CrudController
             'type' => 'image',
             'upload' => true,
             'crop' => true,
-            'aspect_ratio' => 1,
             'prefix' => 'storage/',
+            'aspect_ratio' => 0.66666666666666666666666666666667,
+            'width' => 400,
+            'height' => 600,
         ]);
     }
 
@@ -172,10 +201,6 @@ class MemberCrudController extends CrudController
      */
     protected function setupUpdateOperation()
     {
-        $members = Member::all()->map(function($member){
-            $member->name = $member->member_numb . ' - ' . $member->name;
-            return $member;
-        });
         $this->setupCreateOperation();
         $this->crud->setValidation(MemberRequestUpdate::class);
         $this->crud->removeField('member_numb');
@@ -189,14 +214,20 @@ class MemberCrudController extends CrudController
             ],
         ])->beforeField('id_card_type');
         $this->crud->addField([
-            'name' => 'upline_id',
-            'type' => 'Upline',
-            'type' => 'select2_from_array',
-            'options' => $members->pluck('name', 'id'),
+            'name' => 'upline_name',
+            'label' => 'Upline',
+            'type' => 'text',
             'attributes' => [
                 'disabled' => 'disabled'
             ],
-        ])->beforeField('member_numb');
+        ])->beforeField('member_type');
+        $this->crud->addField([
+            'name' => 'upline_id',
+            'type' => 'hidden',
+            'attributes' => [
+                'readonly' => 'disabled'
+            ],
+        ]);
         $this->crud->removeField('level_id');
         $this->crud->removeField('level_name');        
     }
@@ -274,5 +305,32 @@ class MemberCrudController extends CrudController
             Alert::error('Error ', $e->getMessage())->flash();
             return redirect()->back()->withInput();
         }
+    }
+
+    public function edit($id)
+    {
+        $this->crud->hasAccessOrFail('update');
+
+        $this->crud->setOperationSetting('fields', $this->crud->getUpdateFields());
+        $this->data['entry'] = $this->crud->getEntry($id);
+        $this->data['crud'] = $this->crud;
+        $this->data['fields'] = $this->crud->getUpdateFields($id);
+        $this->data['saveAction'] = $this->crud->getSaveAction();
+        $this->data['id'] = $id;
+
+        $upline = $this->data['entry']->upline;
+        if ($upline) {
+            $this->crud->modifyField('upline_id', [
+                'value' => optional($this->data['entry'])->upline_id,
+            ]);
+            $this->crud->modifyField('upline_name', [
+                'value' => $upline->member_numb . ' - ' . $upline->name,
+            ]);
+        } else {
+            $this->crud->modifyField('upline_name', [
+                'type' => 'hidden',
+            ]);
+        }
+        return view('crud::edit', $this->data);
     }
 }

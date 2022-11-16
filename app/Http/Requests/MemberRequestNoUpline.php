@@ -34,6 +34,11 @@ class MemberRequestNoUpline extends FormRequest
             'email' => 'required|min:5|max:255|email',
             'level_id' => 'required|exists:levels,id',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'join_date' => 'required|date',
+            'dob' => 'required|date',
+            'id_card_type' => 'required|in:KTP,SIM',
+            'postal_code' => 'required|min:1|max:255',
+            'member_type' => 'required|in:REGULAR,STOKIST,CABANG,NSI',
         ];
     }
 
