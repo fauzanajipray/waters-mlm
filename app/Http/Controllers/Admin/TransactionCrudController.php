@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Models\User;
 use App\Http\Requests\TransactionRequest;
 use App\Models\Level;
-use App\Models\LogProductSold;
 use App\Models\Member;
 use App\Models\Product;
 use App\Models\Transaction;
+use App\Models\TransactionProduct;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Illuminate\Http\Request;
@@ -39,7 +39,6 @@ class TransactionCrudController extends CrudController
         $this->crud->setModel(Transaction::class);
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/transaction');
         $this->crud->setEntityNameStrings('transaction', 'transactions');
-
     }
 
     /**
@@ -60,13 +59,7 @@ class TransactionCrudController extends CrudController
                 'name' => 'member_numb',
                 'label' => 'Unique Number',
             ], 
-            'member_name', 
-            'product_name', 
-            'qty_sold', 
-            [
-                'name' => 'unit_price',
-                'label' => 'Netto Price',
-            ], 
+            'member_name',
             'total_price', 
             'id_card',
             'member_id',
@@ -77,8 +70,6 @@ class TransactionCrudController extends CrudController
                 'attribute' => 'name' ,
                 'model' => Level::class,
             ],
-            'product_id',
-            'product_model',
         ]);
 
         $this->crud->removeButton('update');
@@ -126,18 +117,11 @@ class TransactionCrudController extends CrudController
             'name' => 'transaction_date',
             'type' => 'date_picker',
             'label' => 'Date',
-            'date_picker_option' => [
+            'date_picker_options' => [
                 'todayBtn' => 'linked',
                 'format'   => 'dd-mm-yyyy',
                 'language' => 'en'
             ],
-        ]);
-        $this->crud->addField([
-            'name' => 'product_id',
-            'type' => 'select2_from_array',
-            'label' => 'Product',
-            'options' => $product->pluck('name', 'id')->toArray(),
-            'allows_null' => false,
         ]);
         $this->crud->addField([
             'name' => 'member_id',
@@ -147,7 +131,35 @@ class TransactionCrudController extends CrudController
             'data_source' => url('api/members/only-actived'),
             'delay' => 500
         ]);
-        $this->crud->field('qty')->type('number_format');
+        $this->crud->addField([
+            'name' => 'products',
+            'label' => 'Products',
+            'type' => 'repeatable',
+            'fields' => [
+                [
+                    'name' => 'product_id',
+                    'type' => 'select2_from_array',
+                    'label' => 'Product',
+                    'options' => $product->pluck('name', 'id')->toArray(),
+                    'allows_null' => false,
+                    'wrapperAttributes' => [
+                        'class' => 'form-group col-md-6'
+                    ],
+                ],
+                [
+                    'name' => 'quantity',
+                    'type' => 'number',
+                    'label' => 'Quantity',
+                    'allows_null' => false,
+                    'wrapperAttributes' => [
+                        'class' => 'form-group col-md-6'
+                    ],
+                ]
+            ],
+            // optional
+            'new_item_label'  => 'Add Product', // customize the text of the button
+            'init_rows' => 1, 
+        ]);
     }
 
     /**
@@ -212,9 +224,6 @@ class TransactionCrudController extends CrudController
                 'value' => $request->query('member_id'),
             ]);
         }
-        $this->crud->modifyField('qty', [
-            'value' => 1,
-        ]);
         return view('crud::create', $this->data);
     }
     
@@ -229,37 +238,45 @@ class TransactionCrudController extends CrudController
     public function store(Request $request)
     {
         $requests = $request->all();
+        $products = $requests['products'];
         $this->crud->validateRequest($requests);
+        foreach ($products as $key => $item) {
+            for ($key2=$key; $key2 < count($products); $key2++) { 
+                if($item['product_id'] == $products[$key2]['product_id'] && $key != $key2){
+                    $errors['products.'.$key2.'.product_id'] = 'Product '.$item['product_id'].' already taken';
+                }
+            }
+        }
+        if (isset($errors)) return redirect()->back()->withErrors($errors)->withInput();
         $member = Member::with(['upline' => function($query) {
             $query->with(['upline' => function($query) {
                 $query->with('level');
             }]);
         }])->find($requests['member_id']);
-
-        $product = Product::find($requests['product_id']);
+        
         DB::beginTransaction();
         try {
+            $totalPrice = 0;
+            foreach ($products as $key => $item) {
+                $product = Product::find($item['product_id']);
+                $totalPrice += $product->price * $item['quantity'];
+            }
             $requests['code'] = $this->generateCode();
             $requests['id_card'] = $member->id_card;
             $requests['member_name'] = $member->name;
             $requests['member_numb'] = $member->member_numb;
             $requests['level_id'] = $member->level_id;
-            $requests['product_name'] = $product->name;
-            $requests['product_model'] = $product->model;
-            $requests['qty_sold'] = $requests['qty'];
-            $requests['unit_price'] = $product->price;
-            $requests['total_price'] = $requests['qty'] * $product->price;
+            $requests['total_price'] = $totalPrice;
             $requests['created_by'] = backpack_user()->id;
             $requests['updated_by'] = backpack_user()->id;
-            $requests['status'] = 'pending';
+
             $transaction = Transaction::create($requests);
             // Save Log Product Sold
-            for($i = 0; $i < $requests['qty']; $i++) {
-                LogProductSold::create([
+            foreach ($products as $key => $item) {
+                TransactionProduct::create([
                     'transaction_id' => $transaction->id,
-                    'product_id' => $product->id,
-                    'member_id' => $member->id,
-                    'transaction_date' => $transaction->transaction_date,
+                    'product_id' => $item['product_id'],
+                    'quantity' => $item['quantity'],
                 ]);
             }
             $requests['transaction_id'] = $transaction->id;
@@ -271,6 +288,7 @@ class TransactionCrudController extends CrudController
         } catch (\Exception $e) {
             DB::rollback();
             Alert::error("Something when wrong")->flash();
+            dd($e->getMessage());
             return redirect()->back()->withInput()->withErrors($e->getMessage());
         }
     }

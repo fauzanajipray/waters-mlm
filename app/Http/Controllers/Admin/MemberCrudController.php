@@ -49,7 +49,7 @@ class MemberCrudController extends CrudController
     {
         $this->crud->viewAfterContent = ['image_preview_helper'];
         $this->crud->firstCellNonFlex = true;
-        $this->crud->column('member_numb')->label('No. Member');
+        $this->crud->column('member_numb')->label('Unique Number');
         $this->crud->column('id_card')->label('ID Card');
         $this->crud->column('name');
         $this->crud->addColumn([

@@ -23,12 +23,6 @@ return new class extends Migration
             $table->foreign('member_id')->references('id')->on('members')->onDelete('restrict')->onUpdate('cascade');
             $table->unsignedBigInteger('level_id')->nullable();
             $table->foreign('level_id')->references('id')->on('levels')->onDelete('restrict')->onUpdate('cascade');
-            $table->unsignedBigInteger('product_id')->nullable();
-            $table->foreign('product_id')->references('id')->on('products')->onDelete('restrict')->onUpdate('cascade');
-            $table->string('product_name');
-            $table->string('product_model');
-            $table->integer('qty_sold')->default(0);
-            $table->bigInteger('unit_price')->default(0);
             $table->bigInteger('total_price')->default(0);
             $table->date('transaction_date')->nullable();            
             $table->unsignedBigInteger('created_by')->nullable();

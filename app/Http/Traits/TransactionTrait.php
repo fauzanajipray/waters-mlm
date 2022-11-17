@@ -4,9 +4,9 @@ namespace App\Http\Traits;
 use App\Models\BonusHistory;
 use App\Models\Level;
 use App\Models\LevelUpHistories;
-use App\Models\LogProductSold;
 use App\Models\Member;
 use App\Models\Transaction;
+use App\Models\TransactionProduct;
 use Carbon\Carbon;
 use Prologue\Alerts\Facades\Alert;
 
@@ -39,7 +39,9 @@ trait TransactionTrait {
         /* Bonus Sponsor */
         $upline = $member->upline;
         if ($upline) {
-            $uplineProductSold = LogProductSold::where('member_id', $upline->id)->count();
+            $uplineProductSold = TransactionProduct::with('transaction')->whereHas('transaction', function($query) use ($upline) {
+                $query->where('member_id', $upline->id);
+            })->sum('quantity');
             $uplineLevel = Level::where('id', $upline->level_id)->first();
             if ($uplineProductSold >= $upline->level->minimum_sold && $uplineLevel->gm_percentage > 0 && $this->isActiveMember($upline)) {  // Cek apakah pernah melakukan transaksi
                 // TODO : Tanya Minimal transaksi atau jual produk
@@ -57,7 +59,9 @@ trait TransactionTrait {
             $upline2 = $upline->upline ?? null;
             if ($upline2) {
                 // Cek apakah pernah melakukan transaksi
-                $uplineProductSold = LogProductSold::where('member_id', $upline2->id)->count();
+                $uplineProductSold = TransactionProduct::with('transaction')->whereHas('transaction', function($query) use ($upline2) {
+                    $query->where('member_id', $upline2->id);
+                })->sum('quantity');
                 $upline2Level = Level::where('id', $upline2->level_id)->first();
                 if($uplineProductSold >= $upline2->level->minimum_sold && $upline2Level->or_percentage > 0 && $this->isActiveMember($upline2)) {
                     BonusHistory::create([
@@ -80,14 +84,15 @@ trait TransactionTrait {
         $member = Member::with(['upline' => function($query) {
             $query->with([
                 'upline' => function($query) { $query->with('level'); }, 
-                'downlines' => function($query) { $query->with(['level', 'logProductSold']); },
+                'downlines' => function($query) { 
+                    $query->with(['level']); 
+                },
                 'level'
             ]);
         }, 'level'])->find($id);
         $uplineMember = $member->upline;
         if ($isCheckAgain){ $uplineMember = $member; }
         if (!$uplineMember) return ;
-        
         $uplineLevel = Level::where('id', $uplineMember->level_id)->first();
         $levelNext =  Level::where('ordering_level', $uplineLevel->ordering_level + 1)->first();
         if(!$levelNext) return ;
@@ -144,8 +149,10 @@ trait TransactionTrait {
 
     private function getDownline($uplineID) 
     {
-        $downline = Member::with(['logProductSold' => function($query) {
-            $query->WhereMonth('transaction_date', date('m'))
+        $downline = Member::with(['transactions' => function($query) {
+            $query
+                ->with('transactionProducts')
+                ->WhereMonth('transaction_date', date('m'))
                 ->whereYear('transaction_date', date('Y'));
         }])->where('upline_id', $uplineID)
         ->get();
@@ -154,7 +161,12 @@ trait TransactionTrait {
 
     private function removeDownlineWhereTransaction($downline, $minimumSoldByDownlineNext, $uplineLevel){
         foreach ($downline as $key => $value) {
-            $downlineSold = count($value->logProductSold);
+            $downlineSold = 0;
+            foreach ($value->transactions as $key => $transaction) {
+                foreach ($transaction->transactionProducts as $key => $transactionProduct) {
+                    $downlineSold += $transactionProduct->quantity;
+                }
+            }
             if ($downlineSold < $minimumSoldByDownlineNext) { 
                 $downline->forget($key); // remove downline yang belum melakukan transaksi
             }

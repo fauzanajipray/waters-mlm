@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
-use Backpack\CRUD\app\Models\Traits\CrudTrait;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Venturecraft\Revisionable\RevisionableTrait;
 
-class Transaction extends Model
+class TransactionProduct extends Model
 {
-    use CrudTrait, SoftDeletes, RevisionableTrait;
+    use RevisionableTrait;
 
     /*
     |--------------------------------------------------------------------------
@@ -17,7 +17,7 @@ class Transaction extends Model
     |--------------------------------------------------------------------------
     */
 
-    protected $table = 'transactions';
+    protected $table = "transaction_products";
     // protected $primaryKey = 'id';
     // public $timestamps = false;
     protected $guarded = ['id'];
@@ -37,32 +37,9 @@ class Transaction extends Model
     |--------------------------------------------------------------------------
     */
 
-    public function product()
+    public function transaction()
     {
-        return $this->belongsTo(Product::class, 'product_id');
-    }
-
-    public function level()
-    {
-        return $this->belongsTo(Level::class, 'level_id');
-    }
-
-    public function createdBy()
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function updatedBy()
-    {
-        return $this->belongsTo(User::class, 'updated_by');
-    }
-
-    public function member() {
-        return $this->belongsTo(Member::class, 'member_id');
-    }
-
-    public function transactionProducts() {
-        return $this->hasMany(TransactionProduct::class, 'transaction_id');
+        return $this->belongsTo(Transaction::class, 'transaction_id');
     }
 
     /*

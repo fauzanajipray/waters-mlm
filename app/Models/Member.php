@@ -55,10 +55,6 @@ class Member extends Model
     |--------------------------------------------------------------------------
     */
 
-    public function user(){
-        return $this->hasOne('App\Models\User', 'member_id', 'id');
-    }
-
     public function level(){
         return $this->belongsTo('App\Models\Level', 'level_id', 'id');
     }
@@ -77,10 +73,6 @@ class Member extends Model
 
     public function downlines(){
         return $this->hasMany('App\Models\Member', 'upline_id', 'id');
-    }
-
-    public function logProductSold(){
-        return $this->hasMany('App\Models\LogProductSold', 'member_id', 'id');
     }
 
     /*

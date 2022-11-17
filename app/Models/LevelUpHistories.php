@@ -40,6 +40,10 @@ class LevelUpHistories extends Model
         return $this->belongsTo('App\Models\Level', 'level_id');
     }
 
+    public function member(){
+        return $this->belongsTo('App\Models\Member', 'member_id');
+    }
+
     /*
     |--------------------------------------------------------------------------
     | SCOPES

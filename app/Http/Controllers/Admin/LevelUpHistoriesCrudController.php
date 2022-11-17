@@ -39,17 +39,22 @@ class LevelUpHistoriesCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        CRUD::column('member_id');
-        CRUD::column('old_level_id');
-        CRUD::column('new_level_id');
+        $this->crud->addColumn([
+            'label' => 'Member',
+            'type' => 'relationship',
+            'name' => 'member',
+            'entity' => 'member',
+            'attribute' => 'name',
+            'model' => 'App\Models\Member',
+            'wrapper' => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('member/'.$related_key.'/show');
+                },
+            ],
+        ]);
         CRUD::column('old_level_code');
-        CRUD::column('new_level_code');
-
-        /**
-         * Columns can be defined using the fluent syntax or array syntax:
-         * - CRUD::column('price')->type('number');
-         * - CRUD::addColumn(['name' => 'price', 'type' => 'number']); 
-         */
+        CRUD::column('new_level_code');   
+        CRUD::column('created_at');
     }
 
     /**

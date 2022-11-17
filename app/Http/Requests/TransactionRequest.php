@@ -26,9 +26,10 @@ class TransactionRequest extends FormRequest
     {   
         return [
             'transaction_date' => 'required|date',
-            'product_id' => 'required|exists:products,id',
             'member_id' => 'required|exists:members,id',
-            'qty' => 'required|numeric|min:1',
+            'products' => 'required|array',
+            'products.*.product_id' => 'required|exists:products,id',
+            'products.*.quantity' => 'required|numeric|min:1',
         ];
     }
 
