@@ -31,6 +31,10 @@ class Transaction extends Model
     |--------------------------------------------------------------------------
     */
 
+    function letterRoad(){
+        return '<a href="'.url('/transaction/print').'" class="btn btn-sm btn-link"><i class="la la-print"></i> Download</a>';
+    }
+
     /*
     |--------------------------------------------------------------------------
     | RELATIONS
@@ -63,6 +67,10 @@ class Transaction extends Model
 
     public function transactionProducts() {
         return $this->hasMany(TransactionProduct::class, 'transaction_id');
+    }
+    
+    public function customer(){
+        return $this->belonsTo(Customer::class, 'customer_id');
     }
 
     /*

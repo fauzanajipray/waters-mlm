@@ -14,6 +14,7 @@ use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Prologue\Alerts\Facades\Alert;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 /**
  * Class TransactionCrudController
@@ -73,6 +74,8 @@ class TransactionCrudController extends CrudController
         ]);
 
         $this->crud->removeButton('update');
+        $this->crud->addButtonFromModelFunction('line', 'letter_road', 'letterRoad', 'beginning');
+
     }
 
     protected function setupShowOperation(){
@@ -291,5 +294,11 @@ class TransactionCrudController extends CrudController
             dd($e->getMessage());
             return redirect()->back()->withInput()->withErrors($e->getMessage());
         }
+    }
+
+    function print(){
+        $pdf = Pdf::loadView('exports.pdf.print-letter-road', []);
+        return $pdf->stream('surat-jalan.pdf');
+        // return view('exports.pdf.print-letter-road', []);
     }
 }
