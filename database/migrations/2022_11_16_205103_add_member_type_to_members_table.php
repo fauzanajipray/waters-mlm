@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('members', function (Blueprint $table) {
-            $table->enum('member_type', ['REGULAR', 'STOKIST', 'CABANG', 'NSI'])->default('REGULAR');
+            $table->enum('member_type', ['DEFAULT', 'STOKIST', 'CABANG', 'NSI'])->default('DEFAULT');
         });
     }
 

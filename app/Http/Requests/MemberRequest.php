@@ -39,7 +39,7 @@ class MemberRequest extends FormRequest
             'dob' => 'required|date',
             'id_card_type' => 'required|in:KTP,SIM',
             'postal_code' => 'required|min:1|max:255',
-            'member_type' => 'required|in:REGULAR,STOKIST,CABANG,NSI',
+            'member_type' => 'required|in:DEFAULT,STOKIST,CABANG,NSI',
         ];
     }
 

@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::table('transactions', function (Blueprint $table) {
             $table->unsignedBigInteger('customer_id')
-            ->after('product_id')->nullable();
+            ->after('level_id')->nullable();
 
             $table->foreign('customer_id')
             ->references('id')->on('customers')->onDelete('restrict')->onUpdate('cascade');

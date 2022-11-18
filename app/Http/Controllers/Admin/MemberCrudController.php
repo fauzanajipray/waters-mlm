@@ -67,7 +67,7 @@ class MemberCrudController extends CrudController
                 'element' => 'span',
                 'class' => function ($crud, $column, $entry, $related_key) {
                     switch ($entry->member_type) {
-                        case 'REGULAR':
+                        case 'DEFAULT':
                             return 'badge badge-primary';
                         case 'STOKIST':
                             return 'badge badge-success';
@@ -128,7 +128,7 @@ class MemberCrudController extends CrudController
             'data_source' => url('api/members/only-actived'),
         ]);
         $this->crud->field('member_type')->label('Member Type')->type('select_from_array')->options([
-            'REGULAR' => 'REGULAR',
+            'DEFAULT' => 'DEFAULT',
             'NSI' => 'NSI',
             'STOKIST' => 'STOKIST',
             'CABANG' => 'CABANG',

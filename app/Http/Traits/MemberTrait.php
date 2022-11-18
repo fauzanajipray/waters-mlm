@@ -18,7 +18,7 @@ trait MemberTrait {
     public function downloadCardMember($id) 
     {
         $member = Member::with('level')->where('id', $id)->firstOrFail();
-        $imageUrl = ($member->photo_url) ? 'storage/'.$member->photo_url : 'images/profile.jpg';
+        $imageUrl = ($member->photo_url) ? 'storage/'.$member->photo_url : 'images/2x3.png';
         $title = "Card Member ($member->member_numb - $member->name)";
         $level = $member->level->name;
         // expired date for human
