@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('code')->unique();
             $table->foreignId('member_id')->constrained();
             $table->string('total');
-            $table->date('payment_date');
+            $table->datetime('payment_date');
             $table->timestamps();
         });
     }

@@ -15,11 +15,9 @@ return new class extends Migration
     {
         Schema::create('transaction_products', function (Blueprint $table) {
             $table->id();
-            // $table->foreignId('member_id')->constrained();
             $table->foreignId('transaction_id')->constrained();
             $table->foreignId('product_id')->constrained();
-            $table->integer('quantity')->default(1);
-            // $table->date('transaction_date')->nullable();      
+            $table->integer('quantity')->default(1);    
             $table->timestamps();
         });
     }

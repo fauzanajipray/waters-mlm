@@ -68,12 +68,12 @@ class ActivationPaymentsCrudController extends CrudController
         
         $this->crud->addField([
             'name' => 'payment_date',
-            'type' => 'date_picker',
+            'type' => 'datetime_picker',
             'label' => 'Date',
             'date_picker_option' => [
                 'todayBtn' => 'linked',
-                'format'   => 'dd-mm-yyyy',
-                'language' => 'en'
+                'format'   => 'Y-m-d H:i:s',
+                'language' => 'id'
             ],
         ]);
         $this->crud->addField([
@@ -110,7 +110,7 @@ class ActivationPaymentsCrudController extends CrudController
         $this->data['fields'] = $this->crud->getCreateFields();
         $this->data['saveAction'] = $this->crud->getSaveAction();
         $this->crud->modifyField('payment_date', [
-            'value' => date('Y-m-d'),
+            'value' => date('Y-m-d H:i:s'),
         ]);
         return view('crud::create', $this->data);
     }
@@ -172,4 +172,5 @@ class ActivationPaymentsCrudController extends CrudController
             return redirect()->route('activation-payments')->withErrors($e->getMessage())->withInput();
         }
     }
+
 }

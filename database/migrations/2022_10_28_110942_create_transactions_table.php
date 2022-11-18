@@ -24,7 +24,7 @@ return new class extends Migration
             $table->unsignedBigInteger('level_id')->nullable();
             $table->foreign('level_id')->references('id')->on('levels')->onDelete('restrict')->onUpdate('cascade');
             $table->bigInteger('total_price')->default(0);
-            $table->date('transaction_date')->nullable();            
+            $table->dateTime('transaction_date')->nullable();            
             $table->unsignedBigInteger('created_by')->nullable();
             $table->foreign('created_by')->references('id')->on('users')->onDelete('restrict')->onUpdate('cascade');
             $table->unsignedBigInteger('updated_by')->nullable();

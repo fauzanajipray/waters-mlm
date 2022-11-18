@@ -118,7 +118,7 @@ class TransactionCrudController extends CrudController
 
         $this->crud->addField([
             'name' => 'transaction_date',
-            'type' => 'date_picker',
+            'type' => 'datetime_picker',
             'label' => 'Date',
             'date_picker_options' => [
                 'todayBtn' => 'linked',
@@ -220,7 +220,7 @@ class TransactionCrudController extends CrudController
         $this->data['fields'] = $this->crud->getCreateFields();
         $this->data['saveAction'] = $this->crud->getSaveAction();
         $this->crud->modifyField('transaction_date', [
-            'value' => date('Y-m-d'),
+            'value' => date('Y-m-d H:i:s'),
         ]);
         if ($request->query('member_id')) {
             $this->crud->modifyField('member_id', [
