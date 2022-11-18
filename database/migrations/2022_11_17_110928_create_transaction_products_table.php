@@ -18,9 +18,10 @@ return new class extends Migration
             $table->foreignId('transaction_id')->constrained();
             $table->unsignedBigInteger('product_id')->nullable();
             $table->foreign('product_id')->references('id')->on('products')->onDelete('restrict')->onUpdate('cascade');
-            $table->string('product_name');
-            $table->string('product_model');
-            $table->bigInteger('unit_price')->default(0);
+            $table->string('name');
+            $table->string('model');
+            $table->string('capacity')->nullable();
+            $table->bigInteger('price')->default(0);
             $table->integer('quantity')->default(1);    
             $table->timestamps();
         });
