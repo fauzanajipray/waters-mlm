@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Customer;
 use App\Models\Member;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
@@ -32,6 +33,7 @@ class MemberSeeder extends Seeder
             'postal_code' => fake()->numberBetween(10000, 99999),
             'upline_id' => null
         ]);
+
         Member::updateOrCreate([
             'id' => 2,
             'member_numb' => 'M-002',
@@ -66,71 +68,12 @@ class MemberSeeder extends Seeder
             'postal_code' => fake()->numberBetween(10000, 99999),
             'upline_id' => 1
         ]);
-        // Member::updateOrCreate([
-        //     'id' => 4,
-        //     'member_numb' => 'M-004',
-        // ], [
-        //     'member_numb' => 'M-004',
-        //     'id_card' => '12348',
-        //     'name' => 'Fauzan Mahaletou',
-        //     'level_id' => 1,
-        //     'gender' => 'F',
-        //     'phone' => '08212938292',
-        //     'email' => 'fauzan@gmail.com',
-        //     'address' => 'Jalan Beku', 
-        //     'upline_id' => 1
-        // ]);
-        
-        // Member::updateOrCreate([
-        //     'id' => 5,
-        //     'member_numb' => 'M-005',
-        // ], [
-        //     'member_numb' => 'M-005',
-        //     'id_card' => '12349',
-        //     'name' => 'Rizky Billar',
-        //     'level_id' => 1,
-        //     'gender' => 'M',
-        //     'phone' => '08212938293',
-        //     'email' => 'rizkybillar@gmail.com',
-        //     'address' => 'Jalan Arjuna',
-        //     'upline_id' => 4
-        // ]);
-
-        // Member::updateOrCreate([
-        //     'id' => 6,
-        //     'member_numb' => 'M-006',
-        // ], [
-        //     'member_numb' => 'M-006',
-        //     'id_card' => '12350',
-        //     'name' => 'Noelle Farmer',
-        //     'level_id' => 1,
-        //     'gender' => 'M',
-        //     'phone' => '08212938294',
-        //     'email' => 'noellefarmer@gmail.com',
-        //     'address' => 'Jalan Arjuna',
-        //     'upline_id' => 4
-        // ]);
-
-        // Member::updateOrCreate([
-        //     'id' => 7,
-        //     'member_numb' => 'M-007',
-        // ], [
-        //     'member_numb' => 'M-007',
-        //     'id_card' => '12351',
-        //     'name' => 'Tsubasa Ozora',
-        //     'level_id' => 1,
-        //     'gender' => 'M',
-        //     'phone' => '08212938295',
-        //     'email' => 'tsubas@gmail.com',
-        //     'address' => 'Jalan Arjuna',
-        //     'upline_id' => 4
-        // ]);
 
         Member::updateOrCreate([
-            'id' => 8,
-            'member_numb' => 'M-008',
+            'id' => 4,
+            'member_numb' => 'M-004',
         ], [
-            'member_numb' => 'M-008',
+            'member_numb' => 'M-004',
             'id_card' => '12352',
             'name' => 'Monkey D Luffy',
             'level_id' => 1, 
@@ -145,10 +88,10 @@ class MemberSeeder extends Seeder
         ]);
 
         Member::updateOrCreate([
-            'id' => 9,
-            'member_numb' => 'M-009',
+            'id' => 5,
+            'member_numb' => 'M-005',
         ], [
-            'member_numb' => 'M-009',
+            'member_numb' => 'M-005',
             'id_card' => '12353',
             'name' => 'Roronoa Zoro',
             'level_id' => 1,
@@ -162,26 +105,11 @@ class MemberSeeder extends Seeder
             'upline_id' => 2
         ]);
 
-        // Member::updateOrCreate([
-        //     'id' => 10,
-        //     'member_numb' => 'M-010',
-        // ], [
-        //     'member_numb' => 'M-010',
-        //     'id_card' => '12354',
-        //     'name' => 'Sanji',
-        //     'level_id' => 2,
-        //     'gender' => 'M',
-        //     'phone' => '08212938298',
-        //     'email' => 'sanji@gmail.com',
-        //     'address' => 'Jalan Arjuna',
-        //     'upline_id' => 2
-        // ]);
-
         Member::updateOrCreate([
-            'id' => 11,
-            'member_numb' => 'M-011',
+            'id' => 6,
+            'member_numb' => 'M-006',
         ], [
-            'member_numb' => 'M-011',
+            'member_numb' => 'M-006',
             'id_card' => '12355',
             'name' => 'Usopp',
             'level_id' => 1, 
@@ -196,10 +124,10 @@ class MemberSeeder extends Seeder
         ]);
 
         Member::updateOrCreate([
-            'id' => 12,
-            'member_numb' => 'M-012',
+            'id' => 7,
+            'member_numb' => 'M-007',
         ], [
-            'member_numb' => 'M-012',
+            'member_numb' => 'M-007',
             'id_card' => '12356',
             'name' => 'Nami',
             'level_id' => 1,
@@ -213,19 +141,118 @@ class MemberSeeder extends Seeder
             'upline_id' => 3
         ]);
 
-        // Member::updateOrCreate([
-        //     'id' => 13,
-        //     'member_numb' => 'M-013',
-        // ], [
-        //     'member_numb' => 'M-013',
-        //     'id_card' => '12355',
-        //     'name' => 'Tony Tony Chopper',
-        //     'level_id' => 2,
-        //     'gender' => 'M',
-        //     'phone' => '08212938299',
-        //     'email' => 'chopper@gmail.com',
-        //     'address' => 'Jalan Arjuna',
-        //     'upline_id' => 3
-        // ]);
+
+        // Customer from Member
+
+        Customer::updateOrCreate([
+            'id' => 1,
+            'member_id' => 1,
+        ], [
+            'name' => 'Kevin Andianto',
+            'address' => 'Jalan Shukumura',
+            'city' => 'Jakarta',
+            'phone' => '08291029320',
+            'is_member' => "1",
+            'member_id' => 1,
+        ]);
+
+        Customer::updateOrCreate([
+            'id' => 2,
+            'member_id' => 2,
+        ], [
+            'name' => 'Benny Michael Amazon',
+            'address' => 'Jalan Pramuka',
+            'city' => 'Jakarta',
+            'phone' => '082123456',
+            'is_member' => "1",
+            'member_id' => 2,
+        ]);
+
+        Customer::updateOrCreate([
+            'id' => 3,
+            'member_id' => 3,
+        ], [
+            'name' => 'Andi Devina Putri',
+            'address' => 'Jalan Manggis',
+            'city' => 'Jakarta',
+            'phone' => '082129832232',
+            'is_member' => "1",
+            'member_id' => 3,
+        ]);
+
+        Customer::updateOrCreate([
+            'id' => 4,
+            'member_id' => 4,
+        ], [
+            'name' => 'Monkey D Luffy',
+            'address' => 'Jalan Arjuna',
+            'city' => 'Jakarta',
+            'phone' => '08212938296',
+            'is_member' => "1",
+            'member_id' => 4,
+        ]);
+
+        Customer::updateOrCreate([
+            'id' => 5,
+            'member_id' => 5,
+        ], [
+            'name' => 'Roronoa Zoro',
+            'address' => 'Jalan Arjuna',
+            'city' => 'Jakarta',
+            'phone' => '08212938297',
+            'is_member' => "1",
+            'member_id' => 5,
+        ]);
+
+        Customer::updateOrCreate([
+            'id' => 6,
+            'member_id' => 6,
+        ], [
+            'name' => 'Usopp',
+            'address' => 'Jalan Arjuna',
+            'city' => 'Jakarta',
+            'phone' => '08212938299',
+            'is_member' => "1",
+            'member_id' => 6,
+        ]);
+
+        Customer::updateOrCreate([
+            'id' => 7,
+            'member_id' => 7,
+        ], [
+            'name' => 'Nami',
+            'address' => 'Jalan Arjuna',
+            'city' => 'Jakarta',
+            'phone' => '08212938298',
+            'is_member' => "1",
+            'member_id' => 7,
+        ]);
+
+        // Customer from Non Member
+
+        Customer::updateOrCreate([
+            'id' => 8,
+            'member_id' => null,
+        ], [
+            'name' => fake()->name(),
+            'address' => fake()->address(),
+            'city' => fake()->city(),
+            'phone' => fake()->phoneNumber(),
+            'member_id' => fake()->numberBetween(1, 7),
+        ]);
+
+        for ($i = 0; $i < 30; $i++) {
+            Customer::updateOrCreate([
+                'id' => $i + 9,
+                'member_id' => null,
+            ], [
+                'name' => fake()->name(),
+                'address' => fake()->address(),
+                'city' => fake()->city(),
+                'phone' => fake()->phoneNumber(),
+                'member_id' => fake()->numberBetween(1, 7),
+            ]);
+        }
+        
     }
 }

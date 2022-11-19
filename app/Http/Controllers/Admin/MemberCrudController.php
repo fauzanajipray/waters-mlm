@@ -6,6 +6,7 @@ use App\Http\Requests\MemberRequest;
 use App\Http\Requests\MemberRequestNoUpline;
 use App\Http\Requests\MemberRequestUpdate;
 use App\Http\Traits\MemberTrait;
+use App\Models\Customer;
 use App\Models\Level;
 use App\Models\Member;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
@@ -277,7 +278,16 @@ class MemberCrudController extends CrudController
             if($checkMember){
                 $requests['member_numb'] = $this->generateMemberNumber();
             }
-            Member::create($requests);
+            $member = Member::create($requests);
+            // Create Customer
+            Customer::create([
+                'name' => $requests['name'],
+                'phone' => $requests['phone'],
+                'email' => $requests['email'],
+                'address' => $requests['address'],
+                'postal_code' => $requests['postal_code'],
+                'member_id' => $member->id,
+            ]);
             DB::commit();
             Alert::success(trans('backpack::crud.insert_success'))->flash();
             return redirect($this->crud->route);

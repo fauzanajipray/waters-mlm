@@ -70,7 +70,7 @@ class Transaction extends Model
     }
     
     public function customer(){
-        return $this->belonsTo(Customer::class, 'customer_id');
+        return $this->belongsTo(Customer::class, 'customer_id');
     }
 
     /*

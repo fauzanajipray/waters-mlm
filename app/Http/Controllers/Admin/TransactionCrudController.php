@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
 use App\Http\Requests\TransactionRequest;
+use App\Models\Customer;
 use App\Models\Level;
 use App\Models\Member;
 use App\Models\Product;
@@ -11,6 +12,7 @@ use App\Models\Transaction;
 use App\Models\TransactionProduct;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
+use Backpack\CRUD\app\Library\Widget;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Prologue\Alerts\Facades\Alert;
@@ -116,6 +118,8 @@ class TransactionCrudController extends CrudController
             return $item;
         });
 
+        Widget::add()->type('script')->content(asset('assets/js/admin/form/transaction.js'));
+
         $this->crud->addField([
             'name' => 'transaction_date',
             'type' => 'datetime_picker',
@@ -134,6 +138,34 @@ class TransactionCrudController extends CrudController
             'data_source' => url('api/members/only-actived'),
             'delay' => 500
         ]);
+        
+        $this->crud->addField([
+            'name' => 'customer_id',
+            'type' => 'relationship',
+            'attribute' => 'name',
+            'ajax' => true,
+            'inline_create' => [
+                'entity' => 'customer',
+                'create_route' => route("customer-inline-create-save"),
+                'modal_route' => route("customer-inline-create"),
+                'modal_class' => 'modal-dialog modal-lg',
+            ],
+            /// AJAX OPTIONAL
+            'dependencies' => ['member_id', 'is_member'],
+            'data_source' => url('customer/get-customer-by-member-id'),
+            'placeholder' => 'Select a customer',
+        ]);
+
+        $this->crud->addField([
+            'name' => 'is_member',
+            'type' => 'checkbox',
+            'label' => 'Member is customer',
+            'wrapperAttributes' => [
+                'class' => 'form-group col-md-12'
+            ], 
+            'value' => 1,
+        ]);
+
         $this->crud->addField([
             'name' => 'products',
             'label' => 'Products',
@@ -240,23 +272,34 @@ class TransactionCrudController extends CrudController
 
     public function store(Request $request)
     {
-        $requests = $request->all();
-        $products = $requests['products'];
-        $this->crud->validateRequest($requests);
-        foreach ($products as $key => $item) {
-            for ($key2=$key; $key2 < count($products); $key2++) { 
-                if($item['product_id'] == $products[$key2]['product_id'] && $key != $key2){
-                    $errors['products.'.$key2.'.product_id'] = 'Product '.$item['product_id'].' already taken';
+        try {
+            $requests = $request->all();
+            $products = $requests['products'];
+            $this->crud->validateRequest($requests);
+            foreach ($products as $key => $item) {
+                for ($key2=$key; $key2 < count($products); $key2++) { 
+                    if($item['product_id'] == $products[$key2]['product_id'] && $key != $key2){
+                        $errors['products.'.$key2.'.product_id'] = 'Product '.$item['product_id'].' already taken';
+                    }
                 }
             }
+            if ($requests['is_member'] == 1 && $requests['member_id']) {
+                $customer = Customer::where('member_id', $requests['member_id'])->first();
+                if ($customer) {
+                    $requests['customer_id'] = strval($customer->id);
+                } else {
+                    $errors['customer_id'] = 'Customer not found';
+                }
+            }
+            if (isset($errors)) return redirect()->back()->withErrors($errors)->withInput();
+            $member = Member::with(['upline' => function($query) {
+                $query->with(['upline' => function($query) {
+                    $query->with('level');
+                }]);
+            }])->find($requests['member_id']);
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors($e->getMessage())->withInput();
         }
-        if (isset($errors)) return redirect()->back()->withErrors($errors)->withInput();
-        $member = Member::with(['upline' => function($query) {
-            $query->with(['upline' => function($query) {
-                $query->with('level');
-            }]);
-        }])->find($requests['member_id']);
-        
         DB::beginTransaction();
         try {
             $totalPrice = 0;
@@ -276,11 +319,17 @@ class TransactionCrudController extends CrudController
             $transaction = Transaction::create($requests);
             // Save Log Product Sold
             foreach ($products as $key => $item) {
-                TransactionProduct::create([
+                $product = Product::find($item['product_id']);
+                $tp = TransactionProduct::create([
                     'transaction_id' => $transaction->id,
-                    'product_id' => $item['product_id'],
+                    'product_id' => $product->id,
+                    'name' => $product->name,
+                    'model' => $product->model,
+                    'price' => $product->price,
+                    'capacity' => $product->capacity,
                     'quantity' => $item['quantity'],
                 ]);
+                $transactionProduct[] = $tp->toArray();
             }
             $requests['transaction_id'] = $transaction->id;
             $this->calculateBonus($requests, $member);
@@ -291,7 +340,6 @@ class TransactionCrudController extends CrudController
         } catch (\Exception $e) {
             DB::rollback();
             Alert::error("Something when wrong")->flash();
-            dd($e->getMessage());
             return redirect()->back()->withInput()->withErrors($e->getMessage());
         }
     }

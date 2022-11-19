@@ -28,7 +28,7 @@ class CustomerInlineCreateRequest extends FormRequest
             'name' => 'required|min:5|max:255',
             'address' => 'required|min:5|max:255',
             'city' => 'required|min:5|max:255',
-            'no_hp' => 'required|min:5|max:255',
+            'phone' => 'required|min:5|max:255',
         ];
     }
 

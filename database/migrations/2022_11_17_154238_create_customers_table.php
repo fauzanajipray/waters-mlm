@@ -17,12 +17,11 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('address');
-            $table->string('city');
-            $table->string('no_hp');
+            $table->string('city')->nullable();
+            $table->string('phone');
             $table->unsignedBigInteger('member_id');
             $table->enum('is_member', array('0','1'))->default('0');
             $table->timestamps();
-            
             $table->foreign('member_id')
             ->references('id')->on('members')->onDelete('restrict')->onUpdate('cascade');
         });

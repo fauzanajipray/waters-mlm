@@ -6,8 +6,6 @@ use App\Http\Requests\CustomerInlineCreateRequest;
 use App\Http\Requests\CustomerRequest;
 use App\Models\Customer;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
-use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
-use Backpack\CRUD\app\Library\Widget;
 use Illuminate\Http\Request;
 
 /**
@@ -20,7 +18,7 @@ class CustomerCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
-    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
+    // use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\InlineCreateOperation;
 
@@ -31,9 +29,9 @@ class CustomerCrudController extends CrudController
      */
     public function setup()
     {
-        CRUD::setModel(\App\Models\Customer::class);
-        CRUD::setRoute(config('backpack.base.route_prefix') . '/customer');
-        CRUD::setEntityNameStrings('customer', 'customers');
+        $this->crud->setModel(\App\Models\Customer::class);
+        $this->crud->setRoute(config('backpack.base.route_prefix') . '/customer');
+        $this->crud->setEntityNameStrings('customer', 'customers');
     }
 
     /**
@@ -44,19 +42,19 @@ class CustomerCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        CRUD::column('name');
-        CRUD::column('address');
-        CRUD::column('city');
-        CRUD::column('no_hp');
-        CRUD::column('member_id');
-        CRUD::column('is_member');
-        CRUD::column('created_at');
-        CRUD::column('updated_at');
+        $this->crud->column('name');
+        $this->crud->column('address');
+        $this->crud->column('city');
+        $this->crud->column('phone');
+        $this->crud->column('member_id');
+        $this->crud->column('is_member');
+        $this->crud->column('created_at');
+        $this->crud->column('updated_at');
 
         /**
          * Columns can be defined using the fluent syntax or array syntax:
-         * - CRUD::column('price')->type('number');
-         * - CRUD::addColumn(['name' => 'price', 'type' => 'number']); 
+         * - $this->crud->column('price')->type('number');
+         * - $this->crud->addColumn(['name' => 'price', 'type' => 'number']); 
          */
     }
 
@@ -68,21 +66,30 @@ class CustomerCrudController extends CrudController
      */
     protected function setupCreateOperation()
     {
-        CRUD::setValidation(CustomerRequest::class);
+        $this->crud->setValidation(CustomerRequest::class);
 
-        CRUD::field('name');
-        CRUD::field('address');
-        CRUD::field('city');
-        CRUD::field('no_hp');
-        CRUD::field('member_id');
-        CRUD::field('is_member');
+        // $this->crud->field('member_id');
+        $this->crud->addField([
+            'name' => 'member_id',
+            'type' => 'select2_from_ajax',
+            'entity' => 'member',
+            'attribute' => 'text',
+            'data_source' => url('api/members/only-actived'),
+            'delay' => 500
+        ]);
+        $this->crud->field('name');
+        $this->crud->field('address');
+        $this->crud->field('city');
+        $this->crud->field('phone')->type('number');
 
-        /**
-         * Fields can be defined using the fluent syntax or array syntax:
-         * - CRUD::field('price')->type('number');
-         * - CRUD::addField(['name' => 'price', 'type' => 'number'])); 
-         */
+       
+        // Widget::add()->type('script')->content(asset('assets/js/admin/form/customer.js'));
     }
+
+    // public function store(Request $request)
+    // {   
+    //     dd($request->all());
+    // }
 
     /**
      * Define what happens when the Update operation is loaded.
@@ -98,39 +105,40 @@ class CustomerCrudController extends CrudController
     protected function setupInlineCreateOperation(){
 
         $this->crud->setValidation(CustomerInlineCreateRequest::class);
-        // $this->crud->removeField('member_id');
         $this->crud->removeField('is_member');
-        $this->crud->addField([
-            'name' => 'member_id',
-            'type' => 'number',
-            'attributes' => [
-                // 'value' => $member_id,
-                // 'class' => 'd-none'
-            ]
-        ]);
     }
 
     public function customerbyMemberID(Request $request){
-        $search_term = $request->q;
-        $member_id = $request->member_id;
-        if($search_term) {
+        $search_term = $request->input('q');
+        $memberIdForm = request()->form[3];
+        if($search_term && $memberIdForm['name'] == 'member_id' && $memberIdForm['value']) {
             $customers = Customer::
-                where('member_id', $member_id)
-                // ->where('name', 'like', '%'.$search_term.'%')
-                // ->orWhere('no_hp', 'like', '%'.$search_term.'%')
+                where('member_id', $memberIdForm['value'])
+                ->where('is_member', "0")
+                ->where('name', 'like', '%'.$search_term.'%')
+                ->orWhere('phone', 'like', '%'.$search_term.'%')
                 ->paginate(10);
             $customers->map(function($customer){
-                $customer->text = $customer->name . ' - ' . $customer->no_hp;
+                $customer->name = $customer->name . ' - ' . $customer->phone;
                 return $customer;
             });
-        } else{
-            $customers = Customer::where('member_id', $member_id)->paginate(10);
+        } else if (!$search_term && $memberIdForm['name'] == 'member_id' && $memberIdForm['value']){ 
+            $customers = Customer::
+                where('member_id', $memberIdForm['value'])
+                ->where('is_member', "0")
+                ->paginate(10);
+            $customers->map(function($customer){
+                $customer->name = $customer->name . ' - ' . $customer->phone;
+                return $customer;
+            });
+        } else {
+            $customers = Customer::
+                where('is_member', "0")->paginate(10);
+            $customers->map(function($customer){
+                $customer->name = $customer->name . ' - ' . $customer->phone;
+                return $customer;
+            });
         }
-        
         return $customers;
     }
-
-    // public function storeInlineCreate(){
-
-    // }
 }
