@@ -20,6 +20,9 @@ Route::group([
     Route::crud('member', 'MemberCrudController');
     Route::get('member/{id}/download-card-member', 'MemberCrudController@downloadCardMember');
     Route::get('member/{id}/report-member', 'MemberCrudController@reportMember');
+    Route::get('/members', [App\Http\Controllers\Api\MemberController::class, 'index']);
+    Route::get('/members/not-activated', [App\Http\Controllers\Api\MemberController::class, 'notActivated']);
+    Route::get('/members/only-actived', [App\Http\Controllers\Api\MemberController::class, 'onlyActive']);
     Route::crud('role', 'RoleCrudController');
     Route::crud('permission', 'PermissionCrudController');
     Route::crud('product', 'ProductCrudController');

@@ -81,7 +81,7 @@ class ActivationPaymentsCrudController extends CrudController
             'type' => 'select2_from_ajax',
             'entity' => 'member',
             'attribute' => 'text',
-            'data_source' => url('api/members/not-activated'),
+            'data_source' => url('members/not-activated'),
             'placeholder' => 'Select a member',
         ]);
         $this->crud->field('total')->label('Total Payment')->type('number_format')->prefix('Rp. ');

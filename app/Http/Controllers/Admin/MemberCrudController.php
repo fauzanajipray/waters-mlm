@@ -126,7 +126,7 @@ class MemberCrudController extends CrudController
             'type' => 'select2_from_ajax',
             'entity' => 'upline',
             'attribute' => 'text',
-            'data_source' => url('api/members/only-actived'),
+            'data_source' => url('members/only-actived'),
         ]);
         $this->crud->field('member_type')->label('Member Type')->type('select_from_array')->options([
             'DEFAULT' => 'DEFAULT',

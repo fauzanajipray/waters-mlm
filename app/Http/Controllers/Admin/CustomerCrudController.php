@@ -74,7 +74,7 @@ class CustomerCrudController extends CrudController
             'type' => 'select2_from_ajax',
             'entity' => 'member',
             'attribute' => 'text',
-            'data_source' => url('api/members/only-actived'),
+            'data_source' => url('members/only-actived'),
             'delay' => 500
         ]);
         $this->crud->field('name');
