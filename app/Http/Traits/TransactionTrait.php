@@ -2,12 +2,15 @@
 namespace App\Http\Traits;
 
 use App\Models\BonusHistory;
+use App\Models\Customer;
 use App\Models\Level;
 use App\Models\LevelUpHistories;
 use App\Models\Member;
 use App\Models\Transaction;
 use App\Models\TransactionProduct;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Prologue\Alerts\Facades\Alert;
 
 trait TransactionTrait {
@@ -189,5 +192,30 @@ trait TransactionTrait {
             return false;
         }
         return true;
+    }
+
+    public function print(){
+        $pdf = Pdf::loadView('exports.pdf.print-letter-road', []);
+        return $pdf->stream('surat-jalan.pdf');
+        // return view('exports.pdf.print-letter-road', []);
+    }
+
+    public function checkCustomer(Request $request)
+    {
+        $customer = Customer::
+            where('member_id', $request->member_id)
+            ->where('id', $request->customer_id)
+            ->first();
+        if ($customer) {
+            return response()->json([
+                'status' => true,
+                'data' => $customer,
+            ]);
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => 'Customer not found',
+            ]);
+        }
     }
 }

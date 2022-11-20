@@ -25,10 +25,10 @@ class CustomerInlineCreateRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|min:5|max:255',
-            'address' => 'required|min:5|max:255',
-            'city' => 'required|min:5|max:255',
-            'phone' => 'required|min:5|max:255',
+            'name' => 'required|max:255',
+            'address' => 'required|max:255',
+            'city' => 'required|max:255',
+            'phone' => 'required|max:255',
         ];
     }
 

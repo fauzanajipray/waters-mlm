@@ -344,9 +344,4 @@ class TransactionCrudController extends CrudController
         }
     }
 
-    function print(){
-        $pdf = Pdf::loadView('exports.pdf.print-letter-road', []);
-        return $pdf->stream('surat-jalan.pdf');
-        // return view('exports.pdf.print-letter-road', []);
-    }
 }
