@@ -29,6 +29,7 @@ Route::group([
     Route::crud('transaction', 'TransactionCrudController');
     Route::post('transaction/check-customer', 'TransactionCrudController@checkCustomer');
     Route::get('transaction/{id}/download-letter-road', 'TransactionCrudController@downloadLetterRoad');
+    Route::get('transaction/{id}/download-invoice', 'TransactionCrudController@downloadInvoice');
     Route::crud('level', 'LevelCrudController');
     Route::crud('bonus-history', 'BonusHistoryCrudController');
     Route::crud('level-up-histories', 'LevelUpHistoriesCrudController');

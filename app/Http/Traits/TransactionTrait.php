@@ -215,6 +215,16 @@ trait TransactionTrait {
         // return $pdf->stream('surat-jalan.pdf');
     }
 
+    public function downloadInvoice($id){
+
+        $pdf = Pdf::loadView('exports.pdf.print-letter-invoice', [
+            // 'data' => $transaction,
+        ]);
+        // return view('exports.pdf.print-letter-invoice');
+        // return $pdf->download('Surat Jalan '.$transaction->code.'.pdf');
+        return $pdf->stream('surat-invoice.pdf');
+    }
+
     public function checkCustomer(Request $request)
     {
         $customer = Customer::

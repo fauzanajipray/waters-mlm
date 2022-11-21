@@ -77,6 +77,7 @@ class TransactionCrudController extends CrudController
 
         $this->crud->removeButton('update');
         $this->crud->addButtonFromModelFunction('line', 'letter_road', 'letterRoad', 'beginning');
+        $this->crud->addButtonFromModelFunction('line', 'invoice', 'invoice', 'beginning');
 
     }
 
@@ -149,6 +150,7 @@ class TransactionCrudController extends CrudController
                 'create_route' => route("customer-inline-create-save"),
                 'modal_route' => route("customer-inline-create"),
                 'modal_class' => 'modal-dialog modal-lg',
+                'include_main_form_fields' => ['member_id'], // pass certain fields from the main form to the modal, get them with: request('main_form_fields')
             ],
             /// AJAX OPTIONAL
             'dependencies' => ['member_id', 'is_member'],

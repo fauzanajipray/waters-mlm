@@ -35,6 +35,10 @@ class Transaction extends Model
         return '<a href="'. backpack_url('transaction') . '/' . $this->id . '/download-letter-road" class="btn btn-sm btn-link"><i class="la la-print"></i> Download</a>';
     }
 
+    function invoice(){
+        return '<a href="'. backpack_url('transaction') . '/' . $this->id . '/download-invoice" class="btn btn-sm btn-link"><i class="la la-print"></i> Invoice</a>';
+    }
+
     /*
     |--------------------------------------------------------------------------
     | RELATIONS
