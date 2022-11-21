@@ -346,4 +346,14 @@ class TransactionCrudController extends CrudController
         }
     }
 
+    public function show($id)
+    {
+        $this->crud->hasAccessOrFail('show');
+
+        $this->data['entry'] = $this->crud->getEntry($id);
+        $this->data['crud'] = $this->crud;
+        $this->data['crud'] = $this->crud;
+        $this->data['products'] = TransactionProduct::where('transaction_id', $id)->get();
+        return view('transaction.show', $this->data);
+    }
 }

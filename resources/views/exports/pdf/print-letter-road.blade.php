@@ -7,6 +7,9 @@
         <title>Surat Jalan</title>
     </head>
     <style>
+            * {
+                font-size: 9px
+            }
             .td-style{
                 padding:0px;
             }
@@ -35,9 +38,16 @@
                 float:left;
                 width:55%;
             }
+            .panel-left2 {
+                float:left;
+                width:45%;
+            }
             .catatan {
                 border: 1px solid black;
                 padding: 4px;
+            }
+            table td, table td * {
+                vertical-align: top;
             }
     </style>
     <body>
@@ -57,7 +67,7 @@
                     <tr>
                         <td style="width: 160px;">No.Surat Jalan</td>
                         <td>:&nbsp;</td>
-                        <td>-</td>
+                        <td>{{ $data->letter_road_code }}</td>
                     </tr>
                     <tr>
                         <td style="width: 160px;">No.Invoice</td>
@@ -78,25 +88,25 @@
                     </tr>
                 </table>
             </div>
-            <div class="panel-left">
+            <div class="panel-left2">
                 <table>
                     <tr>
-                        <td style="width: 160px;">Nama</td>
+                        <td style="width: 100px;">Nama</td>
                         <td>:&nbsp;</td>
                         <td>{{ $data->customer->name }}</td>
                     </tr>
                     <tr>
-                        <td style="width: 160px;">Alamat</td>
+                        <td style="width: 100px;">Alamat</td>
                         <td>:&nbsp;</td>
                         <td>{{ $data->customer->address }}</td>
                     </tr>
                     <tr>
-                        <td style="width: 160px;">Kota</td>
+                        <td style="width: 100px;">Kota</td>
                         <td>:&nbsp;</td>
                         <td>{{ $data->customer->city }}</td>
                     </tr>
                     <tr>
-                        <td style="width: 160px;">Telp/HP</td>
+                        <td style="width: 100px;">Telp/HP</td>
                         <td>:&nbsp;</td>
                         <td>{{ $data->customer->phone }}</td>
                     </tr>
@@ -134,12 +144,16 @@
                         <center><span>Tanda Terima</span></center>
                         <br/>
                         <br/>
+                        <br/>
+                        <br/>
                         <center>(.......................)</center>
                     </div>
                 </td>
                 <td>
                     <div>
                         <center><span>Driver</span></center>
+                        <br/>
+                        <br/>
                         <br/>
                         <br/>
                         <center>(.......................)</center>
@@ -150,12 +164,16 @@
                         <center><span>Gudang</span></center>
                         <br/>
                         <br/>
+                        <br/>
+                        <br/>
                         <center>(.......................)</center>
                     </div>
                 </td>
                 <td>
                     <div>
                         <center><span>Ekspedisi</span></center>
+                        <br/>
+                        <br/>
                         <br/>
                         <br/>
                         <center>(.......................)</center>
@@ -166,6 +184,8 @@
                         <center><span>Bagian Keuangan</span></center>
                         <br/>
                         <br/>
+                        <br/>
+                        <br/>
                         <center>(.......................)</center>
                     </div>
                 </td>
@@ -173,11 +193,15 @@
         </table>
         <div class="panel-final" style="margin-top: 30px;">
             <div class="panel-left" style="width: 52% !important;">
-                <span>JASA TAMBAHAN :</span><span> -</span>
-                <br/>
-                <span>Ongkos Kirim :</span><span>.......................</span>
-                <br/>
-                <span>Terbilang :</span><span> <i>.......................</i></span>
+                <div class="" style="margin-bottom:12px;">
+                    <span>JASA TAMBAHAN : </span><span> -</span>
+                </div>
+                <div class="" style="margin-bottom:12px;">
+                    <span>Ongkos Kirim : </span><span>.......................</span>
+                </div>
+                <div class="" style="margin-bottom:12px;">
+                    <span>Terbilang : </span><span> <i>.......................</i></span>
+                </div>
             </div>
             <div class="panel-left" style="width: 48% !important;">
                 <div class="catatan" style="text-align: justify;">

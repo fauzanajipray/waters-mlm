@@ -7,6 +7,9 @@
         <title>Surat Invoice</title>
     </head>
     <style>
+            * {
+                font-size: 9px
+            }
             .td-style{
                 padding:0px;
             }
@@ -53,6 +56,17 @@
                 font-size: 10pt;
                 margin-top: 40px;
             }
+            .panel-left2 {
+                float:left;
+                width:45%;
+            }
+            .catatan {
+                border: 1px solid black;
+                padding: 4px;
+            }
+            table td, table td * {
+                vertical-align: top;
+            }
     </style>
     <body>
         <div class="panel-description">
@@ -66,41 +80,41 @@
                     <span>NPWP : 60.351.086.8-509.000</span>
                 </div>
             </div>
-            <div class="panel-left">
+            <div class="panel-left2">
                 KEPADA Yang terhormat,
                 <table>
                     <tr>
                         <td style="width: 70px;">Nama</td>
                         <td>:&nbsp;</td>
-                        <td>--</td>
+                        <td>{{ $transaction->customer->name }}</td>
                     </tr>
                     <tr>
                         <td style="width: 70px;">Alamat</td>
                         <td>:&nbsp;</td>
-                        <td>--</td>
+                        <td>{{ $transaction->customer->address }}</td>
                     </tr>
                     <tr>
                         <td style="width: 70px;">Kota</td>
                         <td>:&nbsp;</td>
-                        <td>--</td>
+                        <td>{{ $transaction->customer->city }}</td>
                     </tr>
                     <tr>
                         <td style="width: 70px;">Telp/HP</td>
                         <td>:&nbsp;</td>
-                        <td>--</td>
+                        <td>{{ $transaction->customer->phone }}</td>
                     </tr>
                 </table>
             </div>
             <div style="clear:both;"></div>
         </div>
-        <div style="margin-top: 9px;">
+        <div style="margin-top: 12px;">
             <div class="panel-left">
-                <span><strong>FAKTUR PENJUALAN</strong> : <span>--</span><br/>
-                <span>Tanggal Kirim : </span><span>--<span><br/>
-                <span>Keterangan : </span><span>--</span><br/>
+                <span><strong>FAKTUR PENJUALAN</strong> : <span>{{ $transaction->code }}</span><br/>
+                <span>Tanggal Kirim : </span><span>{{ $transaction->transaction_date }}<span><br/>
+                <span>Keterangan : </span><span style="border-bottom: 1px solid black; width: 100%;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br/>
             </div>
             <div class="panel-left">
-                <span>Alamat Kirim </span><span>:</span><span>---</span>
+                <span>Alamat Kirim </span><span>:&nbsp;</span><span>{{ $transaction->customer->address }}</span>
             </div>
             <div style="clear:both;"></div>
         </div>
@@ -118,28 +132,32 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>---</td>
-                    <td>---</td>
-                    <td>---</td>
-                    <td>---</td>
-                    <td>---</td>
-                    <td>---</td>
-                    <td>---</td>
-                    <td>---</td>
-                </tr>
+                @foreach ($transaction->transactionProducts as $item)
+                    <tr>
+                        <td>{{ $item->quantity }}</td>
+                        <td>{{ strtoupper($item->name) }}</td>
+                        <td>{{ strtoupper($item->capacity) }}</td>
+                        <td>{{ strtoupper($item->model) }}</td>
+                        <td>{{ number_format($item->price, 2, ',', '.') }}</td>
+                        <td>{{ strtoupper($transaction->member->member_numb) }}</td>
+                        <td>{{ strtoupper($transaction->member->name) }}</td>
+                        <td></td>
+                    </tr>
+                @endforeach
             </tbody>
         </table>
         <table style="width:100%; margin-top:12px;">
             <tr>
                 <td>
                     <div>
-                        Terbilang : ###
+                        <div style="margin-top: 12px;">
+                            <span>Terbilang : </span><span style="border-bottom: 1px solid black; width: 100%;">{{ $transaction->terbilang }}</span>
+                        </div>
                     </div>
                 </td>
                 <td>
-                    <div>
-                        Total : ---
+                    <div style="margin-top: 12px;">
+                        Total : Rp. {{ number_format($transaction->total_price, 2, ',', '.') }}
                     </div>
                 </td>
             </tr>

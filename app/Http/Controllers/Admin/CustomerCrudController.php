@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\CustomerInlineCreateRequest;
-use App\Http\Requests\CustomerRequest;
+use App\Http\Requests\CustomerInlineCreateRequest as InlineCreateRequest;
+use App\Http\Requests\CustomerRequest as StoreRequest;
+use App\Http\Requests\CustomerUpdateRequest as UpdateRequest;
 use App\Models\Customer;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Illuminate\Http\Request;
@@ -66,9 +67,7 @@ class CustomerCrudController extends CrudController
      */
     protected function setupCreateOperation()
     {
-        $this->crud->setValidation(CustomerRequest::class);
-
-        // $this->crud->field('member_id');
+        $this->crud->setValidation(StoreRequest::class);
         $this->crud->addField([
             'name' => 'member_id',
             'type' => 'select2_from_ajax',
@@ -82,14 +81,7 @@ class CustomerCrudController extends CrudController
         $this->crud->field('city');
         $this->crud->field('phone')->type('number');
 
-       
-        // Widget::add()->type('script')->content(asset('assets/js/admin/form/customer.js'));
     }
-
-    // public function store(Request $request)
-    // {   
-    //     dd($request->all());
-    // }
 
     /**
      * Define what happens when the Update operation is loaded.
@@ -100,12 +92,30 @@ class CustomerCrudController extends CrudController
     protected function setupUpdateOperation()
     {
         $this->setupCreateOperation();
+        $this->crud->setValidation(UpdateRequest::class);
+        $this->crud->removeField('member_id');
     }
 
     protected function setupInlineCreateOperation(){
 
-        $this->crud->setValidation(CustomerInlineCreateRequest::class);
-        $this->crud->removeField('is_member');
+        $this->crud->setValidation(InlineCreateRequest::class);
+        $this->crud->removeField('member_id');   
+        $memberID = request('main_form_fields')[0]['value'] ?? 1;
+        $member = Customer::where('member_id', $memberID)->first();
+        $this->crud->addField([
+            'name' => 'member_id',
+            'type' => 'hidden',
+            'value' => $memberID,
+        ]);
+        $this->crud->addField([
+            'name' => 'member_name',
+            'type' => 'text',
+            'value' => $member->name . ' - ' . $member->phone,
+            'attributes' => [
+                'readonly' => 'readonly',
+                'disabled' => 'disabled',
+            ],
+        ])->beforeField('name');
     }
 
     public function customerbyMemberID(Request $request){
@@ -141,4 +151,5 @@ class CustomerCrudController extends CrudController
         }
         return $customers;
     }
+    
 }
