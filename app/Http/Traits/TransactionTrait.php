@@ -12,6 +12,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Prologue\Alerts\Facades\Alert;
+use Nasution\Terbilang;
 
 trait TransactionTrait {
     protected function generateCode() 
@@ -194,10 +195,24 @@ trait TransactionTrait {
         return true;
     }
 
-    public function print(){
-        $pdf = Pdf::loadView('exports.pdf.print-letter-road', []);
-        return $pdf->stream('surat-jalan.pdf');
-        // return view('exports.pdf.print-letter-road', []);
+    public function downloadLetterRoad($id){
+        $transaction = Transaction::with(['transactionProducts', 'member', 'customer'])->find($id);
+        if (!$transaction) {
+            return redirect()->back()->with('error', 'Data tidak ditemukan');
+        }
+        $convert = new Terbilang();
+        $terbilang = $convert->convert($transaction->total_price) . ' rupiah';
+        $transaction->terbilang = ucwords($terbilang);
+
+        // return view('exports.pdf.print-letter-road', [
+        //     'data' => $transaction,
+        // ]);
+
+        $pdf = Pdf::loadView('exports.pdf.print-letter-road', [
+            'data' => $transaction,
+        ]);
+        return $pdf->download('Surat Jalan '.$transaction->code.'.pdf');
+        // return $pdf->stream('surat-jalan.pdf');
     }
 
     public function checkCustomer(Request $request)

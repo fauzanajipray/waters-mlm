@@ -15,6 +15,7 @@
         "laravel/framework": "^9.19",
         "laravel/sanctum": "^3.0",
         "laravel/tinker": "^2.7",
+        "nasution/terbilang": "^0.1.0",
         "venturecraft/revisionable": "^1.39"
     },
     "require-dev": {

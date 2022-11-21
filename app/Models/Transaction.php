@@ -32,7 +32,7 @@ class Transaction extends Model
     */
 
     function letterRoad(){
-        return '<a href="'.url('/transaction/print').'" class="btn btn-sm btn-link"><i class="la la-print"></i> Download</a>';
+        return '<a href="'. backpack_url('transaction') . '/' . $this->id . '/download-letter-road" class="btn btn-sm btn-link"><i class="la la-print"></i> Download</a>';
     }
 
     /*

@@ -27,8 +27,8 @@ Route::group([
     Route::crud('permission', 'PermissionCrudController');
     Route::crud('product', 'ProductCrudController');
     Route::crud('transaction', 'TransactionCrudController');
-    Route::get('transaction/print', 'TransactionCrudController@print');
     Route::post('transaction/check-customer', 'TransactionCrudController@checkCustomer');
+    Route::get('transaction/{id}/download-letter-road', 'TransactionCrudController@downloadLetterRoad');
     Route::crud('level', 'LevelCrudController');
     Route::crud('bonus-history', 'BonusHistoryCrudController');
     Route::crud('level-up-histories', 'LevelUpHistoriesCrudController');

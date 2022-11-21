@@ -44,7 +44,7 @@
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 5px;">
             <tr>
                 <td style="width: 55%; padding: 0px;"><h3 style="margin:0px; padding-left:3px;">SURAT JALAN</h3></td>
-                <td>Semarang, 07-12-2022</td>
+                <td>Semarang, {{ now()->format('d-m-Y') }}</td>
             </tr>
             <tr>
                 <td style="width: 55%; border:1px;"></td>
@@ -57,24 +57,24 @@
                     <tr>
                         <td style="width: 160px;">No.Surat Jalan</td>
                         <td>:&nbsp;</td>
-                        <td>83928392839</td>
+                        <td>-</td>
                     </tr>
                     <tr>
                         <td style="width: 160px;">No.Invoice</td>
                         <td>:&nbsp;</td>
-                        <td>83928392839-777788-5576544898989</td>
+                        <td>{{ $data->code }}</td>
                     </tr>
                 </table>
                 <table>
                     <tr>
                         <td style="width: 160px;">Tanggal Pengiriman</td>
                         <td>:&nbsp;</td>
-                        <td>12/12/2022</td>
+                        <td>{{ $data->transaction_date }}</td>
                     </tr>
                     <tr>
                         <td style="width: 160px;">Almat. kirim</td>
                         <td>:&nbsp;</td>
-                        <td>Jl.sadewo wahono</td>
+                        <td>{{ $data->customer->address }}</td>
                     </tr>
                 </table>
             </div>
@@ -83,22 +83,22 @@
                     <tr>
                         <td style="width: 160px;">Nama</td>
                         <td>:&nbsp;</td>
-                        <td>Budi sedianto</td>
+                        <td>{{ $data->customer->name }}</td>
                     </tr>
                     <tr>
                         <td style="width: 160px;">Alamat</td>
                         <td>:&nbsp;</td>
-                        <td>Jl. ki parang kusuma</td>
+                        <td>{{ $data->customer->address }}</td>
                     </tr>
                     <tr>
                         <td style="width: 160px;">Kota</td>
                         <td>:&nbsp;</td>
-                        <td>Meikarta</td>
+                        <td>{{ $data->customer->city }}</td>
                     </tr>
                     <tr>
                         <td style="width: 160px;">Telp/HP</td>
                         <td>:&nbsp;</td>
-                        <td>0898893792839</td>
+                        <td>{{ $data->customer->phone }}</td>
                     </tr>
                 </table>
             </div>
@@ -115,20 +115,16 @@
                 </tr>
             </thead>
             <tbody>
+                {{-- {{ dd($data->transactionProducts) }} --}}
+                @foreach ($data->transactionProducts as $item)
                 <tr>
-                    <td>2</td>
-                    <td>WATERS BIO MINERAL POT</td>
-                    <td>22 LITER</td>
-                    <td>BMP 3000</td>
+                    <td>{{ $item->quantity }}</td>
+                    <td>{{ strtoupper($item->name) }}</td>
+                    <td>{{ strtoupper($item->capacity) }}</td>
+                    <td>{{ strtoupper($item->model) }}</td>
                     <td></td>
                 </tr>
-                <tr>
-                    <td>12</td>
-                    <td>WATERS BIO POT</td>
-                    <td>23 LITER</td>
-                    <td>BMP 349</td>
-                    <td></td>
-                </tr>
+                @endforeach
             </tbody>
         </table>
         <table style="width:100%; margin-top:30px;">
@@ -179,9 +175,9 @@
             <div class="panel-left" style="width: 52% !important;">
                 <span>JASA TAMBAHAN :</span><span> -</span>
                 <br/>
-                <span>Ongkos Kirim :</span><span> Rp. 19090</span>
+                <span>Ongkos Kirim :</span><span>.......................</span>
                 <br/>
-                <span>Terbilang :</span><span> <i>Sembilan Belas Ribu Sembilan Puluh Rupiah</i></span>
+                <span>Terbilang :</span><span> <i>.......................</i></span>
             </div>
             <div class="panel-left" style="width: 48% !important;">
                 <div class="catatan" style="text-align: justify;">
