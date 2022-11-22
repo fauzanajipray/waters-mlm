@@ -3,6 +3,7 @@ namespace App\Http\Traits;
 
 use App\Http\Requests\MemberRequest;
 use App\Models\BonusHistory;
+use App\Models\Configuration;
 use App\Models\Level;
 use App\Models\Member;
 use App\Models\User;
@@ -163,7 +164,9 @@ trait MemberTrait {
 
     function downloadFormRegister(){
         // $view = view('exports.pdf.print-letter-form-register', []);
-        $pdf = Pdf::loadView('exports.pdf.print-letter-form-register', [
+        $registrationPayment = Configuration::where('key', 'activation_payment_amount')->first()->value;
+        $pdf = Pdf::loadView('exports.pdf.print-letter-form-register-blank', [
+            'payment' => $registrationPayment
         ]);
 
         // return view('exports.pdf.print-letter-form-register');
@@ -171,12 +174,19 @@ trait MemberTrait {
         return $pdf->stream('form-registrasi-member.pdf');
     }
 
-    function downloadFormLineRegister(){
-        // $view = view('exports.pdf.print-letter-form-register', []);
+    function downloadFormLineRegister($id){
+        $data = Member::with('upline')->where('id', $id)->first();
+        $registrationPayment = Configuration::where('key', 'activation_payment_amount')->first()->value;
+        
         $pdf = Pdf::loadView('exports.pdf.print-letter-form-register', [
+            'data' => $data,
+            'payment' => $registrationPayment,
         ]);
 
-        // return view('exports.pdf.print-letter-form-register');
+        // return view('exports.pdf.print-letter-form-register', [
+        //     'data' => $data,
+        //     'payment' => $registrationPayment,
+        // ]);
         // return $pdf->download('Surat Jalan '.$transaction->code.'.pdf');
         return $pdf->stream('form-registrasi-member.pdf');
     }

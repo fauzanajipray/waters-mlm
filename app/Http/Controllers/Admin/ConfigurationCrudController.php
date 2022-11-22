@@ -141,11 +141,9 @@ class ConfigurationCrudController extends CrudController
         if ($this->data['entry']->key == 'activation_payment_amount') {
             $this->crud->modifyField('value', [
                 'prefix' => 'Rp .',
-                'type' => 'number',
+                'type' => 'number_format',
             ]);
         }
-
-
         return view('crud::edit', $this->data);
     }
 }

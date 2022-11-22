@@ -85,7 +85,6 @@
                     </table>
                 </div>
             </div>
-            {{-- {{ dd($payment) }} --}}
             <div class="panel-left" style="padding-left: 100px; padding-top: 40px;">
                 <img src="{{ public_path() . '/images/llogo-waters.jpg'}}" width="120"/> 
                 <div class="starter-kit">
@@ -105,38 +104,38 @@
                     <div id="find-body" style="padding-left: 86px;">
                         <div class="line">
                             <div class="box label">1. Nama</div>
-                            <div class="box bot">:&nbsp;</div>
-                            <div class="box val">{{ $data->name }}</div>
+                            <div class="box bot">:</div>
+                            <div class="box val"></div>
                             <div style="clear: both;"></div>
                         </div>
                         <div class="line">
                             <div class="box label">2. Jenis Kelamin</div>
-                            <div class="box bot">:&nbsp;</div>
-                            <div class="box val">{{ ($data->gender == "M") ? 'Laki-laki' : 'Perempuan' }}</div>
+                            <div class="box bot">:</div>
+                            <div class="box val"></div>
                             <div style="clear: both;"></div>
                         </div>
                         <div class="line">
                             <div class="box label">3. Tanggal Lahir</div>
-                            <div class="box bot">:&nbsp;</div>
-                            <div class="box val">{{ $data->dob }}</div>
+                            <div class="box bot">:</div>
+                            <div class="box val"></div>
                             <div style="clear: both;"></div>
                         </div>
                         <div class="line">
                             <div class="box label">4. Mobile Phone</div>
-                            <div class="box bot">:&nbsp;</div>
-                            <div class="box val">{{ $data->phone }}</div>
+                            <div class="box bot">:</div>
+                            <div class="box val"></div>
                             <div style="clear: both;"></div>
                         </div>
                         <div class="line">
                             <div class="box label">5. Email</div>
-                            <div class="box bot">:&nbsp;</div>
-                            <div class="box val">{{ $data->email }}</div>
+                            <div class="box bot">:</div>
+                            <div class="box val"></div>
                             <div style="clear: both;"></div>
                         </div>
                         <div class="line">
                             <div class="box label">6. Alamat</div>
-                            <div class="box bot">:&nbsp;</div>
-                            <div class="box val">{{ $data->address }}</div>
+                            <div class="box bot">:</div>
+                            <div class="box val"></div>
                             <div style="clear: both;"></div>
                         </div>
                         <div class="line">
@@ -154,14 +153,14 @@
                         </div>
                         <div class="line">
                             <div class="box label">7. Upline</div>
-                            <div class="box bot">:&nbsp;</div>
-                            <div class="box val">{{ $data->upline->name ?? '-' }}</div>
+                            <div class="box bot">:</div>
+                            <div class="box val"></div>
                             <div style="clear: both;"></div>
                         </div>
                         <div class="line">
-                            <div class="box label">8. Unique Number</div>
-                            <div class="box bot">:&nbsp;</div>
-                            <div class="box val">{{ $data->upline->member_numb ?? '-' }}</div>
+                            <div class="box label">8. Unigue Number</div>
+                            <div class="box bot">:</div>
+                            <div class="box val"></div>
                             <div style="clear: both;"></div>
                         </div>
                     </div>

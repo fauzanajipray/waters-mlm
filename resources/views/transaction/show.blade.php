@@ -117,13 +117,13 @@
                                 <td>{{ $item->name }}</td>
                                 <td>{{ $item->capacity }}</td>
                                 <td>{{ $item->model }}</td>
-                                <td>{{ number_format($item->price) }}</td>
-                                <td>{{ number_format($item->price * $item->quantity) }}</td>
+                                <td>Rp.{{ number_format($item->price, 2, ',', '.') }}</td>
+                                <td>Rp.{{ number_format($item->price * $item->quantity, 2, ',', '.') }}</td>
                             </tr>
                         @endforeach
                         <tr>
                             <td colspan="5" style="text-align: right; font-weight: bold;">Total</td>
-                            <td>{{ number_format($entry->total_price) }}</td>
+                            <td>Rp. {{ number_format($entry->total_price, 2, ',', '.') }}</td>
                         </tr>
                     </tbody>
                 </table>

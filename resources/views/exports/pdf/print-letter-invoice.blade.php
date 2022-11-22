@@ -133,34 +133,32 @@
             </thead>
             <tbody>
                 @foreach ($transaction->transactionProducts as $item)
-                    <tr>
-                        <td>{{ $item->quantity }}</td>
-                        <td>{{ strtoupper($item->name) }}</td>
-                        <td>{{ strtoupper($item->capacity) }}</td>
-                        <td>{{ strtoupper($item->model) }}</td>
-                        <td>{{ number_format($item->price, 2, ',', '.') }}</td>
-                        <td>{{ strtoupper($transaction->member->member_numb) }}</td>
-                        <td>{{ strtoupper($transaction->member->name) }}</td>
-                        <td></td>
-                    </tr>
+                <tr>
+                    <td>{{ $item->quantity }}</td>
+                    <td>{{ strtoupper($item->name) }}</td>
+                    <td>{{ strtoupper($item->capacity) }}</td>
+                    <td>{{ strtoupper($item->model) }}</td>
+                    <td>Rp.{{ number_format($item->price, 2, ',', '.') }}</td>
+                    <td>{{ strtoupper($transaction->member->member_numb) }}</td>
+                    <td>{{ strtoupper($transaction->member->name) }}</td>
+                    <td></td>
+                </tr>
                 @endforeach
-            </tbody>
-        </table>
-        <table style="width:100%; margin-top:12px;">
-            <tr>
-                <td>
-                    <div>
-                        <div style="margin-top: 12px;">
-                            <span>Terbilang : </span><span style="border-bottom: 1px solid black; width: 100%;">{{ $transaction->terbilang }}</span>
+                <tr style="border: none !important;">
+                    <td style="border: none !important;" colspan="3">
+                        <div>
+                            <div style="margin-top: 12px;">
+                                <span>Terbilang : </span><span style="border-bottom: 1px solid black; width: 100%;">{{ $transaction->terbilang }}</span>
+                            </div>
                         </div>
-                    </div>
-                </td>
-                <td>
-                    <div style="margin-top: 12px;">
-                        Total : Rp. {{ number_format($transaction->total_price, 2, ',', '.') }}
-                    </div>
-                </td>
-            </tr>
+                    </td>
+                    <td style="border: none !important;" colspan="5">
+                        <div style="margin-top: 12px;">
+                            TOTAL : Rp. {{ number_format($transaction->total_price, 2, ',', '.') }}
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
         </table>
         <table id="keuangan">
             <tr>
