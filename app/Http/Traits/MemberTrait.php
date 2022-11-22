@@ -160,5 +160,25 @@ trait MemberTrait {
         }
         return true;
     }
+
+    function downloadFormRegister(){
+        // $view = view('exports.pdf.print-letter-form-register', []);
+        $pdf = Pdf::loadView('exports.pdf.print-letter-form-register', [
+        ]);
+
+        // return view('exports.pdf.print-letter-form-register');
+        // return $pdf->download('Surat Jalan '.$transaction->code.'.pdf');
+        return $pdf->stream('form-registrasi-member.pdf');
+    }
+
+    function downloadFormLineRegister(){
+        // $view = view('exports.pdf.print-letter-form-register', []);
+        $pdf = Pdf::loadView('exports.pdf.print-letter-form-register', [
+        ]);
+
+        // return view('exports.pdf.print-letter-form-register');
+        // return $pdf->download('Surat Jalan '.$transaction->code.'.pdf');
+        return $pdf->stream('form-registrasi-member.pdf');
+    }
 }
 
