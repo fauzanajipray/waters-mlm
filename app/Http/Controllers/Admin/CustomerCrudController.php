@@ -7,7 +7,10 @@ use App\Http\Requests\CustomerRequest as StoreRequest;
 use App\Http\Requests\CustomerUpdateRequest as UpdateRequest;
 use App\Models\Customer;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
+use Backpack\CRUD\app\Library\Widget;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Prologue\Alerts\Facades\Alert;
 
 /**
  * Class CustomerCrudController
@@ -52,11 +55,9 @@ class CustomerCrudController extends CrudController
         $this->crud->column('created_at');
         $this->crud->column('updated_at');
 
-        /**
-         * Columns can be defined using the fluent syntax or array syntax:
-         * - $this->crud->column('price')->type('number');
-         * - $this->crud->addColumn(['name' => 'price', 'type' => 'number']); 
-         */
+        $this->crud->addButtonFromModelFunction('line', 'deleteButton', 'deleteButton', 'end');
+        
+        Widget::add()->type('script')->content(asset('assets/js/admin/form/customer.js'));
     }
 
     /**
@@ -162,29 +163,27 @@ class CustomerCrudController extends CrudController
         return $customers;
     }
 
-    // public function destroy($id){
-    //     $customer = Customer::with('transactions')
-    //         ->where('id', $id)
-    //         ->where('is_member', '0') 
-    //         ->first();
-    //     if($customer->transactions->count() > 0){
-    //         dd('Customer has transactions');
-    //         return response()->json([
-    //             'status' => false,
-    //             'message' => 'Customer has transactions'
-    //         ]);
-    //     } else {
-    //         // dd($customer);
-    //         $customer->delete();
-    //         return response()->json([
-    //             'status' => true,
-    //             'message' => 'Customer deleted'
-    //         ]);
-    //     }
-    //     // $customer->delete();
-    //     dd($customer);
-    //     return redirect()->back();
-    // }
+    public function deleteCustomer($id){
+        DB::beginTransaction();
+        try {
+            $customer = Customer::with('transactions')
+                ->where('id', $id)
+                ->where('is_member', '0') 
+                ->first();
+            if($customer->transactions->count() > 0){
+                Alert::error('Customer has transactions');
+                return redirect()->back()->with('error', 'Customer has transactions, not allowed to delete');
+            } 
+            $customer->delete();
+            DB::commit();
+            Alert::success('Customer deleted');
+            return redirect()->back();
+        } catch (\Exception $e) {
+            DB::rollback();
+            Alert::error($e->getMessage());
+            return redirect()->back()->with('error', 'Something went wrong');
+        }
+    }
    
     public function getCustomerIsMember(Request $request)
     {

@@ -237,7 +237,7 @@ class MemberSeeder extends Seeder
             'name' => fake()->name(),
             'address' => fake()->address(),
             'city' => fake()->city(),
-            'phone' => fake()->phoneNumber(),
+            'phone' => fake()->numerify('0###########'),
             'member_id' => fake()->numberBetween(1, 7),
         ]);
 
@@ -249,7 +249,7 @@ class MemberSeeder extends Seeder
                 'name' => fake()->name(),
                 'address' => fake()->address(),
                 'city' => fake()->city(),
-                'phone' => fake()->phoneNumber(),
+                'phone' => fake()->numerify('0###########'),
                 'member_id' => fake()->numberBetween(1, 7),
             ]);
         }
