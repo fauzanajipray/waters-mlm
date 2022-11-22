@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\CustomerInlineCreateRequest;
-use App\Http\Requests\CustomerRequest;
+use App\Http\Requests\CustomerInlineCreateRequest as InlineCreateRequest;
+use App\Http\Requests\CustomerRequest as StoreRequest;
+use App\Http\Requests\CustomerUpdateRequest as UpdateRequest;
 use App\Models\Customer;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
+use Backpack\CRUD\app\Library\Widget;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Prologue\Alerts\Facades\Alert;
 
 /**
  * Class CustomerCrudController
@@ -51,11 +55,9 @@ class CustomerCrudController extends CrudController
         $this->crud->column('created_at');
         $this->crud->column('updated_at');
 
-        /**
-         * Columns can be defined using the fluent syntax or array syntax:
-         * - $this->crud->column('price')->type('number');
-         * - $this->crud->addColumn(['name' => 'price', 'type' => 'number']); 
-         */
+        $this->crud->addButtonFromModelFunction('line', 'deleteButton', 'deleteButton', 'end');
+        
+        Widget::add()->type('script')->content(asset('assets/js/admin/form/customer.js'));
     }
 
     /**
@@ -66,9 +68,7 @@ class CustomerCrudController extends CrudController
      */
     protected function setupCreateOperation()
     {
-        $this->crud->setValidation(CustomerRequest::class);
-
-        // $this->crud->field('member_id');
+        $this->crud->setValidation(StoreRequest::class);
         $this->crud->addField([
             'name' => 'member_id',
             'type' => 'select2_from_ajax',
@@ -82,14 +82,7 @@ class CustomerCrudController extends CrudController
         $this->crud->field('city');
         $this->crud->field('phone')->type('number');
 
-       
-        // Widget::add()->type('script')->content(asset('assets/js/admin/form/customer.js'));
     }
-
-    // public function store(Request $request)
-    // {   
-    //     dd($request->all());
-    // }
 
     /**
      * Define what happens when the Update operation is loaded.
@@ -100,12 +93,40 @@ class CustomerCrudController extends CrudController
     protected function setupUpdateOperation()
     {
         $this->setupCreateOperation();
+        $this->crud->setValidation(UpdateRequest::class);
+        $this->crud->removeField('member_id');
+        $customer = $this->crud->getCurrentEntry();
+        $this->crud->addField([
+            'name' => 'member_name',
+            'type' => 'text',
+            'label' => 'Member',
+            'value' => $customer->member->name . ' - ' . $customer->member->phone,
+            'attributes' => [
+                'disabled' => 'disabled'
+            ]
+        ])->beforeField('name');
     }
-
+    
     protected function setupInlineCreateOperation(){
 
-        $this->crud->setValidation(CustomerInlineCreateRequest::class);
-        $this->crud->removeField('is_member');
+        $this->crud->setValidation(InlineCreateRequest::class);
+        $this->crud->removeField('member_id');   
+        $memberID = request('main_form_fields')[0]['value'] ?? 1;
+        $member = Customer::where('member_id', $memberID)->first();
+        $this->crud->addField([
+            'name' => 'member_id',
+            'type' => 'hidden',
+            'value' => $memberID,
+        ]);
+        $this->crud->addField([
+            'name' => 'member_name',
+            'type' => 'text',
+            'value' => $member->name . ' - ' . $member->phone,
+            'attributes' => [
+                'readonly' => 'readonly',
+                'disabled' => 'disabled',
+            ],
+        ])->beforeField('name');
     }
 
     public function customerbyMemberID(Request $request){
@@ -140,5 +161,46 @@ class CustomerCrudController extends CrudController
             });
         }
         return $customers;
+    }
+
+    public function deleteCustomer($id){
+        DB::beginTransaction();
+        try {
+            $customer = Customer::with('transactions')
+                ->where('id', $id)
+                ->where('is_member', '0') 
+                ->first();
+            if($customer->transactions->count() > 0){
+                Alert::error('Customer has transactions');
+                return redirect()->back()->with('error', 'Customer has transactions, not allowed to delete');
+            } 
+            $customer->delete();
+            DB::commit();
+            Alert::success('Customer deleted');
+            return redirect()->back();
+        } catch (\Exception $e) {
+            DB::rollback();
+            Alert::error($e->getMessage());
+            return redirect()->back()->with('error', 'Something went wrong');
+        }
+    }
+   
+    public function getCustomerIsMember(Request $request)
+    {
+        $customer = Customer::
+            where('member_id', $request->member_id)
+            ->where('is_member', 1)
+            ->first();
+        if ($customer) {
+            return response()->json([
+                'status' => true,
+                'data' => $customer->address,
+            ]);
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => 'Customer not found!',
+            ]);
+        }
     }
 }

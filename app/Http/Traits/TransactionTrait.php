@@ -200,29 +200,34 @@ trait TransactionTrait {
         if (!$transaction) {
             return redirect()->back()->with('error', 'Data tidak ditemukan');
         }
-        $convert = new Terbilang();
-        $terbilang = $convert->convert($transaction->total_price) . ' rupiah';
-        $transaction->terbilang = ucwords($terbilang);
-
+        $transaction->letter_road_code = str_replace('INV', 'LRD', $transaction->code);
+        $pdf = Pdf::loadView('exports.pdf.print-letter-road', [
+            'data' => $transaction,
+        ]);
+        return $pdf->stream('Surat Jalan '.$transaction->code.'.pdf');
         // return view('exports.pdf.print-letter-road', [
         //     'data' => $transaction,
         // ]);
 
-        $pdf = Pdf::loadView('exports.pdf.print-letter-road', [
-            'data' => $transaction,
-        ]);
-        return $pdf->download('Surat Jalan '.$transaction->code.'.pdf');
-        // return $pdf->stream('surat-jalan.pdf');
+        // return $pdf->download('Surat Jalan '.$transaction->code.'.pdf');
     }
 
     public function downloadInvoice($id){
-
+        $transaction = Transaction::with(['transactionProducts', 'customer', 'member'])->find($id);
+        if (!$transaction) {
+            return redirect()->back()->with('error', 'Data tidak ditemukan');
+        }
+        $convert = new Terbilang();
+        $terbilang = $convert->convert($transaction->total_price) . ' rupiah';
+        $transaction->terbilang = ucwords($terbilang);
         $pdf = Pdf::loadView('exports.pdf.print-letter-invoice', [
-            // 'data' => $transaction,
+            'transaction' => $transaction,
         ]);
-        // return view('exports.pdf.print-letter-invoice');
+        return $pdf->stream('Invoice '.$transaction->code.'.pdf');
+        // return view('exports.pdf.print-letter-invoice', [
+        //     'transaction' => $transaction,
+        // ]);
         // return $pdf->download('Surat Jalan '.$transaction->code.'.pdf');
-        return $pdf->stream('surat-invoice.pdf');
     }
 
     public function checkCustomer(Request $request)

@@ -21,4 +21,9 @@ class Customer extends Model
     public function member(){
         return $this->belongsTo(Member::class, 'member_id');
     }
+
+
+    public function deleteButton(){
+        return '<a href="'. backpack_url('customer') . '/' . $this->id . '/delete" class="btn btn-sm btn-link btn-delete-customer"><i class="la la-trash"></i> Delete</a>';
+    }
 }

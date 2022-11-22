@@ -23,6 +23,14 @@
 @section('content')
   {{-- Default box --}}
   <div class="row">
+    {{-- Error Session --}}
+    @if (session()->has('error'))
+      <div class="col-md-12">
+        <div class="alert alert-danger">
+          {{ session()->get('error') }}
+        </div>
+      </div>
+    @endif
 
     {{-- THE ACTUAL CONTENT --}}
     <div class="{{ $crud->getListContentClass() }}">
@@ -176,8 +184,10 @@
 @endsection
 
 @section('after_scripts')
+  <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   @include('crud::inc.datatables_logic')
 
   {{-- CRUD LIST CONTENT - crud_list_scripts stack --}}
   @stack('crud_list_scripts')
+
 @endsection
