@@ -44,15 +44,11 @@
                             <td>{{ $entry->transaction_date }}</td>
                         </tr>
                         <tr>
-                            <th>Invoice Code</th>
-                            <td>{{ $entry->code }}</td>
-                        </tr>
-                        <tr>
                             <th>Shipping Address</th>
                             <td>{{ $entry->shipping_address ?? '-'  }}</td>
                         </tr>
                         <tr>
-                            <th>Member</th>
+                            <th>Unique Member</th>
                             <td>{{ $entry->member_numb }}</td>
                         </tr>
                         <tr>
@@ -121,13 +117,13 @@
                                 <td>{{ $item->name }}</td>
                                 <td>{{ $item->capacity }}</td>
                                 <td>{{ $item->model }}</td>
-                                <td>{{ $item->price }}</td>
-                                <td>{{ $item->price * $item->quantity }}</td>
+                                <td>{{ number_format($item->price) }}</td>
+                                <td>{{ number_format($item->price * $item->quantity) }}</td>
                             </tr>
                         @endforeach
                         <tr>
                             <td colspan="5" style="text-align: right; font-weight: bold;">Total</td>
-                            <td>{{ $entry->total_price }}</td>
+                            <td>{{ number_format($entry->total_price) }}</td>
                         </tr>
                     </tbody>
                 </table>
