@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
         $this->product();
         $this->level();
         $this->call(MemberSeeder::class);
+        $this->call(ConfigurationSeeder::class);
     }
 
     private function user()

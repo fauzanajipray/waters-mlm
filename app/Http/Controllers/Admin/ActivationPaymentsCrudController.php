@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\ActivationPaymentsRequest;
 use App\Models\ActivationPayments;
+use App\Models\Configuration;
 use App\Models\Member;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
@@ -84,7 +85,17 @@ class ActivationPaymentsCrudController extends CrudController
             'data_source' => url('members/not-activated'),
             'placeholder' => 'Select a member',
         ]);
-        $this->crud->field('total')->label('Total Payment')->type('number_format')->prefix('Rp. ');
+        $paymentAmount = Configuration::where('key', 'activation_payment_amount')->first()->value;
+        $this->crud->addField([
+            'name' => 'total',
+            'type' => 'number_format',
+            'label' => 'Total',
+            'attributes' => [
+                'readonly' => 'readonly',
+            ],
+            'prefix' => 'Rp. ',
+            'default' => $paymentAmount,
+        ]);
     }
 
     /**
@@ -119,16 +130,18 @@ class ActivationPaymentsCrudController extends CrudController
     {
         $code = $this->generateCode();
         $request->merge(['code' => $code]);
+
         DB::beginTransaction();
         try {
             // Add To Activation Payments
             $activationPayment = ActivationPayments::create($request->all());
             // Update Member Expired at + 2 Years
             $member = $activationPayment->member;
+            $config = Configuration::where('key', 'activation_payment_expiration')->first();
             if($member->expired_at){
-                $member->expired_at = date('Y-m-d', strtotime($member->expired_at . ' + 2 years'));
+                $member->expired_at = date('Y-m-d', strtotime($member->expired_at . ' + '. $config->value .'years'));
             } else {
-                $member->expired_at = date('Y-m-d', strtotime(now() . ' + 2 years'));
+                $member->expired_at = date('Y-m-d', strtotime($request->payment_date . ' + '. $config->value .'years'));
             }
             $member->save();
             Alert::success('Success', 'Activation Payment Created');
@@ -157,7 +170,8 @@ class ActivationPaymentsCrudController extends CrudController
         try {
             $activationPayment = ActivationPayments::where('id', $id)->first();
             $member = Member::find($activationPayment->member_id);
-            $expired_at = date('Y-m-d', strtotime($member->expired_at . ' - 2 years'));
+            $config = Configuration::where('key', 'activation_payment_expiration')->first();
+            $expired_at = date('Y-m-d', strtotime($member->expired_at . ' - '. $config->value .' years'));
             if($expired_at < now()){
                 $expired_at = null;
             }

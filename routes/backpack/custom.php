@@ -38,4 +38,5 @@ Route::group([
     Route::get('customer/{id}/delete', 'CustomerCrudController@deleteCustomer');
     Route::post('customer/get-customer-by-member-id', 'CustomerCrudController@customerbyMemberID');
     Route::post('customer/get-customer-is-member', 'CustomerCrudController@getCustomerIsMember');
+    Route::crud('configuration', 'ConfigurationCrudController');
 }); // this should be the absolute last line of this file
