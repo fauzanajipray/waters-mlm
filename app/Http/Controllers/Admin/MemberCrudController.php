@@ -99,8 +99,10 @@ class MemberCrudController extends CrudController
         ]);
 
         // TODO : Add this buttons
+        $this->crud->addButtonFromModelFunction('line', 'line_register', 'line_register', 'beginning');
         $this->crud->addButtonFromModelFunction('line', 'cardMember', 'cardMember', 'beginning');
         $this->crud->addButtonFromModelFunction('line', 'reportMember', 'reportMember', 'beginning');
+        $this->crud->addButtonFromModelFunction('top', 'register', 'register', 'end');
         // $this->crud->addButtonFromModelFunction('line', 'addTransaction', 'addTransaction', 'beginning');
     }
 

@@ -49,6 +49,14 @@ class Member extends Model
         return '<a href="' . backpack_url('transaction') . '/create?member_id=' . $this->id . '" class="btn btn-sm btn-link"><i class="la la-plus"></i> Add Transaction</a>';
     }
 
+    function register(){
+        return '<a href="'.backpack_url('member').'/register-form" class="btn btn-primary" data-style="zoom-in"><span class="ladda-label"><i class="la la-print"></i> Print Form Register</span></a>';
+    }
+
+    function line_register(){
+        return '<a href="' . backpack_url('member') . '/' . $this->id . '/download-register" target="_blank" class="btn btn-sm btn-link"><i class="la la-print"></i> Register</a>';
+    }
+
     /*
     |--------------------------------------------------------------------------
     | RELATIONS
