@@ -36,4 +36,5 @@ Route::group([
     Route::crud('activation-payments', 'ActivationPaymentsCrudController');
     Route::crud('customer', 'CustomerCrudController');
     Route::post('customer/get-customer-by-member-id', 'CustomerCrudController@customerbyMemberID');
+    Route::post('customer/get-customer-is-member', 'CustomerCrudController@getCustomerIsMember');
 }); // this should be the absolute last line of this file

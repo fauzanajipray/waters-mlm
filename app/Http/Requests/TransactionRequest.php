@@ -30,6 +30,7 @@ class TransactionRequest extends FormRequest
             'products' => 'required|array',
             'products.*.product_id' => 'required|exists:products,id',
             'products.*.quantity' => 'required|numeric|min:1',
+            'shipping_address' => 'required|max:255',
         ];
     }
 

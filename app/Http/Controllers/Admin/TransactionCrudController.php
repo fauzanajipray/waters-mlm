@@ -157,6 +157,16 @@ class TransactionCrudController extends CrudController
             'data_source' => url('customer/get-customer-by-member-id'),
             'placeholder' => 'Select a customer',
         ]);
+        
+        $this->crud->addField([
+            'name' => 'shipping_address',
+            'type' => 'textarea',
+            'label' => 'Shipping Address',
+            'attributes' => [
+                'rows' => 3,
+            ],
+            'dependecies' => ['customer_id']
+        ]);
 
         $this->crud->addField([
             'name' => 'is_member',
@@ -292,6 +302,8 @@ class TransactionCrudController extends CrudController
                 } else {
                     $errors['customer_id'] = 'Customer not found';
                 }
+            } else if (!$requests['customer_id']) {
+                $errors['customer_id'] = 'Customer is required';
             }
             if (isset($errors)) return redirect()->back()->withErrors($errors)->withInput();
             $member = Member::with(['upline' => function($query) {

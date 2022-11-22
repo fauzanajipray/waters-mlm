@@ -114,7 +114,7 @@
                 <span>Keterangan : </span><span style="border-bottom: 1px solid black; width: 100%;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br/>
             </div>
             <div class="panel-left">
-                <span>Alamat Kirim </span><span>:&nbsp;</span><span>{{ $transaction->customer->address }}</span>
+                <span>Alamat Kirim </span><span>:&nbsp;</span><span>{{ $transaction->shipping_address ?? '-' }}</span>
             </div>
             <div style="clear:both;"></div>
         </div>

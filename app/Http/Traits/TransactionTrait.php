@@ -201,15 +201,15 @@ trait TransactionTrait {
             return redirect()->back()->with('error', 'Data tidak ditemukan');
         }
         $transaction->letter_road_code = str_replace('INV', 'LRD', $transaction->code);
+        $pdf = Pdf::loadView('exports.pdf.print-letter-road', [
+            'data' => $transaction,
+        ]);
+        return $pdf->stream('Surat Jalan '.$transaction->code.'.pdf');
         // return view('exports.pdf.print-letter-road', [
         //     'data' => $transaction,
         // ]);
 
-        $pdf = Pdf::loadView('exports.pdf.print-letter-road', [
-            'data' => $transaction,
-        ]);
-        return $pdf->download('Surat Jalan '.$transaction->code.'.pdf');
-        // return $pdf->stream('surat-jalan.pdf');
+        // return $pdf->download('Surat Jalan '.$transaction->code.'.pdf');
     }
 
     public function downloadInvoice($id){
@@ -223,11 +223,11 @@ trait TransactionTrait {
         $pdf = Pdf::loadView('exports.pdf.print-letter-invoice', [
             'transaction' => $transaction,
         ]);
+        return $pdf->stream('Invoice '.$transaction->code.'.pdf');
         // return view('exports.pdf.print-letter-invoice', [
         //     'transaction' => $transaction,
         // ]);
-        return $pdf->download('Surat Jalan '.$transaction->code.'.pdf');
-        // return $pdf->stream('surat-invoice.pdf');
+        // return $pdf->download('Surat Jalan '.$transaction->code.'.pdf');
     }
 
     public function checkCustomer(Request $request)

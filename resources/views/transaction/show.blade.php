@@ -48,6 +48,10 @@
                             <td>{{ $entry->code }}</td>
                         </tr>
                         <tr>
+                            <th>Shipping Address</th>
+                            <td>{{ $entry->shipping_address ?? '-'  }}</td>
+                        </tr>
+                        <tr>
                             <th>Member</th>
                             <td>{{ $entry->member_numb }}</td>
                         </tr>

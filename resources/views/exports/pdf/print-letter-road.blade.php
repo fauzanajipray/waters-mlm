@@ -84,7 +84,7 @@
                     <tr>
                         <td style="width: 160px;">Almat. kirim</td>
                         <td>:&nbsp;</td>
-                        <td>{{ $data->customer->address }}</td>
+                        <td>{{ $data->shipping_address ?? '-' }}</td>
                     </tr>
                 </table>
             </div>

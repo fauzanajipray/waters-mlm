@@ -94,8 +94,18 @@ class CustomerCrudController extends CrudController
         $this->setupCreateOperation();
         $this->crud->setValidation(UpdateRequest::class);
         $this->crud->removeField('member_id');
+        $customer = $this->crud->getCurrentEntry();
+        $this->crud->addField([
+            'name' => 'member_name',
+            'type' => 'text',
+            'label' => 'Member',
+            'value' => $customer->member->name . ' - ' . $customer->member->phone,
+            'attributes' => [
+                'disabled' => 'disabled'
+            ]
+        ])->beforeField('name');
     }
-
+    
     protected function setupInlineCreateOperation(){
 
         $this->crud->setValidation(InlineCreateRequest::class);
@@ -151,5 +161,47 @@ class CustomerCrudController extends CrudController
         }
         return $customers;
     }
-    
+
+    // public function destroy($id){
+    //     $customer = Customer::with('transactions')
+    //         ->where('id', $id)
+    //         ->where('is_member', '0') 
+    //         ->first();
+    //     if($customer->transactions->count() > 0){
+    //         dd('Customer has transactions');
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => 'Customer has transactions'
+    //         ]);
+    //     } else {
+    //         // dd($customer);
+    //         $customer->delete();
+    //         return response()->json([
+    //             'status' => true,
+    //             'message' => 'Customer deleted'
+    //         ]);
+    //     }
+    //     // $customer->delete();
+    //     dd($customer);
+    //     return redirect()->back();
+    // }
+   
+    public function getCustomerIsMember(Request $request)
+    {
+        $customer = Customer::
+            where('member_id', $request->member_id)
+            ->where('is_member', 1)
+            ->first();
+        if ($customer) {
+            return response()->json([
+                'status' => true,
+                'data' => $customer->address,
+            ]);
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => 'Customer not found!',
+            ]);
+        }
+    }
 }
