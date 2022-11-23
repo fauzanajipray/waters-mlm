@@ -25,6 +25,7 @@ class Product extends Model
     protected $fillable = [
         'name',
         'model',
+        'capacity',
         'price',
     ];
     // protected $hidden = [];
