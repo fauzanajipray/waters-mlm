@@ -189,7 +189,7 @@ class CustomerCrudController extends CrudController
     {
         $customer = Customer::
             where('member_id', $request->member_id)
-            ->where('is_member', 1)
+            ->where('is_member', '1')
             ->first();
         if ($customer) {
             return response()->json([
