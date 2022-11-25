@@ -141,15 +141,15 @@ class ActivationPaymentsCrudController extends CrudController
             if($member->expired_at){
                 if($member->expired_at < date('Y-m-d H:i:s')){
                     if($member->expired_at > $activationPayment->payment_date){
-                        $member->expired_at = date('Y-m-d H:i:s', strtotime($member->expired_at . ' + ' . $config->value . ' years'));
+                        $member->expired_at = date('Y-m-d H:i:s', strtotime($member->expired_at . ' + ' . $config->value . ' years - 1 day'));
                     }else{
-                        $member->expired_at = date('Y-m-d H:i:s', strtotime($activationPayment->payment_date . ' + ' . $config->value . ' years'));
+                        $member->expired_at = date('Y-m-d H:i:s', strtotime($activationPayment->payment_date . ' + ' . $config->value . ' years - 1 day'));
                     }
                 }else{
-                    $member->expired_at = date('Y-m-d H:i:s', strtotime($member->expired_at.' +'.$config->value.' years'));
+                    $member->expired_at = date('Y-m-d H:i:s', strtotime($member->expired_at.' +'.$config->value.' years - 1 day'));
                 }
             } else {
-                $member->expired_at = date('Y-m-d H:i:s', strtotime($request->payment_date . ' + '. $config->value .'years'));
+                $member->expired_at = date('Y-m-d H:i:s', strtotime($request->payment_date . ' + '. $config->value .'years - 1 day'));
             }
             $member->save();
             Alert::success('Success', 'Activation Payment Created');

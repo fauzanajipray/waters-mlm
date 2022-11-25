@@ -50,18 +50,17 @@
                 <div class="col-md-2">
                     <div class="form-group required" >
                         <label>Level</label>
-                        <input type="number" name="total_downline_level" class="form-control" value="{{ $totalDownlineLevel }}" id="levels">
+                        <select name="total_downline_level" id="levels" class="form-control">
+                            <option value="1" @if($totalDownlineLevel == '1') selected @endif>1</option>
+                            <option value="2" @if($totalDownlineLevel == '2') selected @endif>2</option>
+                        </select>
+                        {{-- <input type="number" name="total_downline_level" class="form-control" value="{{ $totalDownlineLevel }}" id="levels"> --}}
                     </div>
                 </div>
             </div>
         </form>
     </div>
-    {{-- <div class="col">
-        
-        <input type="submit" class="btn btn-primary form-control" value="Submit">
-        
-    </div> --}}
-    <div class="col-md-8 offset-md-2">
+    <div class="col-md-12">
         <div class="card">
             <div class="card-body">
                 <div class="chart-container" style="width: 100%;"></div>

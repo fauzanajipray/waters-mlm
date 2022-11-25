@@ -91,12 +91,6 @@ class MemberCrudController extends CrudController
             'label' => 'Expired At',
             'type' => 'datetime',
         ]);
-        $this->crud->addColumn([
-            'name' => 'photo_url',
-            'label' => 'Photo Member',
-            'type' => 'image',
-            'prefix' => 'storage/',
-        ]);
 
         // TODO : Add this buttons
         $this->crud->addButtonFromModelFunction('line', 'line_register', 'line_register', 'beginning');
@@ -183,17 +177,6 @@ class MemberCrudController extends CrudController
             'label' => 'Join Date',
             'type' => 'date',
         ]);
-        $this->crud->addField([
-            'name' => 'photo_url',
-            'label' => 'Photo Member',
-            'type' => 'image',
-            'upload' => true,
-            'crop' => true,
-            'prefix' => 'storage/',
-            'aspect_ratio' => 0.66666666666666666666666666666667,
-            'width' => 400,
-            'height' => 600,
-        ]);
     }
 
     /**
@@ -244,7 +227,6 @@ class MemberCrudController extends CrudController
     protected function setupShowOperation() 
     {
         $this->setupListOperation();
-        $this->crud->removeColumn('photo_url');
         $this->crud->addColumn([
             'name' => 'dob',
             'label' => 'Date of Birth',
@@ -258,13 +240,6 @@ class MemberCrudController extends CrudController
             'name' => 'join_date',
             'label' => 'Join Date',
             'type' => 'date',
-        ]);
-        $this->crud->addColumn([
-            'name' => 'photo_url',
-            'label' => 'Photo Member',
-            'type' => 'image',
-            'prefix' => 'storage/',
-            'height' => '200px',
         ]);
         $this->crud->column('updated_at');
         $this->crud->column('created_at');

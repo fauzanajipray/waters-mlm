@@ -22,12 +22,7 @@ trait MemberTrait {
         $imageUrl = ($member->photo_url) ? 'storage/'.$member->photo_url : 'images/2x3.png';
         $title = "Card Member ($member->member_numb - $member->name)";
         $level = $member->level->name;
-        // expired date for human
-        ($this->isActiveMember($member)) ? $expiredDate = Carbon::parse($member->expired_at)->format('d M Y') : $expiredDate = 'Expired';
-        if($expiredDate == 'Expired') {
-            Alert::error('Member Expired')->flash();
-            return redirect()->back();
-        } 
+        ($this->isActiveMember($member)) ? $expiredDate = Carbon::parse($member->expired_at)->format('d F Y') : $expiredDate = 'Expired';
         $pdf = PDF::loadView('member.card_member_pdf', [
             'title' => $title, 
             'member' => $member,
@@ -35,7 +30,7 @@ trait MemberTrait {
             'level' => $level,
             'expiredDate' => $expiredDate,
         ]);
-        return $pdf->download($title . ".pdf");
+        return $pdf->stream($title . ".pdf");
     }
 
     public function reportMember(Request $request, $id)
