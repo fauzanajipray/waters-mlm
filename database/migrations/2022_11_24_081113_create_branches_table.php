@@ -13,8 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('members', function (Blueprint $table) {
-            $table->enum('member_type', ['DEFAULT', 'STOKIST', 'CABANG', 'NSI', 'PUSAT'])->default('DEFAULT');
+        Schema::create('branches', function (Blueprint $table) {
+            $table->id();
+            $table->enum('type', ['PUSAT', 'CABANG', 'STOKIST'])->default('CABANG');
+            $table->string('name');
+            $table->text('address')->nullable();
+            $table->timestamps();
         });
     }
 
@@ -25,8 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('members', function (Blueprint $table) {
-            $table->dropColumn('member_type');
-        });
+        Schema::dropIfExists('branches');
     }
 };
