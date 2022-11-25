@@ -51,6 +51,7 @@ class MemberSeeder extends Seeder
             'postal_code' => fake()->numberBetween(10000, 99999),
             'upline_id' => 1
         ]);
+        
         Member::updateOrCreate([
             'id' => 3,
             'member_numb' => 'M-003',

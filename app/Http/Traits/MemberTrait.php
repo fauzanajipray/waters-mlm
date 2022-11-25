@@ -19,14 +19,12 @@ trait MemberTrait {
     public function downloadCardMember($id) 
     {
         $member = Member::with('level')->where('id', $id)->firstOrFail();
-        $imageUrl = ($member->photo_url) ? 'storage/'.$member->photo_url : 'images/2x3.png';
         $title = "Card Member ($member->member_numb - $member->name)";
         $level = $member->level->name;
         ($this->isActiveMember($member)) ? $expiredDate = Carbon::parse($member->expired_at)->format('d F Y') : $expiredDate = 'Expired';
         $pdf = PDF::loadView('member.card_member_pdf', [
             'title' => $title, 
             'member' => $member,
-            'imageUrl' => $imageUrl,
             'level' => $level,
             'expiredDate' => $expiredDate,
         ]);
@@ -71,7 +69,6 @@ trait MemberTrait {
                 'name' => $member['name'],
                 'level' => $member['level']['name'],
                 'url' => backpack_url('member/'.$member['id'].'/show'),
-                'imageUrl' => ($member['photo_url']) ? backpack_url('storage/'.$member['photo_url']) : backpack_url('images/profile.jpg'),
                 'parentId' => $member['upline_id'] ?? "",
                 'height' => 175,
                 '_directSubordinates' => 0,
@@ -138,10 +135,18 @@ trait MemberTrait {
 
     protected function generateMemberNumber()
     {
+        $uplineID = request()->input('upline_id') ?? 0;
+        $office = request()->input('branch_office_id') ?? 1;
+        if($uplineID > 0){
+            $upline = Member::where('id', $uplineID)->first();
+            $uplineNumber = $upline->member_numb;
+            $uplineNumber = explode('-', $uplineNumber);
+            $uplineID = $uplineNumber[1];
+        }
         $lastMember = Member::withTrashed()->orderBy('id', 'desc')->first();
-        $lastMemberNumb = $lastMember->member_numb ?? 'M-000';
+        $lastMemberNumb = $lastMember->member_numb ?? '0-0000-0000';
         $memberNumb = explode('-', $lastMemberNumb)[1] + 1;
-        $memberNumb = 'M-' . str_pad($memberNumb, 3, '0', STR_PAD_LEFT);
+        $memberNumb = $office .'-'. str_pad($memberNumb, 4, '0', STR_PAD_LEFT) . '-'. str_pad($uplineID, 4, '0', STR_PAD_LEFT);
         $check = Member::where('member_numb', $memberNumb)->first();
         if($check){
             $memberNumb = $this->generateMemberNumber();

@@ -83,6 +83,10 @@ class Member extends Model
         return $this->hasMany('App\Models\Member', 'upline_id', 'id');
     }
 
+    public function branch(){
+        return $this->belongsTo('App\Models\Branch', 'branch_id', 'id');
+    }
+    
     /*
     |--------------------------------------------------------------------------
     | SCOPES

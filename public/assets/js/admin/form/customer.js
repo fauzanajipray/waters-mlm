@@ -1,5 +1,3 @@
-console.log("Customer Js Loaded");
-
 $(document).on("click", ".btn-delete-customer", function () {
   console.log("Delete Customer Clicked");
   var link = $(this).attr("href");

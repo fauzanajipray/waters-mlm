@@ -41,4 +41,7 @@ Route::group([
     Route::post('customer/get-customer-by-member-id', 'CustomerCrudController@customerbyMemberID');
     Route::post('customer/get-customer-is-member', 'CustomerCrudController@getCustomerIsMember');
     Route::crud('configuration', 'ConfigurationCrudController');
+    Route::crud('branch', 'BranchCrudController');
+    Route::post('branches/member-not-exist', 'BranchCrudController@memberNotExist');
+    Route::post('branches/member-exist', 'BranchCrudController@memberExist');
 }); // this should be the absolute last line of this file

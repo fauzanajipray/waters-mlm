@@ -20,10 +20,11 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $this->call(RoleSeeder::class);
+        $this->call(BranchSeeder::class);
         $this->user();
         $this->product();
         $this->level();
-        $this->call(MemberSeeder::class);
+        // $this->call(MemberSeeder::class);
         $this->call(ConfigurationSeeder::class);
     }
 
@@ -31,13 +32,11 @@ class DatabaseSeeder extends Seeder
     {
         $user = User::updateOrCreate([
             'email' => 'kevin@rectmedia.com',
-            // 'member_id' => 1,
         ], [
             'email' => 'kevin@rectmedia.com',
             'password' => bcrypt('qwerty'),
             'name' => 'Kevin',
             'role_id' => 1,
-            // 'member_id' => 1,
         ]);
         $user->assignRole('Super Admin');
 
@@ -48,7 +47,6 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('qwerty'),
             'name' => 'Benny',
             'role_id' => 2,
-            // 'member_id' => 2,
         ]);
         $user->assignRole('Admin');
         
@@ -60,7 +58,6 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('qwerty'),
             'name' => 'Andi',
             'role_id' => 2,
-            // 'member_id' => 3,
         ]);
         $user->assignRole('Admin');
 
@@ -81,7 +78,6 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('qwerty'),
             'name' => 'Fauzan',
             'role_id' => 1,
-            // 'member_id' => 4,
         ]);
         $user->assignRole('Super Admin');
         

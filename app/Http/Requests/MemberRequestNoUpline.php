@@ -26,7 +26,6 @@ class MemberRequestNoUpline extends FormRequest
     {
         return [
             'name' => 'required|min:4|max:255',
-            'member_numb' => 'required|min:5|max:255',
             'address' => 'required|min:5|max:255',
             'phone' => 'required|min:5|max:255',
             'id_card' => 'required|min:5|max:255',
@@ -38,7 +37,10 @@ class MemberRequestNoUpline extends FormRequest
             'dob' => 'required|date',
             'id_card_type' => 'required|in:KTP,SIM',
             'postal_code' => 'required|min:1|max:255',
-            'member_type' => 'required|in:DEFAULT,STOKIST,CABANG,NSI',
+            'member_type' => 'required|in:DEFAULT,STOKIST,CABANG,PUSAT',
+            'bank_account' => 'required|min:1|max:255',
+            'bank_name' => 'required|min:1|max:255',
+            'bank_branch' => 'required|min:1|max:255',
         ];
     }
 

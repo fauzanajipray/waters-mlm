@@ -6,11 +6,13 @@ use App\Http\Requests\MemberRequest;
 use App\Http\Requests\MemberRequestNoUpline;
 use App\Http\Requests\MemberRequestUpdate;
 use App\Http\Traits\MemberTrait;
+use App\Models\Branch;
 use App\Models\Customer;
 use App\Models\Level;
 use App\Models\Member;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
+use Backpack\CRUD\app\Library\Widget;
 use Illuminate\Support\Facades\DB;
 use Prologue\Alerts\Facades\Alert;
 
@@ -74,7 +76,7 @@ class MemberCrudController extends CrudController
                             return 'badge badge-success';
                         case 'CABANG':
                             return 'badge badge-warning';
-                        case 'NSI':
+                        case 'PUSAT':
                             return 'badge badge-danger';
                         default:
                             return 'badge badge-secondary';
@@ -116,28 +118,50 @@ class MemberCrudController extends CrudController
             'type' => 'hidden',
             'value' => $level->id,
         ]);
+        if($countMember > 0){
+            $this->crud->addField([
+                'name' => 'upline_id',
+                'type' => 'Upline',
+                'type' => 'select2_from_ajax',
+                'entity' => 'upline',
+                'attribute' => 'text',
+                'data_source' => url('members/only-actived'),
+            ]);
+        }
+        $branchPusat = Member::where('member_type', 'PUSAT')->count();
+        $this->crud->field('member_type')->label('Member Type')->type('select_from_array')->options(
+            ($branchPusat == 0) ? [
+                // 'DEFAULT' => 'DEFAULT',
+                // 'STOKIST' => 'STOKIST',
+                // 'CABANG' => 'CABANG',
+                // 'NSI' => 'NSI',
+                'PUSAT' => 'PUSAT',
+            ] : [
+                'DEFAULT' => 'DEFAULT',
+                'STOKIST' => 'STOKIST',
+                'CABANG' => 'CABANG',
+                // 'NSI' => 'NSI',
+            ]
+        )->allows_null(false);
+        // $this->crud->addField([
+        //     'name' => 'member_numb',
+        //     'label' => 'No. Member',
+        //     'type' => 'text',
+        //     'attributes' => [
+        //         'readonly' => 'readonly',
+        //     ],
+        //     'value' => $this->generateMemberNumber(),
+        // ]);
         $this->crud->addField([
-            'name' => 'upline_id',
-            'type' => 'Upline',
+            'name' => 'branch_id',
+            'label' => 'Branch',
             'type' => 'select2_from_ajax',
-            'entity' => 'upline',
-            'attribute' => 'text',
-            'data_source' => url('members/only-actived'),
-        ]);
-        $this->crud->field('member_type')->label('Member Type')->type('select_from_array')->options([
-            'DEFAULT' => 'DEFAULT',
-            'NSI' => 'NSI',
-            'STOKIST' => 'STOKIST',
-            'CABANG' => 'CABANG',
-        ])->allows_null(false);
-        $this->crud->addField([
-            'name' => 'member_numb',
-            'label' => 'No. Member',
-            'type' => 'text',
-            'attributes' => [
-                'readonly' => 'readonly',
-            ],
-            'value' => $this->generateMemberNumber(),
+            'attribute' => 'name',
+            'dependencies' => ['member_type'],
+            'include_all_form_fields' => true,
+            'method' => 'POST',
+            'delay' => 500,
+            'data_source' => url('branches/member-not-exist'),
         ]);
         $this->crud->addField([
             'name' => 'level_name',
@@ -149,6 +173,25 @@ class MemberCrudController extends CrudController
                 'disabled' => 'disabled'
             ],
         ]);
+        // $labelType = Branch::whereHas('member')->groupBy('type')->pluck('type', 'type');
+        // $this->crud->field('office_type')->label('Office Type')->type('select_from_array')
+        // ->options($labelType->toArray());
+        if(!$branchPusat == 0){
+            $this->crud->addField([
+                'name' => 'branch_office_id',
+                'label' => 'Branch Office',
+                'type' => 'select2_from_ajax',
+                'attribute' => 'name',
+                'dependencies' => ['office_type'],
+                'include_all_form_fields' => true,
+                'method' => 'POST',
+                'model' => Branch::class,
+                'delay' => 500,
+                'data_source' => url('branches/member-exist'),
+                'allows_null' => true,
+            ]);
+        }
+
         $this->crud->addField([
             'name' => 'id_card_type',
             'label' => 'ID Card Type',
@@ -157,26 +200,58 @@ class MemberCrudController extends CrudController
                 'KTP' => 'KTP',
                 'SIM' => 'SIM',
             ],
+            'tab' => 'Personal Info',
         ]);
-        $this->crud->field('id_card')->label('ID Card')->type('number');
-        $this->crud->field('name');
+        $this->crud->field('id_card')->label('ID Card')->type('number')->tab('Personal Info');
+        $this->crud->field('name')->tab('Personal Info');
         $this->crud->addField([
             'name' => 'gender',
             'label' => 'Gender',
             'type' => 'select_from_array',
             'options' => ['M' => 'Male', 'F' => 'Female'],
+            'tab' => 'Personal Info',
         ]);
-        $this->crud->field('dob')->label('Date of Birth')->type('date');
-        $this->crud->field('phone');
-        $this->crud->field('phone')->type('number');
-        $this->crud->field('email')->type('email');
-        $this->crud->field('address')->type('textarea');
-        $this->crud->field('postal_code');
+        $this->crud->field('dob')->label('Date of Birth')->type('date')->tab('Personal Info');
+        $this->crud->field('phone')->tab('Personal Info');
+        $this->crud->field('phone')->type('number')->tab('Personal Info');
+        $this->crud->field('email')->type('email')->tab('Personal Info');
+        $this->crud->field('address')->type('textarea')->tab('Personal Info');
+        $this->crud->field('postal_code')->tab('Personal Info');
         $this->crud->addField([
             'name' => 'join_date',
             'label' => 'Join Date',
             'type' => 'date',
+            'tab' => 'Personal Info',
         ]);
+
+        $this->crud->addField([
+            'name' => 'bank_account',
+            'label' => 'Bank Account',
+            'type' => 'text',
+            'attributes' => [
+                'placeholder' => 'ex: 1234567890',
+            ],
+            'tab' => 'Bank',
+        ]);
+        $this->crud->addField([
+            'name' => 'bank_name',
+            'label' => 'Bank Name',
+            'type' => 'text',
+            'attributes' => [
+                'placeholder' => 'ex: BCA',
+            ],
+            'tab' => 'Bank',
+        ]);
+        $this->crud->addField([
+            'name' => 'bank_branch',
+            'label' => 'Bank Branch',
+            'type' => 'text',
+            'attributes' => [
+                'placeholder' => 'ex: Semarang'
+            ],
+            'tab' => 'Bank',
+        ]);
+        Widget::add()->type('script')->content(asset('assets/js/admin/form/member.js'));
     }
 
     /**
@@ -189,8 +264,28 @@ class MemberCrudController extends CrudController
     {
         $this->setupCreateOperation();
         $this->crud->setValidation(MemberRequestUpdate::class);
-        $this->crud->removeField('member_numb');
+        $entry = $this->crud->getCurrentEntry();
         $this->crud->removeField('upline_id');
+        $this->crud->removeField('branch_office_id');
+        $this->crud->removeField('member_type');
+        $this->crud->removeField('branch_id');
+        $this->crud->addField([
+            'name' => 'member_type',
+            'label' => 'Member Type',
+            'type' => 'text',
+            'attributes' => [
+                'disabled' => 'disable', 
+            ],
+        ])->beforeField('branch_id');
+        $this->crud->addField([
+            'name' => 'branch_id',
+            'label' => 'Branch',
+            'type' => 'text',
+            'attributes' => [
+                'disabled' => 'disable',
+            ],
+            'value' => $entry->branch->name,
+        ]);
         $this->crud->addField([
             'name' => 'member_numb',
             'label' => 'No. Member',
@@ -198,7 +293,7 @@ class MemberCrudController extends CrudController
             'attributes' => [
                 'readonly' => 'readonly',
             ],
-        ])->beforeField('id_card_type');
+        ]);
         $this->crud->addField([
             'name' => 'upline_name',
             'label' => 'Upline',
@@ -212,6 +307,15 @@ class MemberCrudController extends CrudController
             'type' => 'hidden',
             'attributes' => [
                 'readonly' => 'disabled'
+            ],
+        ]);
+        $branchOffice = Branch::where('id', $entry->branch_office_id)->first();
+        $this->crud->addField([
+            'name' => 'branch_office_id',
+            'label' => 'Branch Office',
+            'value' => $branchOffice->name,
+            'attributes' => [
+                'disabled' => 'disabled'
             ],
         ]);
         $this->crud->removeField('level_id');
@@ -248,15 +352,23 @@ class MemberCrudController extends CrudController
     public function store()
     {
         $requests = request()->all();
-        $this->crud->validateRequest();
+        $this->crud->validateRequest(MemberRequest::class);
+        if($requests['member_type'] != 'DEFAULT'){
+            if(!isset($requests['branch_id'])){
+                $errors['branch_id'] = 'branch_id is required';
+            } else{
+                $branch = Branch::find($requests['branch_id']);
+                if(!$branch){
+                    $errors['branch_id'] = "branch didn't exists";
+                }
+            }
+        }
+        if (isset($errors)) return redirect()->back()->withErrors($errors)->withInput();
+        
         DB::beginTransaction();
         try {
-            $checkMember = Member::where('member_numb', $requests['member_numb'])->first();
-            if($checkMember){
-                $requests['member_numb'] = $this->generateMemberNumber();
-            }
+            $requests['member_numb'] = $this->generateMemberNumber();
             $member = Member::create($requests);
-            // Create Customer
             Customer::create([
                 'name' => $requests['name'],
                 'phone' => $requests['phone'],
