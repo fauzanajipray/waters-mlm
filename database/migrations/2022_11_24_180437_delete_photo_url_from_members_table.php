@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('bank_name')->nullable()->after('bank_account');
             $table->string('bank_branch')->nullable()->after('bank_name');
             $table->foreignId('branch_id')->nullable()->constrained('branches')->nullOnDelete()->after('type');
+            $table->boolean('have_npwp')->default(false)->after('branch_id');
         });
     }
 

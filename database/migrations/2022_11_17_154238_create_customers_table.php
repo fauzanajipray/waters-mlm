@@ -21,7 +21,6 @@ return new class extends Migration
             $table->string('phone');
             $table->unsignedBigInteger('member_id');
             $table->enum('is_member', array('0','1'))->default('0');
-            $table->boolean('have_npwp')->default(false);
             $table->timestamps();
             $table->foreign('member_id')
             ->references('id')->on('members')->onDelete('restrict')->onUpdate('cascade');
