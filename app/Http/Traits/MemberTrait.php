@@ -190,5 +190,21 @@ trait MemberTrait {
         // return $pdf->download('Surat Jalan '.$transaction->code.'.pdf');
         return $pdf->stream('form-registrasi-member.pdf');
     }
+
+    public function getMembersForFilter(Request $request)
+    {
+        $term = $request->input('term');
+        if($term){
+            $members = Member::where('name', 'like', '%'.$term.'%')->orWhere('member_numb', 'LIKE', '%'.$term.'%')->get();
+        }else{
+            $members = Member::all();
+        }
+        $members = $members->map(function($member){
+            $member->name = $member->member_numb . ' - ' . $member->name;
+            return $member;
+        });
+        $options = $members->pluck('name', 'id');
+        return $options;
+    }
 }
 

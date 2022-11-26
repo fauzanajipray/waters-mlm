@@ -383,7 +383,7 @@ class MemberCrudController extends CrudController
                 'address' => $requests['address'],
                 'postal_code' => $requests['postal_code'],
                 'member_id' => $member->id,
-                'is_member' => 1
+                'is_member' => '1',
             ]);
             DB::commit();
             Alert::success(trans('backpack::crud.insert_success'))->flash();

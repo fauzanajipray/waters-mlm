@@ -24,6 +24,7 @@ Route::group([
     Route::get('/members', [App\Http\Controllers\Api\MemberController::class, 'index']);
     Route::get('/members/not-activated', [App\Http\Controllers\Api\MemberController::class, 'notActivated']);
     Route::get('/members/only-actived', [App\Http\Controllers\Api\MemberController::class, 'onlyActive']);
+    Route::post('/members-filter', 'MemberCrudController@getMembersForFilter');
     Route::get('/member/register-form', 'MemberCrudController@downloadFormRegister');
     Route::crud('role', 'RoleCrudController');
     Route::crud('permission', 'PermissionCrudController');
