@@ -24,8 +24,19 @@ class TransactionRequest extends FormRequest
      */
     public function rules()
     {   
+        
         return [
-            'transaction_date' => 'required|date',
+            'transaction_date' => ['required', function ($attribute, $value, $fail) {
+                $d = date('Y-m-d', strtotime($value));
+                $date = explode('-', $d);
+                $month = date('m');
+                $year = date('Y');
+                if ($date[1] != $month) {
+                    $fail('Transaction date must be in this month');
+                } else if ($date[0] != $year) {
+                    $fail('Transaction date must be in this year');
+                } 
+            }],
             'member_id' => 'required|exists:members,id',
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|numeric|min:1',

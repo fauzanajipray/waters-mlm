@@ -130,6 +130,7 @@ class TransactionCrudController extends CrudController
                 'format'   => 'dd-mm-yyyy',
                 'language' => 'en'
             ],
+            'default' => date('d-m-Y H:i:s'),
         ]);
         $this->crud->addField([
             'name' => 'member_id',
@@ -271,9 +272,6 @@ class TransactionCrudController extends CrudController
         ]);
         $this->crud->modifyField('code', [
             'value' => optional($this->data['entry'])->code ?? $this->generateCode(),
-        ]);
-        $this->crud->modifyField('transaction_date', [
-            'value' => optional($this->data['entry'])->transaction_date ?? date('Y-m-d'),
         ]);
         return view('crud::edit', $this->data);
     }

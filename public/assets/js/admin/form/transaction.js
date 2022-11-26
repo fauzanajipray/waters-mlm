@@ -79,3 +79,27 @@ crud.field('customer_id').onChange(function(field){
     address.innerHTML = '';
   }
 });
+
+
+var form = document.querySelector('form');
+form.addEventListener('submit', function(e) {
+  console.log('submit');
+  var transactionDate = document.getElementsByName('transaction_date')[0];
+  console.log(transactionDate.value);
+  var date = new Date(transactionDate.value);
+  var month = date.getMonth() + 1;
+  var year = date.getFullYear();
+  var currentMonth = new Date().getMonth() + 1;
+  var currentYear = new Date().getFullYear();
+  if (month != currentMonth || year != currentYear) {
+    e.preventDefault();
+    // alert yes or no
+    var r = confirm("Transaction date is not equal to current month");
+    if (r == true) {
+      form.submit();
+    } else {
+      transactionDate.style.color = 'black';
+      window.location.reload();
+    }
+  }
+});
