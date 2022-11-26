@@ -223,6 +223,11 @@ class MemberCrudController extends CrudController
             'type' => 'date',
             'tab' => 'Personal Info',
         ]);
+        $this->crud->addField([
+            'name' => 'have_npwp',
+            'label'=> 'Have NPWP',
+            'tab' => 'Personal Info'
+        ]);
 
         $this->crud->addField([
             'name' => 'bank_account',
@@ -268,7 +273,6 @@ class MemberCrudController extends CrudController
         $this->crud->removeField('upline_id');
         $this->crud->removeField('branch_office_id');
         $this->crud->removeField('member_type');
-        $this->crud->removeField('branch_id');
         $this->crud->addField([
             'name' => 'member_type',
             'label' => 'Member Type',
@@ -276,16 +280,19 @@ class MemberCrudController extends CrudController
             'attributes' => [
                 'disabled' => 'disable', 
             ],
-        ])->beforeField('branch_id');
-        $this->crud->addField([
-            'name' => 'branch_id',
-            'label' => 'Branch',
-            'type' => 'text',
-            'attributes' => [
-                'disabled' => 'disable',
-            ],
-            'value' => $entry->branch->name,
         ]);
+        if( $entry->branch) {
+            $this->crud->removeField('branch_id');
+            $this->crud->addField([
+                'name' => 'branch_id',
+                'label' => 'Branch',
+                'type' => 'text',
+                'attributes' => [
+                    'disabled' => 'disable',
+                ],
+                'value' => $entry->branch->name,
+            ]);
+        }
         $this->crud->addField([
             'name' => 'member_numb',
             'label' => 'No. Member',
@@ -309,7 +316,7 @@ class MemberCrudController extends CrudController
                 'readonly' => 'disabled'
             ],
         ]);
-        $branchOffice = Branch::where('id', $entry->branch_office_id)->first();
+        $branchOffice = Branch::where('id', $entry->branch_office_id ?? 1)->first();
         $this->crud->addField([
             'name' => 'branch_office_id',
             'label' => 'Branch Office',
