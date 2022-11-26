@@ -178,35 +178,57 @@ class TransactionCrudController extends CrudController
             'value' => 1,
         ]);
 
-        $this->crud->addField([
-            'name' => 'products',
-            'label' => 'Products',
-            'type' => 'repeatable',
-            'fields' => [
-                [
-                    'name' => 'product_id',
-                    'type' => 'select2_from_array',
-                    'label' => 'Product',
-                    'options' => $product->pluck('name', 'id')->toArray(),
-                    'allows_null' => false,
-                    'wrapperAttributes' => [
-                        'class' => 'form-group col-md-6'
-                    ],
+        $this->crud->addFields([
+            [
+                'name' => 'product_id',
+                'type' => 'select2_from_array',
+                'label' => 'Product',
+                'options' => $product->pluck('name', 'id')->toArray(),
+                'allows_null' => false,
+                'wrapperAttributes' => [
+                    'class' => 'form-group col-md-6'
                 ],
-                [
-                    'name' => 'quantity',
-                    'type' => 'number',
-                    'label' => 'Quantity',
-                    'allows_null' => false,
-                    'wrapperAttributes' => [
-                        'class' => 'form-group col-md-6'
-                    ],
-                ]
             ],
-            // optional
-            'new_item_label'  => 'Add Product', // customize the text of the button
-            'init_rows' => 1, 
+            [
+                'name' => 'quantity',
+                'type' => 'number',
+                'label' => 'Quantity',
+                'allows_null' => false,
+                'wrapperAttributes' => [
+                    'class' => 'form-group col-md-6'
+                ],
+            ]
         ]);
+        // $this->crud->addField([
+        //     'name' => 'products',
+        //     'label' => 'Products',
+        //     'type' => 'repeatable',
+        //     'fields' => [
+        //         [
+        //             'name' => 'product_id',
+        //             'type' => 'select2_from_array',
+        //             'label' => 'Product',
+        //             'options' => $product->pluck('name', 'id')->toArray(),
+        //             'allows_null' => false,
+        //             'wrapperAttributes' => [
+        //                 'class' => 'form-group col-md-6'
+        //             ],
+        //         ],
+        //         [
+        //             'name' => 'quantity',
+        //             'type' => 'number',
+        //             'label' => 'Quantity',
+        //             'allows_null' => false,
+        //             'wrapperAttributes' => [
+        //                 'class' => 'form-group col-md-6'
+        //             ],
+        //         ]
+        //     ],
+        //     // optional
+        //     'new_item_label'  => 'Add Product', // customize the text of the button
+        //     'init_rows' => 1, 
+        // ]);
+
     }
 
     /**
@@ -286,8 +308,18 @@ class TransactionCrudController extends CrudController
     {
         try {
             $requests = $request->all();
-            $products = $requests['products'];
             $this->crud->validateRequest($requests);
+            if(!isset($requests['products'])) {
+                $products = [
+                    [
+                       'product_id' =>  $requests['product_id'],
+                       'quantity' =>  $requests['quantity']
+                    ],
+                ];
+            } else {
+                $products = $requests['products'];
+            }
+            // dd($products);
             foreach ($products as $key => $item) {
                 for ($key2=$key; $key2 < count($products); $key2++) { 
                     if($item['product_id'] == $products[$key2]['product_id'] && $key != $key2){
