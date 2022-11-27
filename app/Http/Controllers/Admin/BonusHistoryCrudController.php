@@ -71,7 +71,7 @@ class BonusHistoryCrudController extends CrudController
         $this->crud->column('bonus_type');
         $this->crud->column('bonus_percent');
         $this->crud->column('bonus')->value(function ($entry) {
-            return "Rp. " . number_format($entry->bonus, 2);
+            return "Rp. " . number_format($entry->bonus, 2, ',', '.');
         });
         $this->crud->column('created_at');
         $this->crud->column('updated_at');
@@ -182,8 +182,19 @@ class BonusHistoryCrudController extends CrudController
                 $this->crud->addClause('whereIn', 'bonus_type', json_decode($value));
             },
             function() {
-                $this->crud->addClause('whereIn', 'bonus_type', ['GM', 'OR']);
+                $this->crud->addClause('whereIn', 'bonus_type', ['GM', 'OR', 'BP']);
             },
         );
+    }
+
+    public function index()
+    {
+        $this->crud->hasAccessOrFail('list');
+
+        $this->data['crud'] = $this->crud;
+        $this->data['title'] = $this->crud->getTitle() ?? mb_ucfirst($this->crud->entity_name_plural);
+
+        // load the view from /resources/views/vendor/backpack/crud/ if it exists, otherwise load the one in the package
+        return view('vendor.backpack.crud.list_bonus', $this->data);
     }
 }
