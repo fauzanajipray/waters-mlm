@@ -144,9 +144,9 @@ trait MemberTrait {
             $uplineID = $uplineNumber[1];
         }
         $lastMember = Member::withTrashed()->orderBy('id', 'desc')->first();
-        $lastMemberNumb = $lastMember->member_numb ?? '0-0000-0000';
+        $lastMemberNumb = $lastMember->member_numb ?? '0-0-0';
         $memberNumb = explode('-', $lastMemberNumb)[1] + 1;
-        $memberNumb = $office .'-'. str_pad($memberNumb, 4, '0', STR_PAD_LEFT) . '-'. str_pad($uplineID, 4, '0', STR_PAD_LEFT);
+        $memberNumb = $office .'-'. str_pad($memberNumb, 1, '0', STR_PAD_LEFT) . '-'. str_pad($uplineID, 1, '0', STR_PAD_LEFT);
         $check = Member::where('member_numb', $memberNumb)->first();
         if($check){
             $memberNumb = $this->generateMemberNumber();

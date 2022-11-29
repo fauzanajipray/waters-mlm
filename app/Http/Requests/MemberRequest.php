@@ -37,7 +37,7 @@ class MemberRequest extends FormRequest
             'join_date' => 'required|date',
             'dob' => 'required|date',
             'id_card_type' => 'required|in:KTP,SIM',
-            'postal_code' => 'required|min:1|max:255',
+            'postal_code' => 'nullable|min:1|max:255',
             'member_type' => 'required|in:DEFAULT,STOKIST,CABANG,PUSAT',
             'bank_account' => 'required|min:1|max:255',
             'bank_name' => 'required|min:1|max:255',
