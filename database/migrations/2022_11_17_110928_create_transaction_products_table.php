@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('capacity')->nullable();
             $table->bigInteger('price')->default(0);
             $table->integer('quantity')->default(1);    
+            $table->text('product_notes')->nullable();   
             $table->timestamps();
         });
     }

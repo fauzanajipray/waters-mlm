@@ -132,7 +132,7 @@
                     <td>{{ strtoupper($item->name) }}</td>
                     <td>{{ strtoupper($item->capacity) }}</td>
                     <td>{{ strtoupper($item->model) }}</td>
-                    <td></td>
+                    <td>{{ $item->product_notes }}</td>
                 </tr>
                 @endforeach
             </tbody>
