@@ -16,13 +16,18 @@ class ConfigurationSeeder extends Seeder
      */
     public function run()
     {
-        Configuration::create([
+        Configuration::updateOrCreate([
+            'key' => 'activation_payment_expiration',
+        ],
+        [
             'key' => 'activation_payment_expiration',
             'value' => '1',
             'description' => 'Payment expiration time',
         ]);
 
-        Configuration::create([
+        Configuration::updateOrCreate([
+            'key' => 'activation_payment_amount',
+        ],[
             'key' => 'activation_payment_amount',
             'value' => '100000',
             'description' => 'Payment amount',

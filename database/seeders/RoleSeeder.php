@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Role;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Log;
 
 class RoleSeeder extends Seeder
 {
@@ -15,21 +16,33 @@ class RoleSeeder extends Seeder
      */
     public function run()
     {
-        Role::create([
-            'name' => 'Super Admin',
-            'guard_name' => 'web'
-        ]);
+        $datas = [
+            [
+                'name' => 'Super Admin',
+                'guard_name' => 'web',
+            ],
+            [
+                'name' => 'Admin',
+                'guard_name' => 'web',
+            ],
+            [
+                'name' => 'Member',
+                'guard_name' => 'web',
+            ]
+        ];
 
-        Role::create([
-            'name' => 'Admin',
-            'guard_name' => 'web'
-        ]);
+        foreach ($datas as $key => $value) {
+            $exists = Role::where('name', $value['name'])
+                        ->where('guard_name', $value['guard_name'])
+                        ->first();
 
-        Role::create([
-            'name' => 'Member',
-            'guard_name' => 'web',
-            'deleted_at' => now()
-        ]);
+            if (!$exists) {
+                Role::create([
+                    'name' => $value['name'],
+                    'guard_name' => $value['guard_name'],
+                ]);
+            }
+        }
 
     }
 }

@@ -4,11 +4,19 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Http\Controllers\Admin\TransactionCrudController;
+use App\Models\ActivationPayments;
+use App\Models\Branch;
+use App\Models\Configuration;
+use App\Models\Customer;
 use App\Models\Level;
 use App\Models\Member;
 use App\Models\Product;
+use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class DatabaseSeeder extends Seeder
 {
@@ -19,13 +27,37 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
+        $this->call(ConfigurationSeeder::class);
         $this->call(RoleSeeder::class);
-        $this->call(BranchSeeder::class);
+        // $this->call(BranchSeeder::class);
         $this->user();
         $this->product();
         $this->level();
-        // $this->call(MemberSeeder::class);
-        $this->call(ConfigurationSeeder::class);
+        $this->office();
+        $this->member();
+        $this->customer();
+        $this->transaction();
+        // // $this->call(MemberSeeder::class);
+    }
+
+    public function csvToArray($filename = '', $delimiter = ',')
+    {
+        if (!file_exists($filename) || !is_readable($filename))
+            return false;
+
+        $header = null;
+        $data = array();
+        if (($handle = fopen($filename, 'r')) !== false) {
+            while (($row = fgetcsv($handle, 1000, $delimiter)) !== false) {
+                if (!$header)
+                    $header = $row;
+                else
+                    $data[] = array_combine($header, $row);
+            }
+            fclose($handle);
+        }
+
+        return $data;
     }
 
     private function user()
@@ -85,45 +117,22 @@ class DatabaseSeeder extends Seeder
 
     private function product()
     {
-        Product::updateOrCreate([
-            'name' => 'BIO Mineral Pot',
-            'model' => 'BMP 3000'
-        ], [
-            'name' => 'BIO Mineral Pot',
-            'model' => 'BMP 3000',
-            'capacity' => "22 Liter",
-            'price' => 23000000,
-        ]);
+        $filename = Storage::path('sample/product.csv');
+        $csvDatas = $this->csvToArray($filename);
 
-        Product::updateOrCreate([
-            'name' => 'BIO Mineral Pot',
-            'model' => 'BMP 2000'
-        ], [
-            'name' => 'BIO Mineral Pot',
-            'model' => 'BMP 2000',
-            'capacity' => "14 Liter",
-            'price' => 18000000,
-        ]);
+        foreach ($csvDatas as $csvData) {
+            Product::updateOrCreate([
+                "name" => $csvData["Name"],
+                "model" => $csvData["Model"]
+            ],[
+                "name" => $csvData["Name"],
+                "model" => $csvData["Model"],
+                "capacity" => $csvData["Capacity"],
+                "price" => $csvData["Netto Price"],
+            ]);
+        }
 
-        Product::updateOrCreate([
-            'name' => 'BIO Mineral Pot',
-            'model' => 'BMP 1100'
-        ], [
-            'name' => 'BIO Mineral Pot',
-            'model' => 'BMP 1100',
-            'capacity' => "11 Liter",
-            'price' => 15000000,
-        ]);
-
-        Product::updateOrCreate([
-            'name' => 'BIO Mineral Pot',
-            'model' => 'BMP 1000'
-        ], [
-            'name' => 'BIO Mineral Pot',
-            'model' => 'BMP 1000',
-            'capacity' => "10 Liter",
-            'price' => 14000000,
-        ]);
+        $this->command->line("Completed --> Product");
     }
 
     private function level()
@@ -134,100 +143,145 @@ class DatabaseSeeder extends Seeder
          * - GM = Goldmine (Bonus dari downline level 1)
          * - OR = Overriding (Bonus dari downline level 2)
          */
-        Level::updateOrCreate([
-            'code' => 'BC',
-            'name' => 'Business Consultant'
-        ], [
-            'code' => 'BC',
-            'name' => 'Business Consultant',
-            'description' => 'desc',
-            'minimum_downline' => 0,
-            'minimum_sold_by_downline' => 0,
-            'minimum_sold' => 1, // minimum sold untuk mendapatkan GM (Goldmine) dan OR (Overriding)
-            'ordering_level' => 1,
-            'bp_percentage' => 18, // in percent
-            'gm_percentage' => 0,  // in percent
-            'or_percentage' => 0,// in percent
-        ]);
+        $filename = Storage::path('sample/level.csv');
+        $csvDatas = $this->csvToArray($filename);
 
-        Level::updateOrCreate([
-            'code' => 'TL',
-            'name' => 'Team Leader'
-        ], [
-            'code' => 'TL',
-            'name' => 'Team Leader',
-            'description' => 'desc',
-            'minimum_downline' => 3, // minimum downline untuk mendapatkan TL
-            'minimum_sold_by_downline' => 1, // minimum sold by downline untuk mendapatkan TL
-            'minimum_sold' => 1, // minimum sold untuk mendapatkan GM dan OR
-            'ordering_level' => 2,
-            'bp_percentage' => 18, // in percent (18)
-            'gm_percentage' => 2,  // in percent
-            'or_percentage' => 0.5,// in percent
-        ]);
+        foreach ($csvDatas as $csvData) {
+            Level::updateOrCreate([
+                'code' => $csvData["Code"],
+                'name' => $csvData["Name"],
+            ], [
+                'code' => $csvData["Code"],
+                'name' => $csvData["Name"],
+                'description' => $csvData["Description"],
+                'minimum_downline' => $csvData["Minimum Downline"],
+                'minimum_sold_by_downline' => $csvData["Minimum Sold by Downline"],
+                'minimum_sold' => $csvData["Minimun Sold"],
+                'ordering_level' => $csvData["Ordering Level"],
+                'bp_percentage' => $csvData["BP"],
+                'gm_percentage' => $csvData["GM"],
+                'or_percentage' => $csvData["OR"],
+            ]);
+        }
 
-        Level::updateOrCreate([
-            'code' => 'SM',
-            'name' => 'Sales Manager'
-        ], [
-            'code' => 'SM',
-            'name' => 'Sales Manager',
-            'description' => 'desc',
-            'minimum_downline' => 3, // minimum downline berlevel TM untuk mendapatkan SM
-            'minimum_sold_by_downline' => 4, // minimum sold by downline untuk mendapatkan SM
-            'minimum_sold' => 1, // minimum sold untuk mendapatkan GM dan OR
-            'ordering_level' => 3, 
-            'bp_percentage' => 20, // in percent (18+2)
-            'gm_percentage' => 3,  // in percent
-            'or_percentage' => 1,// in percent
-        ]);
+        $this->command->line("Completed --> Level");
+    }
 
-        Level::updateOrCreate([
-            'code' => 'GM',
-            'name' => 'Group Manager'
-        ], [
-            'code' => 'GM',
-            'name' => 'Group Manager',
-            'description' => 'desc',
-            'minimum_downline' => 6, // minimum downline berlevel SM untuk mendapatkan GM
-            'minimum_sold_by_downline' => 4, // minimum sold by downline untuk mendapatkan GM
-            'minimum_sold' => 1, // minimum sold untuk mendapatkan GM dan OR
-            'ordering_level' => 4,
-            'bp_percentage' => 21, // in percent (18+3)
-            'gm_percentage' => 4,  // in percent
-            'or_percentage' => 1,// in percent
-        ]);
 
-        Level::updateOrCreate([
-            'code' => 'SD',
-            'name' => 'Sales Director'
-        ], [
-            'code' => 'SD',
-            'name' => 'Sales Director',
-            'description' => 'desc ',
-            'minimum_downline' => 6, // minimum downline 6 berlevel GM untuk mendapatkan SD
-            'minimum_sold_by_downline' => 4, // minimum sold by downline untuk mendapatkan SD
-            'minimum_sold' => 1, // minimum sold untuk mendapatkan GM dan OR
-            'ordering_level' => 5,
-            'bp_percentage' => 23, // in percent (18+5)
-            'gm_percentage' => 5,  // in percent
-            'or_percentage' => 1.5,// in percent
-        ]);
+    private function office()
+    {
+        $filename = Storage::path('sample/office.csv');
+        $csvDatas = $this->csvToArray($filename);
 
-        Level::updateOrCreate([
-            'code' => 'GD',
-            'name' => 'Group Director'
-        ], [
-            'code' => 'GD',
-            'name' => 'Group Director',
-            'description' => 'desc',
-            'minimum_downline' => 6, // minimum downline 6 berlevel SD untuk mendapatkan GD
-            'minimum_sold_by_downline' => 4, // minimum sold by downline untuk mendapatkan GD
-            'minimum_sold' => 1, // minimum sold untuk mendapatkan GM dan OR
-            'ordering_level' => 6,
-            'bp_percentage' => 26, // in percent (18+8)
-            'gm_percentage' => 5,  // in percent
-            'or_percentage' => 2,// in percent
-        ]);
+        foreach ($csvDatas as $csvData) {
+            Branch::updateOrCreate([
+                "name" => $csvData["Name"],
+            ],[
+                "name" => $csvData["Name"],
+                "type" => $csvData["Type"],
+                "address" => $csvData["Address"],
+            ]);
+        }
+
+        $this->command->line("Completed --> Branch Office");
+    }
+
+
+    private function member()
+    {
+        $filename = Storage::path('sample/member.csv');
+        $csvDatas = $this->csvToArray($filename);
+
+        $config = Configuration::where('key', 'activation_payment_amount')->first();
+        ActivationPayments::truncate();
+        foreach ($csvDatas as $csvData) {
+            $memberMst = Member::where("id", $csvData["Upline ID"])->first();
+
+            $member = Member::updateOrCreate([
+                        "member_numb" => $csvData["Unique Number"],
+                    ],[
+                        "member_numb" => $csvData["Unique Number"],
+                        "id_card_type" => $csvData["ID Card Type"],
+                        "id_card" => $csvData["ID Card"],
+                        "name" => $csvData["Name"],
+                        "level_id" => $csvData["Level ID"],
+                        "gender" => $csvData["Gender"],
+                        "postal_code" => $csvData["Postal Code"],
+                        "dob" => date("Y-m-d", strtotime($csvData["DOB"])),
+                        "phone" => $csvData["Phone"],
+                        "email" => $csvData["Email"],
+                        "address" => $csvData["Address"],
+                        "join_date" => date("Y-m-d", strtotime($csvData["Join Date"])),
+                        "expired_at" => date("Y-m-d", strtotime($csvData["Expired At"])),
+                        "upline_id" => (isset($memberMst)) ? $memberMst->id : null,
+                    ]);
+
+            if (strtolower($csvData["Last Payment Status"]) == "paid") {
+                ActivationPayments::updateOrCreate([
+                        "payment_date" => date("Y-m-d", strtotime($csvData["Join Date"])),
+                        "member_id" => $member->id
+                    ],[
+                        "code" => "PYM-".time().$member->id,
+                        "payment_date" => date("Y-m-d", strtotime($csvData["Join Date"])),
+                        "member_id" => $member->id,
+                        "total" => $config->value
+                    ]);
+            }
+        }
+        $this->command->line("Completed --> Member");
+
+    }
+
+
+    private function customer()
+    {
+        $filename = Storage::path('sample/customer.csv');
+        $csvDatas = $this->csvToArray($filename);
+
+        foreach ($csvDatas as $csvData) {
+            Customer::updateOrCreate([
+                "name" => $csvData["Name"],
+            ],[
+                "name" => $csvData["Name"],
+                "address" => $csvData["Address"],
+                "city" => $csvData["City"],
+                "phone" => $csvData["HP"],
+                "member_id" => $csvData["Member ID"],
+                "is_member" => $csvData["Is Member"],
+            ]);
+        }
+
+        $this->command->line("Completed --> Customer");
+    }
+
+
+    private function transaction()
+    {
+        $filename = Storage::path('sample/transaction.csv');
+        $csvDatas = $this->csvToArray($filename);
+        $transCrud = new TransactionCrudController();
+
+        foreach ($csvDatas as $csvData) {
+            $existTrans = Transaction::where("code", $csvData['Code'])->exists();
+            $customer = Customer::where("id", $csvData['Customer ID'])->first();
+
+            $requests = [
+                "transaction_date" => date("Y-m-d H:i:s", strtotime($csvData['Transaction Date'])),
+                "customer_id" => $csvData['Customer ID'],
+                "shipping_address" => $csvData['Shipping Address'],
+                "is_member" => (isset($customer)) ? $customer->is_member : 0,
+                "member_id" => $csvData['Member ID'],
+                "product_id" => $csvData['Product ID'],
+                "quantity" => $csvData['Qty'],
+                "created_by" => 1,
+                "updated_by" => 1,
+            ];
+
+            if (!$existTrans) {
+                $transCrud->createByImport($requests);
+            }
+        }
+
+        $this->command->line("Completed --> Transaction");
     }
 }

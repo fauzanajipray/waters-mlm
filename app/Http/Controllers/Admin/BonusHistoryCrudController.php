@@ -145,7 +145,11 @@ class BonusHistoryCrudController extends CrudController
         $this->crud->addFilter([
                 'type' => 'date_range',
                 'name' => 'created_at',
-                'label'=> 'Date'
+                'label'=> 'Date',
+                'init_selection' => [
+                    'from' => $startDate,
+                    'to' => $endDate
+                ]
             ], 
             false, 
             function($value) {
@@ -176,6 +180,7 @@ class BonusHistoryCrudController extends CrudController
                 'name' => 'bonus_type',
                 'type' => 'select2_multiple',
                 'label'=> 'Bonus Type',
+                'init_selection'=> ['GM', 'OR', 'BP'],
             ],
             [ 'GM' => 'GM', 'OR' => 'OR', 'BP' => 'BP'],
             function($value) {

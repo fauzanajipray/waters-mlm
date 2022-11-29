@@ -388,6 +388,7 @@ class TransactionCrudController extends CrudController
         }
     }
 
+
     public function show($id)
     {
         $this->crud->hasAccessOrFail('show');
@@ -397,5 +398,73 @@ class TransactionCrudController extends CrudController
         $this->data['crud'] = $this->crud;
         $this->data['products'] = TransactionProduct::where('transaction_id', $id)->get();
         return view('transaction.show', $this->data);
+    }
+
+
+    public function createByImport($requests)
+    {
+        if(!isset($requests['products'])) {
+            $products = [
+                [
+                   'product_id' =>  $requests['product_id'],
+                   'quantity' =>  $requests['quantity']
+                ],
+            ];
+        } else {
+            $products = $requests['products'];
+        }
+
+        $member = Member::with(['upline' => function($query) {
+            $query->with(['upline' => function($query) {
+                $query->with('level');
+            }]);
+        }])->find($requests['member_id']);
+
+        if ($requests['is_member'] == 1 && $requests['member_id']) {
+            $customer = Customer::where('member_id', $requests['member_id'])->first();
+            if ($customer) {
+                $requests['customer_id'] = strval($customer->id);
+            } else {
+                $errors['customer_id'] = 'Customer not found';
+            }
+        } else if (!$requests['customer_id']) {
+            $errors['customer_id'] = 'Customer is required';
+        }
+
+        $totalPrice = 0;
+            foreach ($products as $key => $item) {
+                $product = Product::find($item['product_id']);
+                $totalPrice += $product->price * $item['quantity'];
+            }
+            $requests['code'] = $this->generateCode();
+            $requests['id_card'] = $member->id_card;
+            $requests['member_name'] = $member->name;
+            $requests['member_numb'] = $member->member_numb;
+            $requests['level_id'] = $member->level_id;
+            $requests['total_price'] = $totalPrice;
+            // $requests['created_by'] = backpack_user()->id;
+            // $requests['updated_by'] = backpack_user()->id;
+            unset($requests['is_member']);
+            unset($requests['product_id']);
+            unset($requests['quantity']);
+
+            $transaction = Transaction::create($requests);
+            // Save Log Product Sold
+            foreach ($products as $key => $item) {
+                $product = Product::find($item['product_id']);
+                $tp = TransactionProduct::create([
+                    'transaction_id' => $transaction->id,
+                    'product_id' => $product->id,
+                    'name' => $product->name,
+                    'model' => $product->model,
+                    'price' => $product->price,
+                    'capacity' => $product->capacity,
+                    'quantity' => $item['quantity'],
+                ]);
+                $transactionProduct[] = $tp->toArray();
+            }
+            $requests['transaction_id'] = $transaction->id;
+            $this->calculateBonus($requests, $member);
+            $this->levelUpMember($member->id);
     }
 }
