@@ -151,6 +151,7 @@ class ActivationPaymentsCrudController extends CrudController
             } else {
                 $member->expired_at = date('Y-m-d H:i:s', strtotime($request->payment_date . ' + '. $config->value .'years - 1 day'));
             }
+            $member->lastpayment_status = 1;
             $member->save();
             Alert::success('Success', 'Activation Payment Created');
             DB::commit();

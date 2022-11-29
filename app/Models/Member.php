@@ -45,10 +45,6 @@ class Member extends Model
         return '<a href="' . backpack_url('member') . '/' . $this->id . '/report-member" class="btn btn-sm btn-link"><i class="la la-chart-bar"></i> Report Member</a>';
     }
 
-    public function addTransaction(){
-        return '<a href="' . backpack_url('transaction') . '/create?member_id=' . $this->id . '" class="btn btn-sm btn-link"><i class="la la-plus"></i> Add Transaction</a>';
-    }
-
     function register(){
         return '<a href="'.backpack_url('member').'/register-form" class="btn btn-primary" data-style="zoom-in"><span class="ladda-label"><i class="la la-print"></i> Print Form Register</span></a>';
     }
@@ -112,4 +108,21 @@ class Member extends Model
     |--------------------------------------------------------------------------
     */
 
+    public function getGenderAttribute($value){
+        if($value == 'M'){
+            return 'Laki-laki';
+        } else {
+            return 'Perempuan';
+        }
+    }
+
+    public function setGenderAttribute($value){
+        if($value == 'P'){
+            return 'F';
+        } else if ($value == 'L'){
+            return 'M';
+        } else {
+            return $value;
+        }
+    }
 }
