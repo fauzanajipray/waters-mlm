@@ -111,7 +111,7 @@
             <div class="panel-left">
                 <span><strong>FAKTUR PENJUALAN</strong> : <span>{{ $transaction->code }}</span><br/>
                 <span>Tanggal Kirim : </span><span>{{ $transaction->transaction_date }}<span><br/>
-                <span>Keterangan : </span><span style="border-bottom: 1px solid black; width: 100%;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br/>
+                <span>Keterangan : </span><span style="border-bottom: 1px solid black; width: 100%;">{{ $transaction->shipping_notes ?? '-' }}</span><br/>
             </div>
             <div class="panel-left">
                 <span>Alamat Kirim </span><span>:&nbsp;</span><span>{{ $transaction->shipping_address ?? '-' }}</span>
@@ -141,7 +141,7 @@
                     <td>Rp.{{ number_format($item->price, 2, ',', '.') }}</td>
                     <td>{{ strtoupper($transaction->member->member_numb) }}</td>
                     <td>{{ strtoupper($transaction->member->name) }}</td>
-                    <td></td>
+                    <td>{{ $item->product_notes ?? '-' }}</td>
                 </tr>
                 @endforeach
                 <tr style="border: none !important;">

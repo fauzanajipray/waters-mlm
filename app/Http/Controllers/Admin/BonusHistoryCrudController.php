@@ -187,7 +187,7 @@ class BonusHistoryCrudController extends CrudController
                 $this->crud->addClause('whereIn', 'bonus_type', json_decode($value));
             },
             function() {
-                $this->crud->addClause('whereIn', 'bonus_type', ['GM', 'OR', 'BP']);
+                $this->crud->addClause('whereIn', 'bonus_type', ['GM', 'OR']);
             },
         );
     }

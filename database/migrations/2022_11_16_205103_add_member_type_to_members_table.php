@@ -14,7 +14,8 @@ return new class extends Migration
     public function up()
     {
         Schema::table('members', function (Blueprint $table) {
-            $table->enum('member_type', ['DEFAULT', 'STOKIST', 'CABANG', 'NSI', 'PUSAT'])->default('DEFAULT');
+            $table->enum('member_type', ['PERSONAL', 'STOKIST', 'CABANG', 'NSI', 'PUSAT'])->default('PERSONAL')->after('address');
+            $table->boolean('lastpayment_status')->after('member_type');
         });
     }
 
@@ -27,6 +28,7 @@ return new class extends Migration
     {
         Schema::table('members', function (Blueprint $table) {
             $table->dropColumn('member_type');
+            $table->dropColumn('lastpayment_status');
         });
     }
 };

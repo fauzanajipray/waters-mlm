@@ -132,6 +132,7 @@ class TransactionCrudController extends CrudController
             ],
             'default' => date('d-m-Y H:i:s'),
         ]);
+        
         $this->crud->addField([
             'name' => 'member_id',
             'type' => 'select2_from_ajax',
@@ -179,6 +180,8 @@ class TransactionCrudController extends CrudController
             'value' => 1,
         ]);
 
+        $this->crud->field('shipping_notes');
+
         $this->crud->addFields([
             [
                 'name' => 'product_id',
@@ -198,7 +201,15 @@ class TransactionCrudController extends CrudController
                 'wrapperAttributes' => [
                     'class' => 'form-group col-md-6'
                 ],
-            ]
+            ],
+            [
+                'name' => 'product_notes',
+                'type' => 'text',
+                'label' => 'Product Notes',
+                'wrapperAttributes' => [
+                    'class' => 'form-group col-md-12'
+                ],
+            ],
         ]);
         // $this->crud->addField([
         //     'name' => 'products',
@@ -311,13 +322,13 @@ class TransactionCrudController extends CrudController
                 $products = [
                     [
                        'product_id' =>  $requests['product_id'],
-                       'quantity' =>  $requests['quantity']
+                       'quantity' =>  $requests['quantity'],
+                       'product_notes' =>  $requests['product_notes'],
                     ],
                 ];
             } else {
                 $products = $requests['products'];
             }
-            // dd($products);
             foreach ($products as $key => $item) {
                 for ($key2=$key; $key2 < count($products); $key2++) { 
                     if($item['product_id'] == $products[$key2]['product_id'] && $key != $key2){
@@ -372,6 +383,7 @@ class TransactionCrudController extends CrudController
                     'price' => $product->price,
                     'capacity' => $product->capacity,
                     'quantity' => $item['quantity'],
+                    'product_notes' => $item['product_notes'],
                 ]);
                 $transactionProduct[] = $tp->toArray();
             }

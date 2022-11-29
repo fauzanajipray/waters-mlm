@@ -70,7 +70,7 @@ class MemberCrudController extends CrudController
                 'element' => 'span',
                 'class' => function ($crud, $column, $entry, $related_key) {
                     switch ($entry->member_type) {
-                        case 'DEFAULT':
+                        case 'PERSONAL':
                             return 'badge badge-primary';
                         case 'STOKIST':
                             return 'badge badge-success';
@@ -88,6 +88,25 @@ class MemberCrudController extends CrudController
         $this->crud->column('phone');
         $this->crud->column('email');
         $this->crud->column('address');
+        // $this->crud->addColumn([
+        //     'name' => 'lastpayment_status',
+        //     'label' => 'Status',
+        // ])
+        $this->crud->column('lastpayment_status')->label('Last Payment Status')->wrapper([
+            'element' => 'span',
+            'class' => function ($crud, $column, $entry, $related_key) {
+                switch ($entry->lastpayment_status) {
+                    case 1:
+                        return 'badge badge-success';
+                    case 0:
+                        return 'badge badge-danger';
+                    default:
+                        return 'badge badge-secondary';
+                }
+            },
+        ])->value(function ($value) {
+            return ($value->lastpayment_status) ? 'Paid' : 'Unpaid';
+        });
         $this->crud->addColumn([
             'name' => 'expired_at',
             'label' => 'Expired At',
@@ -99,7 +118,6 @@ class MemberCrudController extends CrudController
         $this->crud->addButtonFromModelFunction('line', 'cardMember', 'cardMember', 'beginning');
         $this->crud->addButtonFromModelFunction('line', 'reportMember', 'reportMember', 'beginning');
         $this->crud->addButtonFromModelFunction('top', 'register', 'register', 'end');
-        // $this->crud->addButtonFromModelFunction('line', 'addTransaction', 'addTransaction', 'beginning');
     }
 
     /**
@@ -131,13 +149,13 @@ class MemberCrudController extends CrudController
         $branchPusat = Member::where('member_type', 'PUSAT')->count();
         $this->crud->field('member_type')->label('Member Type')->type('select_from_array')->options(
             ($branchPusat == 0) ? [
-                // 'DEFAULT' => 'DEFAULT',
+                // 'PERSONAL' => 'PERSONAL',
                 // 'STOKIST' => 'STOKIST',
                 // 'CABANG' => 'CABANG',
                 // 'NSI' => 'NSI',
                 'PUSAT' => 'PUSAT',
             ] : [
-                'DEFAULT' => 'DEFAULT',
+                'PERSONAL' => 'PERSONAL',
                 'STOKIST' => 'STOKIST',
                 'CABANG' => 'CABANG',
                 // 'NSI' => 'NSI',
@@ -360,7 +378,7 @@ class MemberCrudController extends CrudController
     {
         $requests = request()->all();
         $this->crud->validateRequest(MemberRequest::class);
-        if($requests['member_type'] != 'DEFAULT'){
+        if($requests['member_type'] != 'PERSONAL'){
             if(!isset($requests['branch_id'])){
                 $errors['branch_id'] = 'branch_id is required';
             } else{
