@@ -11,6 +11,7 @@ use App\Models\Configuration;
 use App\Models\Customer;
 use App\Models\Level;
 use App\Models\Member;
+use App\Models\PaymentMethod;
 use App\Models\Product;
 use App\Models\Transaction;
 use App\Models\User;
@@ -37,6 +38,7 @@ class DatabaseSeeder extends Seeder
         $this->member();
         $this->customer();
         $this->transaction();
+        $this->paymentMethod();
         // // $this->call(MemberSeeder::class);
     }
 
@@ -284,4 +286,28 @@ class DatabaseSeeder extends Seeder
 
         $this->command->line("Completed --> Transaction");
     }
+
+    private function paymentMethod(){
+        PaymentMethod::updateOrCreate([
+            "name" => "BRI",
+        ],[
+            "name" => "BRI",
+            "description" => "Bank Rakyat Indonesia",
+        ]);       
+
+        PaymentMethod::updateOrCreate([
+            "name" => "BCA",
+        ],[
+            "name" => "BCA",
+            "description" => "Bank Central Asia",
+        ]);
+
+        PaymentMethod::updateOrCreate([
+            "name" => "Mandiri",
+        ],[
+            "name" => "Mandiri",
+            "description" => "Bank Mandiri",
+        ]);
+    }
+
 }

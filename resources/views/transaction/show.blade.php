@@ -130,6 +130,39 @@
             </div>
         </div>
     </div>
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header" style="background: #f9fbfd; font-weight:bold;">
+                Payments
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Payment Type</th>
+                            <th>Payment Method</th>
+                            <th>Account Number</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($entry->transactionPayments as $item)
+                            <tr>
+                                <td>{{ $item->type }}</td>
+                                <td>{{ $item->payment_name }}</td>
+                                <td>{{ $item->payment_account_number }}</td>
+                                <td>Rp. {{ number_format($item->amount, 2, ',', '.') }}</td>
+                            </tr>
+                        @endforeach
+                        <tr>
+                            <td colspan="3" style="text-align: right; font-weight: bold;">Total</td>
+                            <td>Rp. {{ number_format($entry->transactionPayments->sum('amount'), 2, ',', '.') }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
     <div class="col-md-12 d-print-none">
         <div class="card">
             <div class="card-body">

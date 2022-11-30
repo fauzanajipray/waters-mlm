@@ -88,10 +88,6 @@ class MemberCrudController extends CrudController
         $this->crud->column('phone');
         $this->crud->column('email');
         $this->crud->column('address');
-        // $this->crud->addColumn([
-        //     'name' => 'lastpayment_status',
-        //     'label' => 'Status',
-        // ])
         $this->crud->column('lastpayment_status')->label('Last Payment Status')->wrapper([
             'element' => 'span',
             'class' => function ($crud, $column, $entry, $related_key) {

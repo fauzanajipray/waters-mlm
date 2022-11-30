@@ -119,29 +119,6 @@ class BonusHistoryCrudController extends CrudController
     private function getFilter(){
         $startDate = Carbon::now()->firstOfMonth()->format('Y-m-d');
         $endDate = Carbon::now()->format('Y-m-d');
-        // dd($startDate, $endDate);
-        // $this->crud->addFilter([
-        //         'type' => 'date',
-        //         'name' => 'start_date',
-        //         'label' => 'Start Date',
-        //     ],
-        //     false,
-        //     function($value) {
-        //         $this->crud->addClause('where', 'created_at', '>=', $value . ' 00:00:00');
-        //     },
-        //     $this->crud->addClause('where', 'created_at', '>=', $startDate . ' 00:00:00')
-        // );
-        // $this->crud->addFilter([
-        //         'type' => 'date',
-        //         'name' => 'end_date',
-        //         'label' => 'End Date',
-        //     ], 
-        //     false,
-        //     function($value) {
-        //         $this->crud->addClause('where', 'created_at', '<=', $value . ' 23:59:59');
-        //     },
-        //     $this->crud->addClause('where', 'created_at', '<=', $endDate . ' 23:59:59')
-        // );
         $this->crud->addFilter([
                 'type' => 'date_range',
                 'name' => 'created_at',
@@ -180,7 +157,7 @@ class BonusHistoryCrudController extends CrudController
                 'name' => 'bonus_type',
                 'type' => 'select2_multiple',
                 'label'=> 'Bonus Type',
-                'init_selection'=> ['GM', 'OR', 'BP'],
+                'init_selection'=> ['GM', 'OR'],
             ],
             [ 'GM' => 'GM', 'OR' => 'OR', 'BP' => 'BP'],
             function($value) {

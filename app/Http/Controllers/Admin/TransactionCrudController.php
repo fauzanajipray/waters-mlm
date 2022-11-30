@@ -54,7 +54,6 @@ class TransactionCrudController extends CrudController
     {
         $this->crud->viewAfterContent = ['image_preview_helper'];
         $this->crud->firstCellNonFlex = true;
-
         $this->crud->addColumns([
             'code',
             'transaction_date', 
@@ -78,7 +77,7 @@ class TransactionCrudController extends CrudController
         $this->crud->removeButton('update');
         $this->crud->addButtonFromModelFunction('line', 'letter_road', 'letterRoad', 'beginning');
         $this->crud->addButtonFromModelFunction('line', 'invoice', 'invoice', 'beginning');
-
+        $this->crud->addButtonFromModelFunction('line', 'add_payment', 'buttonAddPayment', 'beginning');
     }
 
     protected function setupShowOperation(){
@@ -388,8 +387,8 @@ class TransactionCrudController extends CrudController
                 $transactionProduct[] = $tp->toArray();
             }
             $requests['transaction_id'] = $transaction->id;
-            $this->calculateBonus($requests, $member);
-            $this->levelUpMember($member->id);
+            // $this->calculateBonus($requests, $member);
+            // $this->levelUpMember($member->id);
             Alert::success(trans('backpack::crud.insert_success'))->flash();
             DB::commit();
             return redirect($this->crud->route);
@@ -405,7 +404,7 @@ class TransactionCrudController extends CrudController
     {
         $this->crud->hasAccessOrFail('show');
 
-        $this->data['entry'] = $this->crud->getEntry($id);
+        $this->data['entry'] = Transaction::with('transactionPayments')->find($id);
         $this->data['crud'] = $this->crud;
         $this->data['crud'] = $this->crud;
         $this->data['products'] = TransactionProduct::where('transaction_id', $id)->get();
@@ -476,7 +475,7 @@ class TransactionCrudController extends CrudController
                 $transactionProduct[] = $tp->toArray();
             }
             $requests['transaction_id'] = $transaction->id;
-            $this->calculateBonus($requests, $member);
-            $this->levelUpMember($member->id);
+            // $this->calculateBonus($requests, $member);
+            // $this->levelUpMember($member->id);
     }
 }

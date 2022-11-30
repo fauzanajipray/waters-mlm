@@ -45,4 +45,6 @@ Route::group([
     Route::crud('branch', 'BranchCrudController');
     Route::post('branches/member-not-exist', 'BranchCrudController@memberNotExist');
     Route::post('branches/member-exist', 'BranchCrudController@memberExist');
+    Route::crud('payment-method', 'PaymentMethodCrudController');
+    Route::crud('transaction-payment', 'TransactionPaymentCrudController');
 }); // this should be the absolute last line of this file
