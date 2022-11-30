@@ -200,7 +200,7 @@ trait TransactionTrait {
         if (!$transaction) {
             return redirect()->back()->with('error', 'Data tidak ditemukan');
         }
-        $transaction->letter_road_code = str_replace('INV', 'LRD', $transaction->code);
+        $transaction->letter_road_code = str_replace('INV', 'SJ', $transaction->code);
         $pdf = Pdf::loadView('exports.pdf.print-letter-road', [
             'data' => $transaction,
         ]);
