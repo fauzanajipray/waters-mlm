@@ -250,7 +250,7 @@ class TransactionPaymentCrudController extends CrudController
                 $transaction->save();
                 $lastPaymentDate = $transaction->transactionPayments->sortByDesc('payment_date')->first()->payment_date;
                 $this->calculateBonus($transaction, $transaction->member, $lastPaymentDate);
-                $this->levelUpMember($transaction->member->id);
+                
             }
             DB::commit();
             return redirect($this->crud->route);

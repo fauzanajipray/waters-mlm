@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use Carbon\Carbon;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -15,7 +16,22 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        // $schedule->command('inspire')
+        //     ->everyMinute()
+        //     ->sendOutputTo(storage_path('logs/inspire.log'), true);
+        
+        $dayEndInMonth = Carbon::now()->endOfMonth()->format('d');
+        $schedule->command('level-up-member')
+            ->monthlyOn($dayEndInMonth, '23:00')
+            // ->everyMinute()
+            ->emailOutputTo('fauzanjr1@gmail.com')
+            ->appendOutputTo(storage_path('logs/level-up-member.log'))
+            ->before(function () {
+                $this->call('down');
+            })
+            ->after(function () {
+                $this->call('up');
+            });
     }
 
     /**

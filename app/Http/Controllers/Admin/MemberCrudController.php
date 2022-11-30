@@ -90,6 +90,7 @@ class MemberCrudController extends CrudController
         $this->crud->column('phone');
         $this->crud->column('email');
         $this->crud->column('address');
+        $this->crud->column('npwp')->label('NPWP');
         $this->crud->column('lastpayment_status')->label('Last Payment Status')->wrapper([
             'element' => 'span',
             'class' => function ($crud, $column, $entry, $related_key) {
@@ -229,11 +230,11 @@ class MemberCrudController extends CrudController
             'tab' => 'Personal Info',
         ]);
         $this->crud->addField([
-            'name' => 'have_npwp',
-            'label'=> 'Have NPWP',
-            'tab' => 'Personal Info'
+            'name' => 'npwp',
+            'label' => 'NPWP',
+            'type' => 'number',
+            'tab' => 'Personal Info',
         ]);
-
         $this->crud->addField([
             'name' => 'bank_account',
             'label' => 'Bank Account',

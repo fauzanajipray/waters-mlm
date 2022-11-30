@@ -219,6 +219,7 @@ class DatabaseSeeder extends Seeder
                         "member_type" => strtoupper($csvData["Member Type"]),
                         "branch_id" => $csvData["Office ID"],
                         "lastpayment_status" => $csvData["Last Payment Status"],
+                        "npwp" => $csvData["NPWP Number"],
                     ]);
             
             // Create Customer From Member
