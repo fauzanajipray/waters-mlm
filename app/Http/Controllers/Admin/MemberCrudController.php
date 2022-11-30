@@ -14,6 +14,8 @@ use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Backpack\CRUD\app\Library\Widget;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Route;
 use Prologue\Alerts\Facades\Alert;
 
 /**
@@ -157,15 +159,6 @@ class MemberCrudController extends CrudController
                 // 'NSI' => 'NSI',
             ]
         )->allows_null(false);
-        // $this->crud->addField([
-        //     'name' => 'member_numb',
-        //     'label' => 'No. Member',
-        //     'type' => 'text',
-        //     'attributes' => [
-        //         'readonly' => 'readonly',
-        //     ],
-        //     'value' => $this->generateMemberNumber(),
-        // ]);
         $this->crud->addField([
             'name' => 'branch_id',
             'label' => 'Branch',
@@ -187,16 +180,14 @@ class MemberCrudController extends CrudController
                 'disabled' => 'disabled'
             ],
         ]);
-        // $labelType = Branch::whereHas('member')->groupBy('type')->pluck('type', 'type');
-        // $this->crud->field('office_type')->label('Office Type')->type('select_from_array')
-        // ->options($labelType->toArray());
+
         if(!$branchPusat == 0){
             $this->crud->addField([
                 'name' => 'branch_office_id',
                 'label' => 'Branch Office',
                 'type' => 'select2_from_ajax',
                 'attribute' => 'name',
-                'dependencies' => ['office_type'],
+                'dependencies' => ['member_type'],
                 'include_all_form_fields' => true,
                 'method' => 'POST',
                 'model' => Branch::class,
@@ -330,15 +321,6 @@ class MemberCrudController extends CrudController
                 'readonly' => 'disabled'
             ],
         ]);
-        $branchOffice = Branch::where('id', $entry->branch_office_id ?? 1)->first();
-        $this->crud->addField([
-            'name' => 'branch_office_id',
-            'label' => 'Branch Office',
-            'value' => $branchOffice->name,
-            'attributes' => [
-                'disabled' => 'disabled'
-            ],
-        ]);
         $this->crud->removeField('level_id');
         $this->crud->removeField('level_name');        
     }
@@ -373,19 +355,22 @@ class MemberCrudController extends CrudController
     public function store()
     {
         $requests = request()->all();
-        $this->crud->validateRequest(MemberRequest::class);
-        if($requests['member_type'] != 'PERSONAL'){
-            if(!isset($requests['branch_id'])){
-                $errors['branch_id'] = 'branch_id is required';
+        
+        $this->crud->validateRequest($requests);
+        $member_type = request('member_type');
+        if ($member_type == 'PERSONAL'){
+            if(!isset($requests['branch_office_id'])){
+                $errors['branch_office_id'] = 'branch office is required';
             } else{
-                $branch = Branch::find($requests['branch_id']);
+                $branch = Branch::find($requests['branch_office_id']);
                 if(!$branch){
-                    $errors['branch_id'] = "branch didn't exists";
+                    $errors['branch_office_id'] = "branch didn't exists";
                 }
             }
         }
-        if (isset($errors)) return redirect()->back()->withErrors($errors)->withInput();
-        
+        if(isset($errors)){
+            return redirect()->back()->withErrors($errors);
+        }
         DB::beginTransaction();
         try {
             $requests['member_numb'] = $this->generateMemberNumber();
@@ -415,7 +400,6 @@ class MemberCrudController extends CrudController
         $requests = request()->all();
         DB::beginTransaction();
         try {
-            // Update Member 
             $member = Member::find($requests['id']);
             $member->update($requests);
             DB::commit();

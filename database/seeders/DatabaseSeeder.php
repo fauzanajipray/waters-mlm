@@ -216,14 +216,30 @@ class DatabaseSeeder extends Seeder
                         "join_date" => date("Y-m-d", strtotime($csvData["Join Date"])),
                         "expired_at" => date("Y-m-d", strtotime($csvData["Expired At"])),
                         "upline_id" => (isset($memberMst)) ? $memberMst->id : null,
+                        "member_type" => strtoupper($csvData["Member Type"]),
+                        "branch_id" => $csvData["Office ID"],
+                        "lastpayment_status" => $csvData["Last Payment Status"],
                     ]);
+            
+            // Create Customer From Member
+            $customer = Customer::updateOrCreate([
+                "is_member" => "1",
+                "member_id" => $member->id
+            ], [
+                "name" => $member->name,
+                "address" => $member->address,
+                "city" => null,
+                "phone" => $member->phone,
+                "member_id" => $member->id,
+                "is_member" => "1" 
+            ]);
 
             if (strtolower($csvData["Last Payment Status"]) == "paid") {
                 ActivationPayments::updateOrCreate([
                         "payment_date" => date("Y-m-d", strtotime($csvData["Join Date"])),
                         "member_id" => $member->id
                     ],[
-                        "code" => "PYM-".time().$member->id,
+                        "code" => "PYM-".date("ymd", strtotime($csvData["Join Date"])).'-'.str_pad($member->id, 4, '0', STR_PAD_LEFT),
                         "payment_date" => date("Y-m-d", strtotime($csvData["Join Date"])),
                         "member_id" => $member->id,
                         "total" => $config->value

@@ -166,9 +166,9 @@ class ActivationPaymentsCrudController extends CrudController
     protected function generateCode() 
     {
         $lastTransaction = ActivationPayments::orderBy('id', 'desc')->first();
-        $lastTransactionCode = $lastTransaction->code ?? 'PYM-000000-0000';
+        $lastTransactionCode = $lastTransaction->code ?? 'PYM-0000-0000';
         $transactionCode = explode('-', $lastTransactionCode)[2] + 1;
-        $transactionCode = 'REG-' . date('ymd') . '-' . str_pad($transactionCode, 4, '0', STR_PAD_LEFT);
+        $transactionCode = 'PYM-' . date('ymd') . '-' . str_pad($transactionCode, 4, '0', STR_PAD_LEFT);
         return $transactionCode;
     }
 

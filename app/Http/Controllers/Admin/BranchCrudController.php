@@ -46,7 +46,20 @@ class BranchCrudController extends CrudController
         $this->crud->column('name');
         $this->crud->column('address');
         $this->crud->column('type');      
-        
+        $this->crud->addColumn([
+            'name' => 'member',
+            'label' => 'Owner',
+            'type' => 'relationship',
+            'attribute' => 'name',
+            'entity' => 'member',
+            'model' => 'App\Models\Member',
+            'wrapper' => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('member/' . $related_key . '/show');
+                },
+            ],
+        ]);
+        // $this->crud->addButtonFromModelFunction('line', 'add_owner', 'addOwnerButton', 'end');
     }
 
     /**

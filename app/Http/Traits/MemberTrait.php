@@ -136,7 +136,12 @@ trait MemberTrait {
     protected function generateMemberNumber()
     {
         $uplineID = request()->input('upline_id') ?? 0;
-        $office = request()->input('branch_office_id') ?? 1;
+        $memberType = request()->input('member_type') ?? 'PERSONAL';
+        if($memberType == 'PERSONAL'){
+            $branchID = request()->input('branch_office_id') ?? 0;
+        } else {
+            $branchID = request()->input('branch_id') ?? 0;
+        }
         if($uplineID > 0){
             $upline = Member::where('id', $uplineID)->first();
             $uplineNumber = $upline->member_numb;
@@ -146,7 +151,7 @@ trait MemberTrait {
         $lastMember = Member::withTrashed()->orderBy('id', 'desc')->first();
         $lastMemberNumb = $lastMember->member_numb ?? '0-0-0';
         $memberNumb = explode('-', $lastMemberNumb)[1] + 1;
-        $memberNumb = $office .'-'. str_pad($memberNumb, 1, '0', STR_PAD_LEFT) . '-'. str_pad($uplineID, 1, '0', STR_PAD_LEFT);
+        $memberNumb = $branchID .'-'. str_pad($memberNumb, 1, '0', STR_PAD_LEFT) . '-'. str_pad($uplineID, 1, '0', STR_PAD_LEFT);
         $check = Member::where('member_numb', $memberNumb)->first();
         if($check){
             $memberNumb = $this->generateMemberNumber();

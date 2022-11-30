@@ -118,11 +118,21 @@ class Member extends Model
 
     public function setGenderAttribute($value){
         if($value == 'P'){
-            return 'F';
+            return $this->attributes['gender'] = 'F';
         } else if ($value == 'L'){
-            return 'M';
+            return $this->attributes['gender'] = 'M';
         } else {
             return $value;
         }
     }
+
+    public function getNameAttribute($value){
+        return Str::title($value);
+    }
+
+    public function setNameAttribute($value){
+        return $this->attributes['name'] = Str::title($value);
+    }
+
+    
 }
