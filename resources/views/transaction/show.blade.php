@@ -59,6 +59,16 @@
                             <th>Level</th>
                             <td>{{ $entry->level->name }}</td>
                         </tr>
+                        <tr>
+                            <th>Status</th>
+                            <td>
+                                @if ($entry->status_paid)
+                                    <span class="badge badge-success">Lunas</span>
+                                @else
+                                    <span class="badge badge-danger">Belum Lunas</span>
+                                @endif
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -82,11 +92,15 @@
                         </tr>
                         <tr>
                             <th>City</th>
-                            <td>{{ $entry->customer->city }}</td>
+                            <td>{{ $entry->customer->city ?? '-' }}</td>
                         </tr>
                         <tr>
                             <th>Phone</th>
                             <td>{{ $entry->customer->phone }}</td>
+                        </tr>
+                        <tr>
+                            <th>Notes</th>
+                            <td>{{ $entry->shipping_notes ?? '-' }}</td>
                         </tr>
                     </tbody>
                 </table>

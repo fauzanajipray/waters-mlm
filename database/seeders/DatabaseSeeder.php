@@ -305,24 +305,52 @@ class DatabaseSeeder extends Seeder
 
     private function paymentMethod(){
         PaymentMethod::updateOrCreate([
-            "name" => "BRI",
+            "name" => "HCI",
         ],[
-            "name" => "BRI",
-            "description" => "Bank Rakyat Indonesia",
+            "name" => "HCI",
+            "description" => "",
         ]);       
 
         PaymentMethod::updateOrCreate([
-            "name" => "BCA",
+            "name" => "QRIS",
         ],[
-            "name" => "BCA",
-            "description" => "Bank Central Asia",
+            "name" => "QRIS",
+            "description" => "",
         ]);
 
         PaymentMethod::updateOrCreate([
-            "name" => "Mandiri",
+            "name" => "KK Mandiri 6 Bulan",
         ],[
-            "name" => "Mandiri",
-            "description" => "Bank Mandiri",
+            "name" => "KK Mandiri 6 Bulan",
+            "description" => "",
+        ]);
+
+        PaymentMethod::updateOrCreate([
+            "name" => "KK BCA 6 Bulan",
+        ],[
+            "name" => "KK BCA 6 Bulan",
+            "description" => "",
+        ]);
+
+        PaymentMethod::updateOrCreate([
+            "name" => "Debit",
+        ],[
+            "name" => "Debit",
+            "description" => "",
+        ]);
+
+        PaymentMethod::updateOrCreate([
+            "name" => "Kartu Kredit",
+        ],[
+            "name" => "Kartu Kredit",
+            "description" => "",
+        ]);
+
+        PaymentMethod::updateOrCreate([
+            "name" => "Transfer",
+        ],[
+            "name" => "Transfer",
+            "description" => "",
         ]);
     }
 

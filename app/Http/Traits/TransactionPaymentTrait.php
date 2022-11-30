@@ -31,7 +31,7 @@ trait TransactionPaymentTrait {
                 'bonus' => $transaction['total_price'] * $levelNow->bp_percentage / 100,
                 'created_at' => $lastPaymentDate,
             ]);
-            $log[] = "Bonus Penjualan Pribadi: " . $bonus->bonus . " (" . $levelNow->bp_percentage . "%), Date : ". $bonus->created_at;
+            $log[] = $member->name . " mendapatkan Bonus Penjualan sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
         } 
 
         /* Bonus Sponsor */
@@ -41,6 +41,7 @@ trait TransactionPaymentTrait {
                 $query->where('member_id', $upline->id);
             })->sum('quantity');
             $uplineLevel = Level::where('id', $upline->level_id)->first();
+            // dd($uplineProductSold, $upline->toArray(), $member->toArray(), $uplineLevel->toArray());
             if ($uplineProductSold >= $upline->level->minimum_sold && $uplineLevel->gm_percentage > 0 && $this->isActiveMember($upline)) {  // Cek apakah pernah melakukan transaksi
                 // TODO : Tanya Minimal transaksi atau jual produk
                 $bonus = BonusHistory::create([
@@ -52,8 +53,7 @@ trait TransactionPaymentTrait {
                     'bonus_percent' => $uplineLevel->gm_percentage,
                     'bonus' => $transaction['total_price'] * $uplineLevel->gm_percentage / 100,
                 ]);
-
-                $log[] = "Bonus Sponsor: " . $bonus->bonus . " (" . $uplineLevel->gm_percentage . "%)";
+                $log[] = $upline->name . " mendapatkan Bonus Sponsor sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
             }
             /* Bonus Overriding */
             $upline2 = $upline->upline ?? null;
@@ -74,14 +74,16 @@ trait TransactionPaymentTrait {
                         'bonus' => $transaction['total_price'] * $upline2Level->or_percentage / 100,
                     ]);
 
-                    $log[] = "Bonus Overriding: " . $bonus->bonus . " (" . $upline2Level->or_percentage . "%)";
+                    $log[] = $upline2->name . " mendapatkan Bonus Overriding sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
                 } 
             }
         }
 
-        // if($log) {
-        //   dd($log);
-        // }
+        if($log) {
+            foreach($log as $l) {
+                Alert::info($l)->flash();
+            }
+        }
     }
 
     protected function levelUpMember($id, $isCheckAgain = false, $historyLevelUp = []) 
