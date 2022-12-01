@@ -103,3 +103,49 @@ form.addEventListener('submit', function(e) {
     }
   }
 });
+
+
+crud.field('product_id').onChange(function(field) {
+  var discountPercentage = document.getElementsByName('discount_percentage')[0];
+  var discountAmount = document.getElementsByName('discount_amount')[0];
+  if (discountPercentage && discountAmount) {
+    if (field.value && crud.field('quantity').value) {
+      $.ajax({
+        url: '/product/get-product/',
+        type: 'POST',
+        data: {
+          _token: $('meta[name="csrf-token"]').attr('content'),
+          product_id: field.value
+        },
+        success: function(data) {
+          var price =  data.price * crud.field('quantity').value;
+          var discount = price * discountPercentage.value / 100;
+          discountAmount.setAttribute('value', discount);
+          // console.log(discountAmount);
+        }
+      });
+    }
+  }
+}).change();
+
+crud.field('quantity').onChange(function(field) {
+  var discountPercentage = document.getElementsByName('discount_percentage')[0];
+  var discountAmount = document.getElementsByName('discount_amount')[0];
+  if (discountPercentage && discountAmount) {
+    if (field.value && crud.field('product_id').value) {
+      $.ajax({
+        url: '/product/get-product',
+        type: 'POST',
+        data: {
+          _token: $('meta[name="csrf-token"]').attr('content'),
+          product_id: crud.field('product_id').value
+        },
+        success: function(data) {
+          var price =  data.price * crud.field('quantity').value;
+          var discount = price * discountPercentage.value / 100;
+          discountAmount.setAttribute('value', discount);
+        }
+      });
+    }
+  }
+}).change();

@@ -291,9 +291,12 @@ class DatabaseSeeder extends Seeder
                 "is_member" => (isset($customer)) ? $customer->is_member : 0,
                 "member_id" => $csvData['Member ID'],
                 "product_id" => $csvData['Product ID'],
+                "discount_percentage" => $csvData['Diskon Percentage'],
+                "discount_amount" => $csvData['Diskon Amount'],
                 "quantity" => $csvData['Qty'],
                 "created_by" => 1,
                 "updated_by" => 1,
+                "type" => $csvData['Tipe Penjualan'] ?? "Normal",
             ];
 
             if (!$existTrans) {

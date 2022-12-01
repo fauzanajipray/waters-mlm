@@ -70,9 +70,9 @@ class LevelCrudController extends CrudController
         $this->crud->field('minimum_sold_by_downline');
         $this->crud->field('minimum_sold');
         $this->crud->field('ordering_level');
-        $this->crud->field('bp_percentage')->type('number')->label('BP Percentage');
-        $this->crud->field('gm_percentage')->type('number')->label('GM Percentage');
-        $this->crud->field('or_percentage')->type('number')->label('OR Percentage');
+        $this->crud->field('bp_percentage')->label('BP Percentage');
+        $this->crud->field('gm_percentage')->label('GM Percentage');
+        $this->crud->field('or_percentage')->label('OR Percentage');
     }
 
     /**

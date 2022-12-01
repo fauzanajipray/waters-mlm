@@ -110,4 +110,11 @@ class ProductCrudController extends CrudController
         $this->crud->column('updated_at');
         $this->crud->column('created_at');
     }
+
+    public function getProduct()
+    {
+        $id = request()->input('product_id');
+        $product = Product::find($id);
+        return response()->json($product);
+    }
 }

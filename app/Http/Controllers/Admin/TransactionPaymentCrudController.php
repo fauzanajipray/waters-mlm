@@ -108,7 +108,7 @@ class TransactionPaymentCrudController extends CrudController
             'type' => 'select2_from_array',
             'options' => ['Partial' => 'Partial', 'Full' => 'Full'],
             'allows_null' => false,
-            'default' => 'full',
+            'default' => 'Full',
             'tab' => 'Payment',
         ]);
         $data = Transaction::with(['transactionPayments', 'transactionProducts'])->where('id', request()->transaction_id)->first();
@@ -245,13 +245,18 @@ class TransactionPaymentCrudController extends CrudController
             // status paid
             $payment = TransactionPayment::create($requests);
             $transaction = Transaction::with(['transactionPayments', 'transactionProducts', 'member'])->find($requests['transaction_id']);
-            if ($transaction->transactionPayments->sum('amount') == $transaction->transactionProducts->sum('price')) {
+            $totalTransaction = $transaction->transactionProducts->sum(function($item){
+                return $item->price * $item->quantity;
+            });
+            if ($transaction->transactionPayments->sum('amount') == $totalTransaction) {
+                // dd($transaction);
                 $transaction->status_paid = true;
                 $transaction->save();
                 $lastPaymentDate = $transaction->transactionPayments->sortByDesc('payment_date')->first()->payment_date;
                 $this->calculateBonus($transaction, $transaction->member, $lastPaymentDate);
                 
             }
+            // dd('test');
             DB::commit();
             return redirect($this->crud->route);
         } catch (Exception $e) {

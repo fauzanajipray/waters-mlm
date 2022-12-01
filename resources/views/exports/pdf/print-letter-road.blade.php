@@ -8,7 +8,7 @@
     </head>
     <style>
             * {
-                font-size: 9px
+                font-size: 7.5pt
             }
             .td-style{
                 padding:0px;

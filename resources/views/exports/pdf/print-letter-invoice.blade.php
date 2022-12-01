@@ -8,7 +8,7 @@
     </head>
     <style>
             * {
-                font-size: 9px
+                font-size: 7.5pt
             }
             .td-style{
                 padding:0px;
@@ -54,7 +54,7 @@
             }
             #keuangan {
                 font-size: 10pt;
-                margin-top: 40px;
+                margin-top: 10px;
             }
             .panel-left2 {
                 float:left;
@@ -111,7 +111,7 @@
             <div class="panel-left">
                 <span><strong>FAKTUR PENJUALAN</strong> : <span>{{ $transaction->code }}</span><br/>
                 <span>Tanggal Kirim : </span><span>{{ $transaction->transaction_date }}<span><br/>
-                <span>Keterangan : </span><span style="border-bottom: 1px solid black; width: 100%;">{{ $transaction->shipping_notes ?? '-' }}</span><br/>
+                <span>Keterangan : </span><span>{{ $transaction->shipping_notes ?? '-' }}</span><br/>
             </div>
             <div class="panel-left">
                 <span>Alamat Kirim </span><span>:&nbsp;</span><span>{{ $transaction->shipping_address ?? '-' }}</span>
@@ -123,8 +123,8 @@
                 <tr>
                     <td><center>JUMLAH</center></td>
                     <td><center>NAMA BARANG</center></td>
-                    <td><center>KAPASITAS</center></td>
                     <td><center>MODEL</center></td>
+                    <td><center>KAPASITAS</center></td>
                     <td><center>HARGA NETTO</center></td>
                     <td><center>UNIQUE NUMBER</center></td>
                     <td><center>AUTHORIZER<br/>DISTRIBUTOR</center></td>
@@ -136,8 +136,8 @@
                 <tr>
                     <td>{{ $item->quantity }}</td>
                     <td>{{ strtoupper($item->name) }}</td>
-                    <td>{{ strtoupper($item->capacity) }}</td>
                     <td>{{ strtoupper($item->model) }}</td>
+                    <td>{{ strtoupper($item->capacity) }}</td>
                     <td>Rp.{{ number_format($item->price, 2, ',', '.') }}</td>
                     <td>{{ strtoupper($transaction->member->member_numb) }}</td>
                     <td>{{ strtoupper($transaction->member->name) }}</td>

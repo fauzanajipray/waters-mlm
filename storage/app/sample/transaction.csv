@@ -1,4 +1,4 @@
 ID,Code,Unique Number,ID Card Number Member,Member Name,Member ID,Level ID,Customer ID,Transaction Date,Shipping Address,Shipping Date,Shipping Notes,Product ID,Product Name,Product Model,Unit Price,Qty,Diskon Percentage,Diskon Amount,Tipe Penjualan,Product Notes
-1,TRX-221114-0001,1-1-0,12345,Hermanus Hambala,1,1,1,11/10/2022,,,,2,WATERS M/P - 14 Liter,BMP 2000," Rp19,600,000 ",1,,,Demokit,
-2,TRX-221114-0002,1-1-0,,Hermanus Hambala,1,1,2,11/11/2022,,,,1,WATERS M/P - 22 Liter,BMP 2000," Rp19,600,000 ",1,,,Demokit,
-3,TRX-221114-0003,1-4-1,,Lie Hoo Sioe,1,1,3,11/14/2022,,,,1,WATERS M/P - 22 Liter,BMP 1000," Rp13,800,000 ",1,,,Demokit,
+1,INV-221114-0001,1-1-0,12345,Hermanus Hambala,1,1,1,11/10/2022,,,,2,WATERS M/P - 14 Liter,BMP 2000," Rp19,600,000 ",1,,,Demokit,
+2,INV-221114-0002,1-1-0,,Hermanus Hambala,1,1,2,11/11/2022,,,,1,WATERS M/P - 22 Liter,BMP 2000," Rp19,600,000 ",1,,,Demokit,
+3,INV-221114-0003,1-4-1,,Lie Hoo Sioe,4,1,3,11/14/2022,,,,1,WATERS M/P - 22 Liter,BMP 1000," Rp13,800,000 ",1,,,Demokit,
