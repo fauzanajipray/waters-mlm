@@ -24,7 +24,6 @@ class Kernel extends ConsoleKernel
         $schedule->command('level-up-member')
             ->monthlyOn($dayEndInMonth, '23:00')
             // ->everyMinute()
-            ->emailOutputTo('fauzanjr1@gmail.com')
             ->appendOutputTo(storage_path('logs/level-up-member.log'))
             ->before(function () {
                 $this->call('down');
