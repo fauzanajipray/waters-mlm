@@ -32,6 +32,7 @@ Route::group([
     Route::crud('product', 'ProductCrudController');
     Route::post('product/get-product', 'ProductCrudController@getProduct');
     Route::post('product/get-demokit-products', 'ProductCrudController@getDemokitProducts');
+    Route::post('product/get-display-products', 'ProductCrudController@getDisplayProducts');
     Route::crud('transaction', 'TransactionCrudController');
     Route::post('transaction/check-customer', 'TransactionCrudController@checkCustomer');
     Route::get('transaction/{id}/download-letter-road', 'TransactionCrudController@downloadLetterRoad');

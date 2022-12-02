@@ -49,7 +49,7 @@ trait TransactionPaymentTrait {
                 $uplineLevel = Level::where('id', $upline->level_id)->first();
                 // dd($uplineProductSold, $upline->toArray(), $member->toArray(), $uplineLevel->toArray());
                 if ($uplineProductSold >= $upline->level->minimum_sold && $uplineLevel->gm_percentage > 0 && $this->isActiveMember($upline)) {  // Cek apakah pernah melakukan transaksi
-                    // TODO : Tanya Minimal transaksi atau jual produk
+                    
                     $bonus = BonusHistory::create([
                         'member_id' => $upline->id,
                         'member_numb' => $upline->member_numb,

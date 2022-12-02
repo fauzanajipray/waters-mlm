@@ -112,7 +112,6 @@ class MemberCrudController extends CrudController
             'type' => 'datetime',
         ]);
 
-        // TODO : Add this buttons
         $this->crud->addButtonFromModelFunction('line', 'line_register', 'line_register', 'beginning');
         $this->crud->addButtonFromModelFunction('line', 'cardMember', 'cardMember', 'beginning');
         $this->crud->addButtonFromModelFunction('line', 'reportMember', 'reportMember', 'beginning');

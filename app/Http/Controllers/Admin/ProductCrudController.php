@@ -149,4 +149,53 @@ class ProductCrudController extends CrudController
         });
         return $products;
     }
+
+    public function getDisplayProducts()
+    {
+        $search_term = request()->input('q');
+        $member_id = request()->input('form')[3];
+        if($member_id['name'] != 'member_id'){
+            return [];
+        }
+
+        if($search_term){
+            $products = Product::where('name', 'like', '%'.$search_term.'%')->get();
+        }else{
+            $products = Product::get();
+        }
+        $products->map(function($product){
+            $product->name = $product->name.' - '.$product->model. ' - '.$product->price;
+            return $product;
+        });
+
+        // Filter Sudah Pernah Membeli
+        $productBought = [];
+        $transactions = Transaction::with('transactionProducts')
+            ->where('member_id', $member_id['value'])->where('type', 'Normal')->where('status_paid', true)->get();
+        foreach($transactions as $transaction){
+            foreach($transaction->transactionProducts as $transactionProduct){
+                $productBought[$transactionProduct->product_id] = $transactionProduct->product_id;
+            }
+        }
+        $products = $products->filter(function($product) use ($productBought){
+            return isset($productBought[$product->id]);
+        });
+
+        // FIlter sudah beli display
+        $productBought = [];
+        $transactions = Transaction::with('transactionProducts')
+            ->where('member_id', $member_id['value'])->where('type', 'Display')->get();
+        foreach($transactions as $transaction){
+            foreach($transaction->transactionProducts as $transactionProduct){
+                $productBought[$transactionProduct->product_id] = $transactionProduct->product_id;
+            }
+        }
+        $products = $products->filter(function($product) use ($productBought){
+            return !isset($productBought[$product->id]);
+        });
+
+        return $products;
+    }
 }
+
+
