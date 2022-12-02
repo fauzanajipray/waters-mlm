@@ -163,10 +163,17 @@ class TransactionPaymentCrudController extends CrudController
         $transaction_id = $request['transaction_id'] ?? 0;
         $transaction = Transaction::findOrfail($transaction_id);
         $check = Transaction::with(['transactionPayments', 'transactionProducts'])->find($transaction_id);
-        $totalTransaction = $check->transactionProducts->sum(function($item){
-            return $item->price * $item->quantity;
-        });
-        if ($check->transactionPayments->sum('amount') >= $totalTransaction) {
+        $totalPrice =  0;
+        if ($transaction->type == 'Normal') {
+            $totalPrice = $transaction->transactionProducts->sum(function($item){
+                return $item->price * $item->quantity;
+            });
+        } else {
+            $totalPrice = $transaction->transactionProducts->sum(function($item){
+                return $item->price * $item->quantity - ($item->price * $item->quantity * $item->discount_percentage / 100);
+            });
+        }
+        if ($check->transactionPayments->sum('amount') >= $totalPrice) {
             return redirect()->back()->with('error', 'Transaction has been paid');
         }
         if($check->transactionPayments->count() > 0){
@@ -200,11 +207,19 @@ class TransactionPaymentCrudController extends CrudController
                 'disabled' => 'disabled'
             ],
         ])->beforeField('payment_method_id');
+        $totalPrice =  0;
+        if ($transaction->type == 'Normal') {
+            $totalPrice = $transaction->transactionProducts->sum(function($item){
+                return $item->price * $item->quantity;
+            });
+        } else {
+            $totalPrice = $transaction->transactionProducts->sum(function($item){
+                return $item->price * $item->quantity - ($item->price * $item->quantity * $item->discount_percentage / 100);
+            });
+        }
         $this->crud->addField([
             'name' => 'transaction_total',
-            'value' => $transaction->transactionProducts->sum(function($item){
-                return $item->price * $item->quantity;
-            }),
+            'value' => $totalPrice,
             'type' => 'number_format',
             'attributes' => [
                 'readonly' => 'readonly'
@@ -214,11 +229,10 @@ class TransactionPaymentCrudController extends CrudController
                 'class' => 'form-group col-md-6'
             ]
         ])->afterField('transaction_code');
+        $transactionBill = $totalPrice - $transaction->transactionPayments->sum('amount');
         $this->crud->addField([
             'name' => 'transaction_bill',
-            'value' => $transaction->transactionProducts->sum(function($item){
-                return $item->price * $item->quantity;
-            }) - $transaction->transactionPayments->sum('amount'),
+            'value' => $transactionBill,
             'type' => 'number_format',
             'attributes' => [
                 'readonly' => 'readonly'
@@ -245,10 +259,17 @@ class TransactionPaymentCrudController extends CrudController
             // status paid
             $payment = TransactionPayment::create($requests);
             $transaction = Transaction::with(['transactionPayments', 'transactionProducts', 'member'])->find($requests['transaction_id']);
-            $totalTransaction = $transaction->transactionProducts->sum(function($item){
-                return $item->price * $item->quantity;
-            });
-            if ($transaction->transactionPayments->sum('amount') == $totalTransaction) {
+            $totalPrice =  0;
+            if ($transaction->type == 'Normal') {
+                $totalPrice = $transaction->transactionProducts->sum(function($item){
+                    return $item->price * $item->quantity;
+                });
+            } else {
+                $totalPrice = $transaction->transactionProducts->sum(function($item){
+                    return $item->price * $item->quantity - ($item->price * $item->quantity * $item->discount_percentage / 100);
+                });
+            }
+            if ($transaction->transactionPayments->sum('amount') == $totalPrice) {
                 // dd($transaction);
                 $transaction->status_paid = true;
                 $transaction->save();

@@ -85,7 +85,6 @@
                     </table>
                 </div>
             </div>
-            {{-- {{ dd($payment) }} --}}
             <div class="panel-left" style="padding-left: 100px; padding-top: 40px;">
                 <img src="{{ public_path() . '/images/llogo-waters.jpg'}}" width="120"/> 
                 <div class="starter-kit">

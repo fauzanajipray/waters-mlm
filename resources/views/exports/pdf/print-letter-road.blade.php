@@ -125,7 +125,6 @@
                 </tr>
             </thead>
             <tbody>
-                {{-- {{ dd($data->transactionProducts) }} --}}
                 @foreach ($data->transactionProducts as $item)
                 <tr>
                     <td>{{ $item->quantity }}</td>

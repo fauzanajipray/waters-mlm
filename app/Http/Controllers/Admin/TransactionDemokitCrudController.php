@@ -29,7 +29,7 @@ class TransactionDemokitCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
     // use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
-    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
+    // use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
     use \App\Http\Traits\TransactionTrait;
 
@@ -382,6 +382,7 @@ class TransactionDemokitCrudController extends CrudController
                     'capacity' => $product->capacity,
                     'quantity' => $item['quantity'],
                     'product_notes' => $item['product_notes'],
+                    'discount_percentage' => $item['discount_percentage'],
                 ]);
                 $transactionProduct[] = $tp->toArray();
             }
