@@ -127,8 +127,8 @@
                     <td><center>KAPASITAS</center></td>
                     <td><center>HARGA NETTO</center></td>
                     <td><center>UNIQUE NUMBER</center></td>
-                    @if ($transaction->type == 'Demokit' || $transaction->type == 'Display')
-                        <td><center>DISKON (%)</center></td>
+                    @if ($transaction->type == 'Demokit' || $transaction->type == 'Display' || $transaction->type == 'Bebas Putus')
+                        <td><center>DISKON</center></td>
                     @endif
                     <td><center>AUTHORIZER<br/>DISTRIBUTOR</center></td>
                     <td><center>KETERANGAN</center></td>
@@ -144,7 +144,13 @@
                     <td>Rp.{{ number_format($item->price, 2, ',', '.') }}</td>
                     <td>{{ strtoupper($transaction->member->member_numb) }}</td>
                     @if ($transaction->type == 'Demokit' || $transaction->type == 'Display')
-                        <td>{{ $item->discount_percentage }}</td>
+                        <td>{{ $item->discount_percentage }} %</td>
+                    @elseif($transaction->type == 'Bebas Putus')
+                        @if ($item->discount_percentage > 0)
+                            <td>{{ $item->discount_percentage }} %</td>
+                        @else
+                            <td>Rp. {{ number_format($item->discount_amount, 2, ',', '.') }}</td>
+                        @endif
                     @endif
                     <td>{{ strtoupper($transaction->member->name) }}</td>
                     <td>{{ $item->product_notes ?? '-' }}</td>
@@ -158,7 +164,7 @@
                             </div>
                         </div>
                     </td>
-                    <td style="border: none !important;" colspan="@if($transaction->type == 'Demokit' || $transaction->type == 'Display') 6 @else 5 @endif">
+                    <td style="border: none !important;" colspan="@if($transaction->type == 'Demokit' || $transaction->type == 'Display' || $transaction->type == 'Bebas Putus') 6 @else 5 @endif">
                         <div style="margin-top: 12px;">
                             TOTAL : Rp. {{ number_format($transaction->total_price, 2, ',', '.') }}
                         </div>

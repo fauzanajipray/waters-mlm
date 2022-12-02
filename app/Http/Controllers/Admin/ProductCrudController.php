@@ -128,7 +128,10 @@ class ProductCrudController extends CrudController
             return [];
         }
         if($search_term){
-            $products = Product::where('is_demokit', 1)->where('name', 'like', '%'.$search_term.'%')->get();
+            $products = Product::where('is_demokit', 1)
+                ->where('name', 'like', '%'.$search_term.'%')
+                ->orWhere('model', 'like', '%'.$search_term.'%')
+                ->get();
         }else{
             $products = Product::where('is_demokit', 1)->get();
         }
@@ -159,7 +162,9 @@ class ProductCrudController extends CrudController
         }
 
         if($search_term){
-            $products = Product::where('name', 'like', '%'.$search_term.'%')->get();
+            $products = Product::where('name', 'like', '%'.$search_term.'%')
+                ->orWhere('model', 'like', '%'.$search_term.'%')
+                ->get();
         }else{
             $products = Product::get();
         }
@@ -192,6 +197,24 @@ class ProductCrudController extends CrudController
         }
         $products = $products->filter(function($product) use ($productBought){
             return !isset($productBought[$product->id]);
+        });
+
+        return $products;
+    }
+
+    public function getProducts()
+    {
+        $search_term = request()->input('q');
+        if($search_term){
+            $products = Product::where('name', 'like', '%'.$search_term.'%')
+                ->orWhere('model', 'like', '%'.$search_term.'%')
+                ->get();
+        }else{
+            $products = Product::get();
+        }
+        $products->map(function($product){
+            $product->name = $product->name.' - '.$product->model. ' - '.$product->price;
+            return $product;
         });
 
         return $products;

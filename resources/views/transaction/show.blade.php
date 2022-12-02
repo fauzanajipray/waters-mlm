@@ -121,8 +121,8 @@
                             <th>Capacity</th>
                             <th>Model</th>
                             <th>Price</th>
-                            @if ($entry->type == 'Demokit' || $entry->type == 'Display')
-                                <th>Discount (%)</th>
+                            @if ($entry->type == 'Demokit' || $entry->type == 'Display' || $entry->type == 'Bebas Putus')
+                                <th>Discount</th>
                             @endif
                             <th>Subtotal</th>
                             <th>Notes</th>
@@ -137,8 +137,16 @@
                                 <td>{{ $item->model }}</td>
                                 <td>Rp. {{ number_format($item->price, 2, ',', '.') }}</td>
                                 @if ($entry->type == 'Demokit' || $entry->type == 'Display')
-                                    <td>{{ $item->discount_percentage }}</td>
+                                    <td>{{ $item->discount_percentage }} %</td>
                                     <td>Rp. {{ number_format($item->price * $item->quantity - ($item->price * $item->quantity * $item->discount_percentage / 100), 2, ',', '.') }}</td>
+                                @elseif($entry->type == 'Bebas Putus')
+                                    @if ($item->discount_percentage > 0)
+                                        <td>{{ $item->discount_percentage }} %</td>
+                                        <td>Rp. {{ number_format($item->price * $item->quantity - ($item->price * $item->quantity * $item->discount_percentage / 100), 2, ',', '.') }}</td>
+                                    @else
+                                        <td>Rp. {{ number_format($item->discount_amount, 2, ',', '.') }}</td>
+                                        <td>Rp. {{ number_format($item->price * $item->quantity - $item->discount_amount, 2, ',', '.') }}</td>
+                                    @endif
                                 @else
                                     <td>Rp. {{ number_format($item->price * $item->quantity, 2, ',', '.') }}</td>
                                 @endif
@@ -146,7 +154,7 @@
                             </tr>
                         @endforeach
                         <tr>
-                            <td colspan="@if($entry->type == 'Demokit' || $entry->type == 'Display') 6 @else 5 @endif" style="text-align: right; font-weight: bold;">Total</td>
+                            <td colspan="@if($entry->type == 'Demokit' || $entry->type == 'Display' || $entry->type == 'Bebas Putus') 6 @else 5 @endif" style="text-align: right; font-weight: bold;">Total</td>
                             <td>Rp. {{ number_format($entry->total_price, 2, ',', '.') }}</td>
                             
                         </tr>

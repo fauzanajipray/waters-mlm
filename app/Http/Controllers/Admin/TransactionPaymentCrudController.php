@@ -168,6 +168,16 @@ class TransactionPaymentCrudController extends CrudController
             $totalPrice = $transaction->transactionProducts->sum(function($item){
                 return $item->price * $item->quantity;
             });
+        } else if ($transaction->type == 'Bebas Putus') {
+            $totalPrice = $transaction->transactionProducts->sum(function($item){
+                $discount = 0;
+                if ($item->discrount_percentage > 0) {
+                    $discount = $item->price * $item->discrount_percentage / 100;
+                } else if ($item->discrount_price > 0) {
+                    $discount = $item->discrount_price;
+                }
+                return $item->price * $item->quantity - $discount;
+            });
         } else {
             $totalPrice = $transaction->transactionProducts->sum(function($item){
                 return $item->price * $item->quantity - ($item->price * $item->quantity * $item->discount_percentage / 100);
@@ -211,6 +221,16 @@ class TransactionPaymentCrudController extends CrudController
         if ($transaction->type == 'Normal') {
             $totalPrice = $transaction->transactionProducts->sum(function($item){
                 return $item->price * $item->quantity;
+            });
+        } else if ($transaction->type == 'Bebas Putus') {
+            $totalPrice = $transaction->transactionProducts->sum(function($item){
+                $discount = 0;
+                if ($item->discount_percentage > 0) {
+                    $discount = $item->price * $item->discrount_percentage / 100;
+                } else  {
+                    $discount = $item->discount_amount;
+                }
+                return $item->price * $item->quantity - $discount;
             });
         } else {
             $totalPrice = $transaction->transactionProducts->sum(function($item){
@@ -264,20 +284,28 @@ class TransactionPaymentCrudController extends CrudController
                 $totalPrice = $transaction->transactionProducts->sum(function($item){
                     return $item->price * $item->quantity;
                 });
+            } else if ($transaction->type == 'Bebas Putus'){
+                $totalPrice = $transaction->transactionProducts->sum(function($item) use ($transaction){
+                    $discount = 0;
+                    if ($item->discount_percentage > 0) {
+                        $discount = $item->price * $item->quantity * $item->discount_percentage / 100;
+                    } else {
+                        $discount = $item->discount_amount;
+                    }
+                    return $item->price * $item->quantity - $discount;
+                });
             } else {
                 $totalPrice = $transaction->transactionProducts->sum(function($item){
                     return $item->price * $item->quantity - ($item->price * $item->quantity * $item->discount_percentage / 100);
                 });
             }
             if ($transaction->transactionPayments->sum('amount') == $totalPrice) {
-                // dd($transaction);
                 $transaction->status_paid = true;
                 $transaction->save();
                 $lastPaymentDate = $transaction->transactionPayments->sortByDesc('payment_date')->first()->payment_date;
                 $this->calculateBonus($transaction, $transaction->member, $lastPaymentDate);
                 
             }
-            // dd('test');
             DB::commit();
             return redirect($this->crud->route);
         } catch (Exception $e) {
