@@ -1,5 +1,6 @@
 <?php
 
+use FontLib\Table\Type\post;
 use Illuminate\Support\Facades\Route;
 
 // --------------------------
@@ -30,11 +31,13 @@ Route::group([
     Route::crud('permission', 'PermissionCrudController');
     Route::crud('product', 'ProductCrudController');
     Route::post('product/get-product', 'ProductCrudController@getProduct');
+    Route::post('product/get-demokit-products', 'ProductCrudController@getDemokitProducts');
     Route::crud('transaction', 'TransactionCrudController');
     Route::post('transaction/check-customer', 'TransactionCrudController@checkCustomer');
     Route::get('transaction/{id}/download-letter-road', 'TransactionCrudController@downloadLetterRoad');
     Route::get('transaction/{id}/download-invoice', 'TransactionCrudController@downloadInvoice');
     Route::crud('transaction-display', 'TransactionDisplayCrudController');
+    Route::crud('transaction-demokit', 'TransactionDemokitCrudController');
     Route::crud('level', 'LevelCrudController');
     Route::crud('bonus-history', 'BonusHistoryCrudController');
     Route::crud('level-up-histories', 'LevelUpHistoriesCrudController');

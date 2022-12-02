@@ -64,7 +64,7 @@ class TransactionCrudController extends CrudController
             'member_name',
             'total_price', 
             'id_card',
-            'member_id',
+            'customer_id',
             [
                 'name' => 'level_id',
                 'label' => 'Level',

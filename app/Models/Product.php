@@ -27,6 +27,7 @@ class Product extends Model
         'model',
         'capacity',
         'price',
+        'is_demokit'
     ];
     // protected $hidden = [];
     // protected $dates = [];

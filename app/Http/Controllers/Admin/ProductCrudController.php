@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\ProductRequest;
 use App\Models\Product;
+use App\Models\Transaction;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
@@ -72,6 +72,7 @@ class ProductCrudController extends CrudController
         $this->crud->field('model')->label('Model');
         $this->crud->field('capacity')->label('Capacity');
         $this->crud->field('price')->label('Netto Price')->type('number_format')->prefix('Rp. ');
+        $this->crud->field('is_demokit')->label('Is Demokit');
     }
 
     /**
@@ -107,6 +108,7 @@ class ProductCrudController extends CrudController
     protected function setupShowOperation()
     {
         $this->setupListOperation();
+        $this->crud->column('is_demokit')->label('Is Demokit')->type('boolean');
         $this->crud->column('updated_at');
         $this->crud->column('created_at');
     }
@@ -116,5 +118,35 @@ class ProductCrudController extends CrudController
         $id = request()->input('product_id');
         $product = Product::find($id);
         return response()->json($product);
+    }
+    
+    public function getDemokitProducts()
+    {
+        $search_term = request()->input('q');
+        $member_id = request()->input('form')[3];
+        if($member_id['name'] != 'member_id'){
+            return [];
+        }
+        if($search_term){
+            $products = Product::where('is_demokit', 1)->where('name', 'like', '%'.$search_term.'%')->get();
+        }else{
+            $products = Product::where('is_demokit', 1)->get();
+        }
+        $products->map(function($product){
+            $product->name = $product->name.' - '.$product->model. ' - '.$product->price;
+            return $product;
+        });
+        $productBought = [];
+        $transactions = Transaction::with('transactionProducts')
+            ->where('member_id', $member_id['value'])->where('type', 'Demokit')->get();
+        foreach($transactions as $transaction){
+            foreach($transaction->transactionProducts as $transactionProduct){
+                $productBought[$transactionProduct->product_id] = $transactionProduct->product_id;
+            }
+        }
+        $products = $products->filter(function($product) use ($productBought){
+            return !isset($productBought[$product->id]);
+        });
+        return $products;
     }
 }

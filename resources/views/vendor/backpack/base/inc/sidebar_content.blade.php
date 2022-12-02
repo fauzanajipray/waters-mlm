@@ -20,7 +20,7 @@
     {{-- Tranasction Display --}}
     <li class="nav-item"><a class="nav-link" href="#{{-- backpack_url('transaction-display') --}}"><i class="nav-icon la la-dollar"></i> <span>Display</span></a></li>
     {{-- Transaction Demokit --}}
-    <li class="nav-item"><a class="nav-link" href="#{{-- backpack_url('transaction-demokit') --}}"><i class="nav-icon la la-dollar"></i> <span>Demokit</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="{{ backpack_url('transaction-demokit') }}"><i class="nav-icon la la-dollar"></i> <span>Demokit</span></a></li>
     {{-- Transaction Bebas Putus --}}
     <li class="nav-item"><a class="nav-link" href="#{{-- backpack_url('transaction-bebas-putus') --}}"><i class="nav-icon la la-dollar"></i> <span>Bebas Putus</span></a></li>
     <li class= "nav-item"><a class="nav-link" href="{{ backpack_url('transaction-payment') }}"><i class="nav-icon la la-money-bill"></i> <span>Payments</span></a></li>

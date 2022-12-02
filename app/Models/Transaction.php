@@ -95,6 +95,11 @@ class Transaction extends Model
     |--------------------------------------------------------------------------
     */
 
+    public function scopeThisMonthAndYear($query)
+    {
+        return $query->whereMonth('created_at', date('m'))->whereYear('created_at', date('Y'));
+    }
+    
     /*
     |--------------------------------------------------------------------------
     | ACCESSORS

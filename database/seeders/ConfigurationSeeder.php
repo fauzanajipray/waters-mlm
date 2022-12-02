@@ -32,5 +32,21 @@ class ConfigurationSeeder extends Seeder
             'value' => '100000',
             'description' => 'Payment amount',
         ]);
+
+        Configuration::updateOrCreate([
+            'key' => 'transaction_demokit_discount_percentage',
+        ],[
+            'key' => 'transaction_demokit_discount_percentage',
+            'value' => '50',
+            'description' => 'Transaction demokit discount percentage',
+        ]);
+
+        Configuration::updateOrCreate([
+            'key' => 'transaction_diplay_discount_amount',
+        ],[
+            'key' => 'transaction_display_discount_amount',
+            'value' => '50',
+            'description' => 'Transaction display discount amount',
+        ]);
     }
 }

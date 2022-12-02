@@ -121,6 +121,9 @@
                             <th>Capacity</th>
                             <th>Model</th>
                             <th>Price</th>
+                            @if ($entry->type == 'Demokit' || $entry->type == 'Display')
+                                <th>Discount (%)</th>
+                            @endif
                             <th>Subtotal</th>
                         </tr>
                     </thead>
@@ -131,12 +134,17 @@
                                 <td>{{ $item->name }}</td>
                                 <td>{{ $item->capacity }}</td>
                                 <td>{{ $item->model }}</td>
-                                <td>Rp.{{ number_format($item->price, 2, ',', '.') }}</td>
-                                <td>Rp.{{ number_format($item->price * $item->quantity, 2, ',', '.') }}</td>
+                                <td>Rp. {{ number_format($item->price, 2, ',', '.') }}</td>
+                                @if ($entry->type == 'Demokit' || $entry->type == 'Display')
+                                    <td>{{ $item->discount_percentage }}</td>
+                                    <td>Rp. {{ number_format($item->price * $item->quantity - ($item->price * $item->quantity * $item->discount_percentage / 100), 2, ',', '.') }}</td>
+                                @else
+                                    <td>Rp. {{ number_format($item->price * $item->quantity, 2, ',', '.') }}</td>
+                                @endif
                             </tr>
                         @endforeach
                         <tr>
-                            <td colspan="5" style="text-align: right; font-weight: bold;">Total</td>
+                            <td colspan="@if($entry->type == 'Demokit' || $entry->type == 'Display') 6 @else 5 @endif" style="text-align: right; font-weight: bold;">Total</td>
                             <td>Rp. {{ number_format($entry->total_price, 2, ',', '.') }}</td>
                         </tr>
                     </tbody>

@@ -35,8 +35,11 @@ class LevelUpMember extends Command
         DB::beginTransaction();
         try {
             $this->info('Level up member started, Date : '. date('Y-m-d H:i:s'));
-            $transactions = Transaction::select('id', 'member_id', 'total_price','status_paid', 'created_at')->where('status_paid', true)->get();
-            $this->table(['ID', 'Member', 'Total Price', 'Status Paid', 'Create At'], $transactions->toArray());
+            $transactions = Transaction::with(['member', 'transactionPayments'])
+                ->thisMonthAndYear()
+                ->where('type', 'Normal')
+                ->where('status_paid', true)->get();
+            // $this->table(['ID', 'Member', 'Total Price', 'Status Paid', 'Create At'], $transactions->toArray());
             foreach($transactions as $transaction){
                 $this->levelUpMember($transaction->member->id);
             }

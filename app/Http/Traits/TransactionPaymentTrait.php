@@ -20,6 +20,9 @@ trait TransactionPaymentTrait {
     {
         /* Bonus Penjualan Pribadi */
         $levelNow = Level::where('id', $member->level_id)->first();
+        if ($this->isMemberTypePusat($member) && $transaction->type != 'Normal'){
+            return;
+        }
         if ($this->isActiveMember($member)) {
             $bonus = BonusHistory::create([
                 'member_id' => $member->id,
@@ -176,6 +179,7 @@ trait TransactionPaymentTrait {
         foreach ($downline as $key => $value) {
             $downlineSold = 0;
             foreach ($value->transactions as $key => $transaction) {
+                if($transaction->type != 'Normal') continue;
                 foreach ($transaction->transactionProducts as $key => $transactionProduct) {
                     $downlineSold += $transactionProduct->quantity;
                 }
@@ -202,6 +206,14 @@ trait TransactionPaymentTrait {
             return false;
         }
         return true;
+    }
+
+    private function isMemberTypePusat($member) 
+    {
+        if ($member->type == 'PUSAT') {
+            return true;
+        }
+        return false;
     }
 
 }
