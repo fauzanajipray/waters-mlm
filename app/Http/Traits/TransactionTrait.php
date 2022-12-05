@@ -47,12 +47,12 @@ trait TransactionTrait {
 
     public function downloadInvoice($id){
         $transaction = Transaction::with(['transactionProducts', 'customer', 'member', 'transactionPayments'])
-            ->join('transaction_payments', 'transaction_payments.transaction_id', '=', 'transactions.id')
-            ->join('transaction_products', 'transaction_products.transaction_id', '=', 'transactions.id')
-            ->select('transactions.*', 'transaction_payments.type as payment_type',
-                DB::raw('SUM(transaction_payments.amount) as total_paid'),
-            )
             ->find($id);
+        $transaction->total_paid = $transaction->transactionPayments->sum('amount');
+        $transaction->payment_type = null;
+        if ($transaction->transactionPayments->count() > 0)   { 
+            $transaction->payment_type = $transaction->transactionPayments->first()->type ;
+        };
         if (!$transaction) {
             return redirect()->back()->with('error', 'Data tidak ditemukan');
         }
