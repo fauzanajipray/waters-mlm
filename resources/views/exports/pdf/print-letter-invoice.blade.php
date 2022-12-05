@@ -73,34 +73,38 @@
             <div class="panel-left" style="width:60% !important; margin-right: 12px;">
                 <div id="description-official">
                     <h3>CV. CNA INDONESIA</h3>
-                    <span>JL. MAYJEND SUTOYO 942 SEMARANG 50134 - JAWA TENGAH</span>
-                    <span>TELEPON : (+62-24) 8414756 - FACSIMILE (+62-24) 7462356</span>
-                    <span>WEBSITE: www.waters.co.id - email : andygouw@waters.co.id</span>
-                    <br/><br/><br/>
+                    <span>Jl. Mayjend Sutoyo Siswomiharjo No. 942, Semarang 50134</span>
+                    <br />
+                    <span>Telepon : (+62-24) 8414756 - WA (+62) 81326613526</span>
+                    <br />
+                    <span>Web : waters.co.id - Email : andygouw@waters.co.id</span>
+                    <br/>
                     <span>NPWP : 60.351.086.8-509.000</span>
                 </div>
             </div>
             <div class="panel-left2">
-                KEPADA Yang terhormat,
                 <table>
                     <tr>
-                        <td style="width: 70px;">Nama</td>
-                        <td>:&nbsp;</td>
+                        <td colspan="3">KEPADA Yang terhormat,</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 40px;">Nama</td>
+                        <td style="width: 10px; text-align: center;">:&nbsp;</td>
                         <td>{{ $transaction->customer->name }}</td>
                     </tr>
                     <tr>
-                        <td style="width: 70px;">Alamat</td>
-                        <td>:&nbsp;</td>
+                        <td style="width: 40px;">Alamat</td>
+                        <td style="width: 10px; text-align: center;">:&nbsp;</td>
                         <td>{{ $transaction->customer->address }}</td>
                     </tr>
                     <tr>
-                        <td style="width: 70px;">Kota</td>
-                        <td>:&nbsp;</td>
+                        <td style="width: 40px;">Kota</td>
+                        <td style="width: 10px; text-align: center;">:&nbsp;</td>
                         <td>{{ $transaction->customer->city }}</td>
                     </tr>
                     <tr>
-                        <td style="width: 70px;">Telp/HP</td>
-                        <td>:&nbsp;</td>
+                        <td style="width: 40px;">Telp/HP</td>
+                        <td style="width: 10px; text-align: center;">:&nbsp;</td>
                         <td>{{ $transaction->customer->phone }}</td>
                     </tr>
                 </table>
@@ -114,6 +118,7 @@
                 <span>Keterangan : </span><span>{{ $transaction->shipping_notes ?? '-' }}</span><br/>
             </div>
             <div class="panel-left">
+                <br />
                 <span>Alamat Kirim </span><span>:&nbsp;</span><span>{{ $transaction->shipping_address ?? '-' }}</span>
             </div>
             <div style="clear:both;"></div>
@@ -137,7 +142,7 @@
             <tbody>
                 @foreach ($transaction->transactionProducts as $item)
                 <tr>
-                    <td>{{ $item->quantity }}</td>
+                    <td>{{ $item->quantity }} Unit</td>
                     <td>{{ strtoupper($item->name) }}</td>
                     <td>{{ strtoupper($item->model) }}</td>
                     <td>{{ strtoupper($item->capacity) }}</td>
@@ -157,18 +162,18 @@
                 </tr>
                 @endforeach
                 <tr style="border: none !important;">
-                    <td style="border: none !important;" colspan="3">
+                    <td style="border: none !important;" colspan="8">
                         <div>
                             <div style="margin-top: 12px;">
                                 <span>Terbilang : </span><span style="border-bottom: 1px solid black; width: 100%;">{{ $transaction->terbilang }}</span>
                             </div>
                         </div>
                     </td>
-                    <td style="border: none !important;" colspan="@if($transaction->type == 'Demokit' || $transaction->type == 'Display' || $transaction->type == 'Bebas Putus') 6 @else 5 @endif">
+                    {{-- <td style="border: none !important;" colspan="@if($transaction->type == 'Demokit' || $transaction->type == 'Display' || $transaction->type == 'Bebas Putus') 6 @else 5 @endif">
                         <div style="margin-top: 12px;">
                             TOTAL : Rp. {{ number_format($transaction->total_price, 2, ',', '.') }}
                         </div>
-                    </td>
+                    </td> --}}
                 </tr>
             </tbody>
         </table>
