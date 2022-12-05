@@ -282,7 +282,7 @@ class DatabaseSeeder extends Seeder
         $transCrud = new TransactionCrudController();
 
         foreach ($csvDatas as $csvData) {
-            $existTrans = Transaction::where("code", $csvData['Code'])->exists();
+            $existTrans = Transaction::where("code", $csvData['Code'] ?? 0)->exists();
             $customer = Customer::where("id", $csvData['Customer ID'])->first();
 
             $requests = [
@@ -292,8 +292,8 @@ class DatabaseSeeder extends Seeder
                 "is_member" => (isset($customer)) ? $customer->is_member : 0,
                 "member_id" => $csvData['Member ID'],
                 "product_id" => $csvData['Product ID'],
-                "discount_percentage" => $csvData['Diskon Percentage'],
-                "discount_amount" => $csvData['Diskon Amount'],
+                "discount_percentage" => $csvData['Discount Percentage'],
+                "discount_amount" => $csvData['Discount Amount'],
                 "quantity" => $csvData['Qty'],
                 "created_by" => 1,
                 "updated_by" => 1,

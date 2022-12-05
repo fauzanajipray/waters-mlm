@@ -68,7 +68,7 @@ trait TransactionTrait {
         $pdf = Pdf::loadView('exports.pdf.print-letter-invoice', [
             'transaction' => $transaction,
         ]);
-        $customPaper = array(0,0,612.00,396.80);
+        $customPaper = array(0,0,612.00,396.80); // 8.5 x 5.5 inch
         $pdf->set_paper($customPaper);
         return $pdf->stream('Invoice '.$transaction->code.'.pdf');
         // return view('exports.pdf.print-letter-invoice', [
