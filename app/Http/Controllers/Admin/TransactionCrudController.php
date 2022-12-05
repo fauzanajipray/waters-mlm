@@ -192,6 +192,7 @@ class TransactionCrudController extends CrudController
                 'wrapperAttributes' => [
                     'class' => 'form-group col-md-6'
                 ],
+                'tab' => 'Product',
             ],
             [
                 'name' => 'quantity',
@@ -201,6 +202,11 @@ class TransactionCrudController extends CrudController
                 'wrapperAttributes' => [
                     'class' => 'form-group col-md-6'
                 ],
+                'tab' => 'Product',
+                'default' => 1,
+                'attributes' => [
+                    'readonly' => 'readonly',
+                ],
             ],
             [
                 'name' => 'product_notes',
@@ -209,6 +215,7 @@ class TransactionCrudController extends CrudController
                 'wrapperAttributes' => [
                     'class' => 'form-group col-md-12'
                 ],
+                'tab' => 'Product',
             ],
         ]);
         // $this->crud->addField([

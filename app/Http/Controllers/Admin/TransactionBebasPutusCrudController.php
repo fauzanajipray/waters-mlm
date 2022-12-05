@@ -202,6 +202,10 @@ class TransactionBebasPutusCrudController extends CrudController
                 ],
                 'value' => 1,
                 'tab' => 'Product',
+                'attributes' => [
+                    'readonly' => 'readonly'
+                ],
+                'default' => 1,
             ],
             [
                 'name' => 'type_discount',

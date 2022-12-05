@@ -39,7 +39,7 @@ class TransactionRequest extends FormRequest
             }],
             'member_id' => 'required|exists:members,id',
             'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|numeric|min:1',
+            'quantity' => 'required|numeric|min:1|in:1',
             'shipping_address' => 'required|max:255',
             // 'products' => 'required|array',
             // 'products.*.product_id' => 'required|exists:products,id',
