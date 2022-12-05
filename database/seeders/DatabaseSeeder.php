@@ -31,13 +31,13 @@ class DatabaseSeeder extends Seeder
         $this->call(ConfigurationSeeder::class);
         $this->call(RoleSeeder::class);
         // $this->call(BranchSeeder::class);
-        $this->user();
+        // $this->user();
         $this->product();
         $this->level();
         $this->office();
-        $this->member();
-        $this->customer();
-        $this->transaction();
+        // $this->member();
+        // $this->customer();
+        // $this->transaction();
         $this->paymentMethod();
         // // $this->call(MemberSeeder::class);
     }
