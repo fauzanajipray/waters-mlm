@@ -11,6 +11,7 @@ use App\Models\TransactionProduct;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Prologue\Alerts\Facades\Alert;
 use Nasution\Terbilang;
 
@@ -45,13 +46,25 @@ trait TransactionTrait {
     }
 
     public function downloadInvoice($id){
-        $transaction = Transaction::with(['transactionProducts', 'customer', 'member'])->find($id);
+        $transaction = Transaction::with(['transactionProducts', 'customer', 'member', 'transactionPayments'])
+            ->join('transaction_payments', 'transaction_payments.transaction_id', '=', 'transactions.id')
+            ->join('transaction_products', 'transaction_products.transaction_id', '=', 'transactions.id')
+            ->select('transactions.*', 'transaction_payments.type as payment_type',
+                DB::raw('SUM(transaction_payments.amount) as total_paid'),
+            )
+            ->find($id);
         if (!$transaction) {
             return redirect()->back()->with('error', 'Data tidak ditemukan');
         }
         $convert = new Terbilang();
         $terbilang = $convert->convert($transaction->total_price) . ' rupiah';
         $transaction->terbilang = ucwords($terbilang);
+        if($transaction->total_price == $transaction->total_paid){
+            $transaction->shipping_notes = 'Lunas, Pembayaran dilakukan dengan metode '. $transaction->payment_type . ', '.$transaction->shipping_notes;
+        }else{
+            $text = ($transaction->payment_type) ? 'Pembayaran dilakukan dengan metode '. $transaction->payment_type . ', ' : '';
+            $transaction->shipping_notes = 'Belum Lunas, ' . $text . $transaction->shipping_notes;
+        }
         $pdf = Pdf::loadView('exports.pdf.print-letter-invoice', [
             'transaction' => $transaction,
         ]);
