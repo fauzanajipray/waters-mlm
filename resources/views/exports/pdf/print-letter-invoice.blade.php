@@ -8,7 +8,7 @@
     </head>
     <style>
             * {
-                font-size: 7.5pt
+                font-size: 8pt
             }
             .td-style{
                 padding:0px;
@@ -32,8 +32,9 @@
                 color: black;
             }
             body {
-                font-family: monospace;
+                font-family: Verdana, Calibri, Tahoma, sans-serif;
                 font-size: 12pt;
+                word-spacing: normal;
             }
             .panel-left {
                 float:left;
