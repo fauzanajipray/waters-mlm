@@ -4,9 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\BranchRequest;
 use App\Models\Branch;
+use App\Models\Member;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 
 use function PHPUnit\Framework\isEmpty;
 
@@ -59,7 +63,7 @@ class BranchCrudController extends CrudController
                 },
             ],
         ]);
-        // $this->crud->addButtonFromModelFunction('line', 'add_owner', 'addOwnerButton', 'end');
+        $this->crud->addButtonFromModelFunction('line', 'add_owner', 'addOwnerButton', 'end');
     }
 
     /**
@@ -92,6 +96,11 @@ class BranchCrudController extends CrudController
     protected function setupUpdateOperation()
     {
         $this->setupCreateOperation();
+        $this->crud->modifyField('type', [
+            'attributes' => [
+                'disabled' => 'disabled',
+            ],
+        ]);
     }
 
     public function memberNotExist(Request $request){
@@ -134,5 +143,93 @@ class BranchCrudController extends CrudController
                 ->get();
         }
         return $branch;
+    }
+
+    protected function setupUpdateRoutes($segment, $routeName, $controller)
+    {
+        Route::get($segment.'/{id}/edit', [
+            'as'        => $routeName.'.edit',
+            'uses'      => $controller.'@edit',
+            'operation' => 'update',
+        ]);
+
+        Route::put($segment.'/{id}', [
+            'as'        => $routeName.'.update',
+            'uses'      => $controller.'@update',
+            'operation' => 'update',
+        ]);
+
+        Route::get($segment.'/{id}/addOwner', [
+            'as'        => $routeName.'.addOwner',
+            'uses'      => $controller.'@addOwner',
+            'operation' => 'update',
+        ]);
+    }
+
+    public function addOwner($id){
+        $this->crud->hasAccessOrFail('update');
+        // get entry ID from Request (makes sure its the last ID for nested resources)
+        $id = $this->crud->getCurrentEntryId() ?? $id;
+        // get the info for that entry
+
+        $this->data['entry'] = $this->crud->getEntryWithLocale($id);
+        $this->crud->setOperationSetting('fields', $this->crud->getUpdateFields());
+
+        $this->data['crud'] = $this->crud;
+        $this->data['saveAction'] = $this->crud->getSaveAction();
+        $this->data['title'] = 'Add Owners';
+        $this->data['id'] = $id;
+
+        $this->crud->removeAllFields();
+        $this->crud->addFields([
+            [
+                'name' => 'update_type',
+                'type' => 'hidden',
+                'value' => 'add_owner',
+                'attributes' => [
+                    'id' => 'update_type'
+                ],
+            ],
+            [
+                'name' => 'member_id',
+                'label' => 'Member',
+                'type' => 'select2_from_ajax',
+                'entity' => 'member',
+                'attribute' => 'text',
+                'model' => 'App\Models\Member',
+                'data_source' => url('members/not-branch-owner'),
+            ]
+        ]);
+        
+        $this->crud->setEntityNameStrings('owners', 'Owners');
+
+        return view($this->crud->getEditView(), $this->data);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $this->crud->hasAccessOrFail('update');
+        $update_type = $request->update_type;
+        if($update_type == 'add_owner') {
+            DB::beginTransaction();
+            try {
+                $member_id = $request->member_id;
+                $branch_id = $request->id;
+                $branch_type = Branch::find($branch_id)->type;
+                $member = Member::find($member_id);
+                $member->branch_id = $branch_id;
+                $member->member_type = $branch_type;
+                $member->save();
+                DB::commit();
+                return redirect()->route('branch.index');
+            } catch (Exception $e) {
+                DB::rollback();
+                return redirect()->back()->with('error', $e->getMessage());
+            }
+        } else {
+            $request = $this->crud->validateRequest();
+            $this->crud->update($id, $request->all());
+            return $this->crud->performSaveAction($id);
+        }
     }
 }

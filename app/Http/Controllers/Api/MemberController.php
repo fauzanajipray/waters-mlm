@@ -65,7 +65,7 @@ class MemberController extends Controller
         return $members;
     }
 
-    public function onlyActive(Request$request){
+    public function onlyActive(Request $request){
         $search_term = $request->input('q');
         if($search_term) {
             $members = Member::active()->where(function ($query) use ($search_term) {
@@ -81,6 +81,33 @@ class MemberController extends Controller
                 });
         } else {
             $members = Member::active()->paginate(10);
+            $members->map(function($member) {
+                $text = $member->member_numb . ' - ' . $member->name;
+                $member->text = $text;
+                return $member;
+            });
+        }
+        return $members;
+    }
+
+    public function notBranchOwner(Request $request) {
+        $search_term = $request->input('q');
+        if($search_term) {
+            $members = Member::active()->where(function ($query) use ($search_term) {
+                $query->where('name', 'LIKE', '%'.$search_term.'%')
+                    ->orWhere('member_numb', 'LIKE', '%'.$search_term.'%')
+                    ->orWhere('id_card', 'LIKE', '%'.$search_term.'%')
+                    ->where('member_type', 'PERSONAL');
+                })
+                ->paginate(10);
+                $members->map(function($member) {
+                    $text = $member->member_numb . ' - ' . $member->name;
+                    $member->text = $text;
+                    return $member;
+                });
+        } else {
+            $members = Member::active()
+                ->where('member_type', 'PERSONAL')->paginate(10);
             $members->map(function($member) {
                 $text = $member->member_numb . ' - ' . $member->name;
                 $member->text = $text;
