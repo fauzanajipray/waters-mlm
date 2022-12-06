@@ -219,7 +219,7 @@ class DatabaseSeeder extends Seeder
                         "upline_id" => (isset($memberMst)) ? $memberMst->id : null,
                         "member_type" => strtoupper($csvData["Member Type"]),
                         "branch_id" => $csvData["Office ID"],
-                        "lastpayment_status" => $csvData["Last Payment Status"],
+                        "lastpayment_status" => $csvData["Last Payment Status"] == "Paid" ? "1" : "0",
                         "npwp" => $csvData["NPWP Number"],
                     ]);
             
