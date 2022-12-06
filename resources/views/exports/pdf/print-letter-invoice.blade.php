@@ -14,7 +14,6 @@
                 padding:0px;
             }
             #transactions {
-                font-family: Arial, Helvetica, sans-serif;
                 border-collapse: collapse;
                 width: 100%;
                 margin-top: 12px;
@@ -28,14 +27,14 @@
                 padding-top: 12px;
                 padding-bottom: 12px;
                 text-align: left;
-                background-color: #ffff00;
+                font-weight: bold;
+                /* background-color: #ffff00; */
                 color: black;
             }
             body {
-                font-family: Arial, Helvetica, sans-serif;
+                font-family: monospace;
                 font-size: 12pt;
             }
-            
             .panel-left {
                 float:left;
                 width:55%;
@@ -47,7 +46,7 @@
             h3 {
                 padding:0px;
                 margin:0px;
-                font-family: 'Times New Roman';
+                /* font-family: 'Times New Roman'; */
             }
             #description-official {
                 font-size: 14px;
@@ -66,6 +65,9 @@
             }
             table td, table td * {
                 vertical-align: top;
+            }
+            @page{
+                margin: 20px;
             }
     </style>
     <body>
@@ -95,7 +97,7 @@
                     <tr>
                         <td style="width: 40px;">Alamat</td>
                         <td style="width: 10px; text-align: center;">:&nbsp;</td>
-                        <td>{{ $transaction->customer->address }}</td>
+                        <td style="max-width: 250px;">{{ $transaction->customer->address }}</td>
                     </tr>
                     <tr>
                         <td style="width: 40px;">Kota</td>
@@ -117,9 +119,12 @@
                 <span>Tanggal Kirim : </span><span>{{ $transaction->transaction_date }}<span><br/>
                 <span>Keterangan : </span><span>{{ $transaction->shipping_notes ?? '-' }}</span><br/>
             </div>
-            <div class="panel-left">
+            <div class="panel-left" style="max-width: 350px;">
                 <br />
-                <span>Alamat Kirim </span><span>:&nbsp;</span><span>{{ $transaction->shipping_address ?? '-' }}</span>
+                <span>Alamat Kirim </span>
+                    <span>:&nbsp;</span>
+                    <span>{{ $transaction->shipping_address ?? '-' }}
+                </span>
             </div>
             <div style="clear:both;"></div>
         </div>
