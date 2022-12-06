@@ -48,11 +48,16 @@ class TransactionPaymentCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-                
-        $this->crud->column('transaction_id')->wrapper([
-            'href' => function ($crud, $column, $entry, $related_key) {
-                return backpack_url('transaction/'.$entry->transaction_id.'/show');
-            },
+        $this->crud->addColumn([
+            'name' => 'transaction_id',
+            'label' => 'Transaction Code',
+            'entity' => 'transaction',
+            'attribute' => 'code',
+            'wrapper' => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('transaction/'.$entry->transaction_id.'/show');
+                },
+            ],
         ]);
         $this->crud->column('payment_date');
         $this->crud->column('payment_name');

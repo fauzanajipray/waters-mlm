@@ -39,12 +39,12 @@ class TransactionPayment extends Model
     */
 
     public function paymentMethod(){
-        $this->belongsTo(PaymentMethod::class, 'payment_method_id');
+        return $this->belongsTo(PaymentMethod::class, 'payment_method_id');
     }
 
-    // public function transaction(){
-    //     $this->belongsTo(Transaction::class, 'transaction_id', 'id', 'transactions');
-    // }
+    public function transaction(){
+        return $this->belongsTo(Transaction::class, 'transaction_id');
+    }
 
     /*
     |--------------------------------------------------------------------------

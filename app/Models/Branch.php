@@ -29,13 +29,13 @@ class Branch extends Model
     |--------------------------------------------------------------------------
     */
 
-    // public function addOwnerButton()
-    // {
-    //     $member =  $this->member;
-    //     if (!$member) {
-    //         return '<a href="' . route('member.add.branch',$this->id) . '" class="btn btn-sm btn-link"><i class="la la-plus"></i> Add Owner</a>';
-    //     }
-    // }
+    public function addOwnerButton()
+    {
+        $member =  $this->member;
+        if (!$member) {
+            return '<a href="' . route('branch.addOwner',$this->id) . '" class="btn btn-sm btn-link"><i class="la la-plus"></i> Add Owner</a>';
+        }
+    }
 
     /*
     |--------------------------------------------------------------------------
