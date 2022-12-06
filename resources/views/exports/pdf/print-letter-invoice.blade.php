@@ -8,7 +8,7 @@
     </head>
     <style>
             * {
-                font-size: 8pt
+                font-size: 9.5pt
             }
             .td-style{
                 padding:0px;
@@ -16,25 +16,27 @@
             #transactions {
                 border-collapse: collapse;
                 width: 100%;
-                margin-top: 12px;
+                margin-top: 8px;
                 font-size: 10pt;
             }
             #transactions td, #transactions thead td {
-                border: 1px solid black;
-                padding: 8px;
+                border: 1.6px solid black;
+                padding: 4px;
             }
             #transactions thead td {
                 padding-top: 12px;
                 padding-bottom: 12px;
                 text-align: left;
-                font-weight: bold;
+                /* font-weight: bold; */
                 /* background-color: #ffff00; */
                 color: black;
             }
             body {
-                font-family: Verdana, Calibri, Tahoma, sans-serif;
+                font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
                 font-size: 12pt;
+                font-weight: bold;
                 word-spacing: normal;
+                /* transform: scale(1, 1.12); */
             }
             .panel-left {
                 float:left;
@@ -54,21 +56,21 @@
             }
             #keuangan {
                 font-size: 10pt;
-                margin-top: 10px;
+                margin-top: 4px;
             }
             .panel-left2 {
                 float:left;
                 width:45%;
             }
             .catatan {
-                border: 1px solid black;
+                border: 1.5px solid black;
                 padding: 4px;
             }
             table td, table td * {
                 vertical-align: top;
             }
             @page{
-                margin: 20px;
+                margin: 10px 28px 10px 12px;
             }
     </style>
     <body>
@@ -81,8 +83,17 @@
                     <span>Telepon : (+62-24) 8414756 - WA (+62) 81326613526</span>
                     <br />
                     <span>Web : waters.co.id - Email : andygouw@waters.co.id</span>
-                    <br/>
+                    <br />
                     <span>NPWP : 60.351.086.8-509.000</span>
+                    <br /><br />
+                    <span><strong>FAKTUR PENJUALAN</strong> : <span>{{ $transaction->code }}</span>
+                    <br/>
+                    <span>Tanggal Kirim : </span><span>{{ date("d M Y", strtotime($transaction->transaction_date)) }}</span>
+                    <br/>
+                    <span>Keterangan : </span><span>{{ $transaction->shipping_notes ?? '-' }}</span>
+                    <br/>
+                    <span>Alamat Kirim : </span>
+                    <span>{{ $transaction->shipping_address ?? '-' }}</span>
                 </div>
             </div>
             <div class="panel-left2">
@@ -98,7 +109,7 @@
                     <tr>
                         <td style="width: 40px;">Alamat</td>
                         <td style="width: 10px; text-align: center;">:&nbsp;</td>
-                        <td style="max-width: 250px;">{{ $transaction->customer->address }}</td>
+                        <td style="max-width: 230px;">{{ $transaction->customer->address }}</td>
                     </tr>
                     <tr>
                         <td style="width: 40px;">Kota</td>
@@ -114,21 +125,7 @@
             </div>
             <div style="clear:both;"></div>
         </div>
-        <div style="margin-top: 12px;">
-            <div class="panel-left">
-                <span><strong>FAKTUR PENJUALAN</strong> : <span>{{ $transaction->code }}</span><br/>
-                <span>Tanggal Kirim : </span><span>{{ $transaction->transaction_date }}<span><br/>
-                <span>Keterangan : </span><span>{{ $transaction->shipping_notes ?? '-' }}</span><br/>
-            </div>
-            <div class="panel-left" style="max-width: 350px;">
-                <br />
-                <span>Alamat Kirim </span>
-                    <span>:&nbsp;</span>
-                    <span>{{ $transaction->shipping_address ?? '-' }}
-                </span>
-            </div>
-            <div style="clear:both;"></div>
-        </div>
+        
         <table id="transactions">
             <thead>
                 <tr>
@@ -170,7 +167,7 @@
                 <tr style="border: none !important;">
                     <td style="border: none !important;" colspan="8">
                         <div>
-                            <div style="margin-top: 12px;">
+                            <div style="margin-top: 4px;">
                                 <span>Terbilang : </span><span style="border-bottom: 1px solid black; width: 100%;">{{ $transaction->terbilang }}</span>
                             </div>
                         </div>

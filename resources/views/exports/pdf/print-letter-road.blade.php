@@ -7,31 +7,33 @@
         <title>Surat Jalan</title>
     </head>
     <style>
-            * {
-                font-size: 7.5pt
+             * {
+                font-size: 9.5pt
             }
             .td-style{
                 padding:0px;
             }
             #transactions {
-                font-family: Arial, Helvetica, sans-serif;
+                /* font-family: Arial, Helvetica, sans-serif; */
                 border-collapse: collapse;
                 width: 100%;
                 margin-top: 12px;
             }
             #transactions td, #transactions thead td {
-                border: 1px solid black;
+                border: 1.5px solid black;
                 padding: 8px;
             }
             #transactions thead td {
                 padding-top: 12px;
                 padding-bottom: 12px;
                 text-align: left;
-                background-color: #ffff00;
+                /* background-color: #ffff00; */
                 color: black;
             }
             body {
-                font-family: Arial, Helvetica, sans-serif;
+                font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+                font-weight: bold;
+                word-spacing: normal;
             }
             
             .panel-left {
@@ -43,18 +45,21 @@
                 width:45%;
             }
             .catatan {
-                border: 1px solid black;
+                border: 1.5px solid black;
                 padding: 4px;
             }
             table td, table td * {
                 vertical-align: top;
             }
+            @page{
+                margin: 10px 28px 10px 12px;
+            }
     </style>
     <body>
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 5px;">
             <tr>
-                <td style="width: 55%; padding: 0px;"><h3 style="margin:0px; padding-left:3px;">SURAT JALAN</h3></td>
-                <td>Semarang, {{ now()->format('d-m-Y') }}</td>
+                <td style="width: 55%; padding: 0px;"><h3 style="margin:0px; padding-left:3px; font-size:16px;">SURAT JALAN</h3></td>
+                <td>Semarang, {{ now()->format('d M Y') }}</td>
             </tr>
             <tr>
                 <td style="width: 55%; border:1px;"></td>
@@ -79,7 +84,7 @@
                     <tr>
                         <td style="width: 160px;">Tanggal Pengiriman</td>
                         <td>:&nbsp;</td>
-                        <td>{{ $data->transaction_date }}</td>
+                        <td>{{ date("d M Y", strtotime($data->transaction_date)) }}</td>
                     </tr>
                     <tr>
                         <td style="width: 160px;">Almat. kirim</td>
@@ -127,7 +132,7 @@
             <tbody>
                 @foreach ($data->transactionProducts as $item)
                 <tr>
-                    <td>{{ $item->quantity }}</td>
+                    <td>{{ $item->quantity }} UNIT</td>
                     <td>{{ strtoupper($item->name) }}</td>
                     <td>{{ strtoupper($item->capacity) }}</td>
                     <td>{{ strtoupper($item->model) }}</td>
@@ -136,7 +141,7 @@
                 @endforeach
             </tbody>
         </table>
-        <table style="width:100%; margin-top:30px;">
+        <table style="width:100%; margin-top:10px;">
             <tr>
                 <td>
                     <div>
@@ -190,19 +195,19 @@
                 </td>
             </tr>
         </table>
-        <div class="panel-final" style="margin-top: 30px;">
-            <div class="panel-left" style="width: 52% !important;">
-                <div class="" style="margin-bottom:12px;">
+        <div class="panel-final" style="margin-top: 10px;">
+            <div class="panel-left" style="width: 40% !important;">
+                <div class="" style="margin-bottom:8px;">
                     <span>JASA TAMBAHAN : </span><span> -</span>
                 </div>
-                <div class="" style="margin-bottom:12px;">
+                <div class="" style="margin-bottom:8px;">
                     <span>Ongkos Kirim : </span><span>.......................</span>
                 </div>
-                <div class="" style="margin-bottom:12px;">
+                <div class="" style="margin-bottom:8px;">
                     <span>Terbilang : </span><span> <i>.......................</i></span>
                 </div>
             </div>
-            <div class="panel-left" style="width: 48% !important;">
+            <div class="panel-left" style="width: 60% !important;">
                 <div class="catatan" style="text-align: justify;">
                     <strong>CATATAN :</strong><br/>
                     <span>
