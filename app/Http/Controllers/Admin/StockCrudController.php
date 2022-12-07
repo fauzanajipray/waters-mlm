@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\StockRequest;
+use App\Models\Branch;
 use App\Models\Product;
 use App\Models\Stock;
 use App\Models\StockInHistory;
@@ -78,6 +79,7 @@ class StockCrudController extends CrudController
         $this->crud->column('updated_at');
         
         $this->crud->addClause('where', 'quantity', '>', 0);
+        $this->getFilter();
     }
 
     /**
@@ -134,12 +136,12 @@ class StockCrudController extends CrudController
         });   
         
         $this->crud->addField([
-            'name' => 'sending_branch_id',
+            'name' => 'origin_branch_id',
             'type' => 'select2_from_ajax',
-            'label' => 'Sending Branch',
+            'label' => 'Origin Branch',
             'model' => "App\Models\Branch",
-            'data_source' => url('branches/sending'),
-            'placeholder' => 'Select a sending branch',
+            'data_source' => url('branches/origin'),
+            'placeholder' => 'Select a origin branch',
             'include_all_form_fields' => true,
             'dependencies' => ['branch_id'],
             'method' => 'POST',
@@ -156,7 +158,7 @@ class StockCrudController extends CrudController
             'method' => 'POST',
             'placeholder' => 'Select a product',
             'include_all_form_fields' => true,
-            'dependencies' => ['branch_id', 'sending_branch_id'],
+            'dependencies' => ['branch_id', 'origin_branch_id'],
             'tab' => 'Product'
         ]);
         
@@ -231,19 +233,19 @@ class StockCrudController extends CrudController
                     $stock = Stock::create($data);
 
                 }
-                $stockSending = Stock::where('product_id', $data['product_id'])->where('branch_id', $data['sending_branch_id'])->first();
-                $stockSending->quantity = $stockSending->quantity - $data['quantity'];
-                $stockSending->save();
+                $stockOrigin = Stock::where('product_id', $data['product_id'])->where('branch_id', $data['origin_branch_id'])->first();
+                $stockOrigin->quantity = $stockOrigin->quantity - $data['quantity'];
+                $stockOrigin->save();
                 $stockOutHistory = StockOutHistory::create([
                     'product_id' => $data['product_id'],
                     'branch_origin' => $data['branch_id'],
-                    'branch_destination' => $data['sending_branch_id'],
+                    'branch_destination' => $data['origin_branch_id'],
                     'quantity' => $data['quantity'],
                 ]);
                 $stockInHistory = StockInHistory::create([
                     'product_id' => $data['product_id'],
                     'quantity' => $data['quantity'],
-                    'branch_origin' => $data['sending_branch_id'],
+                    'branch_origin' => $data['origin_branch_id'],
                 ]);
             }
             DB::commit();
@@ -253,5 +255,36 @@ class StockCrudController extends CrudController
             return redirect()->back()->with('error', $e->getMessage());
         }      
         return redirect()->route('stock.index');
+    }
+
+    protected function getFilter() {
+        
+        $this->crud->addFilter(
+            [
+                'name' => 'branch_id',
+                'type' => 'select2_ajax',
+                'label'=> 'Branch',
+                'placeholder' => 'Pick a branch',
+                'method' => 'POST'
+            ], 
+            url('branches/for-filter'),
+            function($value) {
+                $this->crud->addClause('where', 'branch_id', $value);
+            }
+        );
+
+        $this->crud->addFilter(
+            [
+                'name' => 'product_id',
+                'type' => 'select2_ajax',
+                'label'=> 'Product',
+                'placeholder' => 'Pick a product',
+                'method' => 'POST'
+            ], 
+            url('product/for-filter'),
+            function($value) {
+                $this->crud->addClause('where', 'product_id', $value);
+            }
+        );
     }
 }

@@ -4,10 +4,10 @@
 crud.field('branch_id').onChange(function(field) {
   if (field.value) {
     if(field.value != 1){
-      crud.field('sending_branch_id').show();
+      crud.field('origin_branch_id').show();
     }
   } else {
-    crud.field('sending_branch_id').hide();
+    crud.field('origin_branch_id').hide();
   }
 }).change();
 
@@ -18,7 +18,7 @@ crud.field('product_id').onChange(function(field) {
       var product_stock = document.getElementsByName('product_stock')[0];
       var quantity = document.getElementsByName('quantity')[0];
       $.ajax({
-        url: '/product/'+field.value+'/branch/'+crud.field('sending_branch_id').value,
+        url: '/product/'+field.value+'/branch/'+crud.field('origin_branch_id').value,
         type: 'GET',
         success: function(data) {
           product_stock.setAttribute('value', data);

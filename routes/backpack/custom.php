@@ -26,7 +26,7 @@ Route::group([
     Route::get('/members/not-activated', [App\Http\Controllers\Api\MemberController::class, 'notActivated']);
     Route::get('/members/only-actived', [App\Http\Controllers\Api\MemberController::class, 'onlyActive']);
     Route::get('members/not-branch-owner', [App\Http\Controllers\Api\MemberController::class, 'notBranchOwner']);
-    Route::post('/members-filter', 'MemberCrudController@getMembersForFilter');
+    Route::post('members/for-filter', 'MemberCrudController@getMembersForFilter');
     Route::get('/member/register-form', 'MemberCrudController@downloadFormRegister');
     Route::crud('role', 'RoleCrudController');
     Route::crud('permission', 'PermissionCrudController');
@@ -35,6 +35,7 @@ Route::group([
     Route::post('product/get-demokit-products', 'ProductCrudController@getDemokitProducts');
     Route::post('product/get-display-products', 'ProductCrudController@getDisplayProducts');
     Route::post('product/get-products', 'ProductCrudController@getProducts');
+    Route::post('product/for-filter', 'ProductCrudController@getProductsForFilter');
     Route::post('product/for-stock', 'ProductCrudController@getProductForStock');
     Route::get('product/{id}/branch/{branch_id}', 'ProductCrudController@getProductStock');
     Route::crud('transaction', 'TransactionCrudController');
@@ -56,7 +57,8 @@ Route::group([
     Route::crud('branch', 'BranchCrudController');
     Route::post('branches/member-not-exist', 'BranchCrudController@memberNotExist');
     Route::post('branches/member-exist', 'BranchCrudController@memberExist');
-    Route::post('branches/sending', 'BranchCrudController@getSendingBranch');
+    Route::post('branches/origin', 'BranchCrudController@getOriginBranch');
+    Route::post('branches/for-filter', 'BranchCrudController@getBranchesForFilter');
     Route::crud('payment-method', 'PaymentMethodCrudController');
     Route::crud('transaction-payment', 'TransactionPaymentCrudController');
     Route::crud('stock', 'StockCrudController');

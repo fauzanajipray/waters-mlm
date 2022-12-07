@@ -147,7 +147,7 @@ class BonusHistoryCrudController extends CrudController
                 'placeholder' => 'Pick a member',
                 'method' => 'POST'
             ], 
-            url('/members-filter'), 
+            url('members/for-filter'), 
             function($value) {
                 $this->crud->addClause('where', 'member_id', $value);
             }

@@ -234,7 +234,7 @@ class BranchCrudController extends CrudController
         }
     }
 
-    public function getSendingBranch(Request $request){
+    public function getOriginBranch(Request $request){
         $search_term = $request->input('q');
         $branch_id = request()->form[2];
         if($branch_id['name'] != 'branch_id') { 
@@ -266,5 +266,26 @@ class BranchCrudController extends CrudController
             return $item;
         });
         return $branch;
+    }
+
+    public function show(Request $request, $id) {
+        $this->crud->hasAccessOrFail('show');
+
+        $this->data['entry'] = $this->crud->getEntry($id);
+        $this->data['crud'] = $this->crud;
+        return view($this->crud->getShowView(), $this->data);
+    }
+
+    public function getBranchesForFilter(Request $request) {
+        $search_term = $request->input('q');
+
+        if($search_term) {
+            $branch = Branch::where('name', 'like', '%'.$search_term.'%')
+                ->get();
+
+        } else {
+            $branch = Branch::get();
+        }
+        return $branch->pluck('name', 'id');
     }
 }

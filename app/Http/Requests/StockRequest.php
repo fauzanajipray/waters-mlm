@@ -26,13 +26,13 @@ class StockRequest extends FormRequest
     {
         return [
             'branch_id' => ['required','exists:branches,id', function ($attribute, $value, $fail) {
-                if($value != 1 && !$this->sending_branch_id) {
-                    $fail('The sending branch field is required.');
+                if($value != 1 && !$this->origin_branch_id) {
+                    $fail('The origin branch field is required.');
                 }
             }],
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|numeric|min:1',
-            'sending_branch_id' => ['nullable', 'exists:branches,id']
+            'origin_branch_id' => ['nullable', 'exists:branches,id']
         ];
     }
 

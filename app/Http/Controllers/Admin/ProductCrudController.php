@@ -221,25 +221,43 @@ class ProductCrudController extends CrudController
         return $products;
     }
 
+    public function getProductsForFilter() 
+    {
+        $search_term = request()->input('q');
+        if($search_term){
+            $products = Product::where('name', 'like', '%'.$search_term.'%')
+                ->orWhere('model', 'like', '%'.$search_term.'%')
+                ->get();
+        }else{
+            $products = Product::get();
+        }
+        $products->map(function($product){
+            $product->name = $product->name.' - '.$product->model. ' - '.$product->price;
+            return $product;
+        });
+
+        return $products->pluck('name', 'id');
+    }
+
     public function getProductForStock() {  
         $search_term = request()->input('q');
         $branch_id = request()->form[2];
-        $sending_branch_id = request()->form[3];
+        $origin_branch_id = request()->form[3];
         if($branch_id['name'] != 'branch_id' ) { 
             return response()->json(['results' => []]);
         }
         if ($branch_id['value'] != 1) {
-            if($sending_branch_id['name'] == 'sending_branch_id' ) { 
+            if($origin_branch_id['name'] == 'origin_branch_id' ) { 
                 if($search_term){
                     $stocks = Stock::leftJoin('products', 'products.id', '=', 'stocks.product_id')
-                        ->where('branch_id', $sending_branch_id['value'])
+                        ->where('branch_id', $origin_branch_id['value'])
                         ->where('quantity', '>', 0)
                         ->where('name', 'like', '%'.$search_term.'%')
                         ->orWhere('model', 'like', '%'.$search_term.'%')
                         ->get();
                 }else{
                     $stocks = Stock::leftJoin('products', 'products.id', '=', 'stocks.product_id')
-                        ->where('branch_id', $sending_branch_id['value'])
+                        ->where('branch_id', $origin_branch_id['value'])
                         ->where('quantity', '>', 0)
                         ->get();
                 }

@@ -404,7 +404,6 @@ class TransactionDemokitCrudController extends CrudController
 
         $this->data['entry'] = Transaction::with('transactionPayments')->find($id);
         $this->data['crud'] = $this->crud;
-        $this->data['crud'] = $this->crud;
         $this->data['products'] = TransactionProduct::where('transaction_id', $id)->get();
         return view('transaction.show', $this->data);
     }
