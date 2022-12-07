@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Product;
+use App\Models\Stock;
 use App\Models\Transaction;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
-use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
+use Illuminate\Support\Facades\Request;
 
 /**
  * Class ProductCrudController
@@ -218,6 +219,61 @@ class ProductCrudController extends CrudController
         });
 
         return $products;
+    }
+
+    public function getProductForStock() {  
+        $search_term = request()->input('q');
+        $branch_id = request()->form[2];
+        $sending_branch_id = request()->form[3];
+        if($branch_id['name'] != 'branch_id' ) { 
+            return response()->json(['results' => []]);
+        }
+        if ($branch_id['value'] != 1) {
+            if($sending_branch_id['name'] == 'sending_branch_id' ) { 
+                if($search_term){
+                    $stocks = Stock::leftJoin('products', 'products.id', '=', 'stocks.product_id')
+                        ->where('branch_id', $sending_branch_id['value'])
+                        ->where('quantity', '>', 0)
+                        ->where('name', 'like', '%'.$search_term.'%')
+                        ->orWhere('model', 'like', '%'.$search_term.'%')
+                        ->get();
+                }else{
+                    $stocks = Stock::leftJoin('products', 'products.id', '=', 'stocks.product_id')
+                        ->where('branch_id', $sending_branch_id['value'])
+                        ->where('quantity', '>', 0)
+                        ->get();
+                }
+                $stocks->map(function ($stock) {
+                    $stock->name = $stock->name.' - '.$stock->model. ' - '.number_format($stock->price) ;
+                    return $stock;
+                });
+
+                return $stocks;
+            } else {
+                return response()->json(['results' => []]);
+            }
+        } else {
+            if($search_term){
+                $products = Product::where('name', 'like', '%'.$search_term.'%')
+                    ->orWhere('model', 'like', '%'.$search_term.'%')
+                    ->get();
+            }else{
+                $products = Product::get();
+            }
+            $products->map(function($product){
+                $product->name = $product->name.' - '.$product->model. ' - '.$product->price;
+                return $product;
+            });
+            return $products;
+        }
+    }
+
+    public function getProductStock(Request $request, $id, $branch_id)
+    {
+        $stocks = Stock::where('product_id', $id)
+            ->where('branch_id', $branch_id)
+            ->first();
+        return $stocks->quantity ?? 0;
     }
 }
 

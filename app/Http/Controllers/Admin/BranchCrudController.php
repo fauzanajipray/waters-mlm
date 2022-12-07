@@ -62,8 +62,9 @@ class BranchCrudController extends CrudController
                     return backpack_url('member/' . $related_key . '/show');
                 },
             ],
-        ]);
-        $this->crud->addButtonFromModelFunction('line', 'add_owner', 'addOwnerButton', 'end');
+        ]);        
+        $this->crud->addButtonFromModelFunction('line', 'add_stock', 'stockButton', 'beginning');
+        $this->crud->addButtonFromModelFunction('line', 'add_owner', 'addOwnerButton', 'beginning');
     }
 
     /**
@@ -231,5 +232,39 @@ class BranchCrudController extends CrudController
             $this->crud->update($id, $request->all());
             return $this->crud->performSaveAction($id);
         }
+    }
+
+    public function getSendingBranch(Request $request){
+        $search_term = $request->input('q');
+        $branch_id = request()->form[2];
+        if($branch_id['name'] != 'branch_id') { 
+            return response()->json(['results' => []]);
+        }
+
+        $branch_type = Branch::find($branch_id['value'])->type;
+        if($branch_type == "STOKIST") {
+            $branch_type = "CABANG";
+        } else if($branch_type == "CABANG") {
+            $branch_type = "PUSAT";
+        } else if ($branch_type == "PUSAT") {
+            $branch_type = null;
+        } else {
+            return response()->json(['results' => []]);
+        }
+
+        if($search_term) {
+            $branch = Branch::where('type', $branch_type)
+                ->where('name', 'like', '%'.$search_term.'%')
+                ->get();
+        } else {
+            $branch = Branch::where('type', $branch_type)
+                ->get();
+        }
+        $branch->map(function($item) {
+            if(isset($item->member)) $item->name = $item->name . ' | ' . $item->member->name;
+            
+            return $item;
+        });
+        return $branch;
     }
 }

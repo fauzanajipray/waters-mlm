@@ -5,7 +5,7 @@ namespace App\Models;
 use Backpack\CRUD\app\Models\Traits\CrudTrait;
 use Illuminate\Database\Eloquent\Model;
 
-class Branch extends Model
+class StockInHistory extends Model
 {
     use CrudTrait;
 
@@ -15,7 +15,7 @@ class Branch extends Model
     |--------------------------------------------------------------------------
     */
 
-    protected $table = 'branches';
+    protected $table = 'stock_in_histories';
     // protected $primaryKey = 'id';
     // public $timestamps = false;
     protected $guarded = ['id'];
@@ -29,47 +29,17 @@ class Branch extends Model
     |--------------------------------------------------------------------------
     */
 
-    public function addOwnerButton()
-    {
-        $member =  $this->member;
-        if (!$member) {
-            return '<a href="' . route('branch.addOwner',$this->id) . '" class="btn btn-sm btn-link"><i class="la la-plus"></i> Add Owner</a>';
-        }
-    }
-
-    public function stockButton(){
-        return '<a href="'. backpack_url('stock/create') . '?branch_id=' . $this->id . '" class="btn btn-sm btn-link"><i class="la la-plus"></i> Stock</a>';
-    }
-
     /*
     |--------------------------------------------------------------------------
     | RELATIONS
     |--------------------------------------------------------------------------
     */
 
-    public function member()
-    {
-        return $this->hasOne('App\Models\Member');
-    }
-
     /*
     |--------------------------------------------------------------------------
     | SCOPES
     |--------------------------------------------------------------------------
     */
-
-    public function scopeType($query, $type)
-    {
-        if ($type == 'STOKIST') {
-            return $query->where('type', 'STOKIST');
-        } elseif ($type == 'CABANG') {
-            return $query->where('type', 'CABANG');
-        } elseif ($type == 'PUSAT') {
-            return $query->where('type', 'PUSAT');
-        } else {
-            return $query;
-        }
-    }
 
     /*
     |--------------------------------------------------------------------------

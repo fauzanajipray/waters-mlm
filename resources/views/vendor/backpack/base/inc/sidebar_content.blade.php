@@ -1,8 +1,8 @@
 {{-- This file is used to store sidebar items, inside the Backpack admin panel --}}
 <li class="nav-item"><a class="nav-link" href="{{ backpack_url('dashboard') }}"><i class="la la-home nav-icon"></i> {{ trans('backpack::base.dashboard') }}</a></li>
 <li class="nav-item"><a class="nav-link" href="{{ backpack_url('product') }}"><i class="nav-icon la la-box"></i> Products</a></li>
-<!-- Member -->
 
+<!-- Member -->
 <li class="nav-item nav-dropdown">
   <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon la la-id-card"></i> Members</a>
   <ul class="nav-dropdown-items">
@@ -11,6 +11,16 @@
     <li class="nav-item"><a class="nav-link" href="{{ backpack_url('activation-payments') }}"><i class="nav-icon la la-money-bill"></i> Payments</a></li>
   </ul>
 </li>
+
+<!-- Stock -->
+<li class="nav-item nav-dropdown">
+  <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon la la-archive"></i> Stock</a>
+  <ul class="nav-dropdown-items">
+    <li class="nav-item"><a class="nav-link" href="{{ backpack_url('stock') }}"><i class="nav-icon la la-list"></i> List</a></li>
+    <li class="nav-item"><a class="nav-link" href="#"><i class="nav-icon la la-history"></i> Histories</a> </li>
+  </ul>
+</li>
+
 <!-- Transactions -->
 <li class="nav-item nav-dropdown">
   <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon la la-money-bill"></i> Transactions</a>
@@ -26,8 +36,10 @@
     <li class= "nav-item"><a class="nav-link" href="{{ backpack_url('transaction-payment') }}"><i class="nav-icon la la-money-bill"></i> <span>Payments</span></a></li>
   </ul>
 </li>
+
 <li class="nav-item"><a class="nav-link" href="{{ backpack_url('level') }}"><i class="nav-icon la la-chart-line"></i> Levels</a></li>
 <li class="nav-item"><a class="nav-link" href="{{ backpack_url('payment-method') }}"><i class="nav-icon la la-money-bill"></i> Payment Methods</a></li>
+
 <!-- Histories -->
 <li class="nav-item nav-dropdown">
   <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon la la-history"></i> Histories</a>
@@ -36,6 +48,7 @@
     <li class="nav-item"><a class="nav-link" href="{{ backpack_url('level-up-histories') }}"><i class="nav-icon la la-level-up-alt"></i> Level Up Histories</a></li>
   </ul>
 </li>
+
 <li class="nav-item"><a class="nav-link" href="{{ backpack_url('branch') }}"><i class="nav-icon la la-city"></i> Branches</a></li>
 <li class="nav-item"><a class="nav-link" href="{{ backpack_url('customer') }}"><i class="nav-icon la la-users"></i> Customers</a></li>
 <li class="nav-item"><a class="nav-link" href="{{ backpack_url('configuration') }}"><i class="nav-icon la la-tools"></i> Configurations</a></li>

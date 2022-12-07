@@ -35,6 +35,8 @@ Route::group([
     Route::post('product/get-demokit-products', 'ProductCrudController@getDemokitProducts');
     Route::post('product/get-display-products', 'ProductCrudController@getDisplayProducts');
     Route::post('product/get-products', 'ProductCrudController@getProducts');
+    Route::post('product/for-stock', 'ProductCrudController@getProductForStock');
+    Route::get('product/{id}/branch/{branch_id}', 'ProductCrudController@getProductStock');
     Route::crud('transaction', 'TransactionCrudController');
     Route::post('transaction/check-customer', 'TransactionCrudController@checkCustomer');
     Route::get('transaction/{id}/download-letter-road', 'TransactionCrudController@downloadLetterRoad');
@@ -54,6 +56,8 @@ Route::group([
     Route::crud('branch', 'BranchCrudController');
     Route::post('branches/member-not-exist', 'BranchCrudController@memberNotExist');
     Route::post('branches/member-exist', 'BranchCrudController@memberExist');
+    Route::post('branches/sending', 'BranchCrudController@getSendingBranch');
     Route::crud('payment-method', 'PaymentMethodCrudController');
     Route::crud('transaction-payment', 'TransactionPaymentCrudController');
+    Route::crud('stock', 'StockCrudController');
 }); // this should be the absolute last line of this file
