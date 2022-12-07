@@ -162,7 +162,7 @@ class TransactionBebasPutusCrudController extends CrudController
             'attributes' => [
                 'rows' => 3,
             ],
-            'dependecies' => ['customer_id']
+            'dependencies' => ['customer_id']
         ]);
 
         $this->crud->addField([
@@ -236,7 +236,7 @@ class TransactionBebasPutusCrudController extends CrudController
                 'default' => 0,
                 'suffix' => '%',
                 'default' => '0',
-                'dependecies' => 'type_discount',
+                'dependencies' => 'type_discount',
                 'tab' => 'Product',
             ],
             [
@@ -252,7 +252,7 @@ class TransactionBebasPutusCrudController extends CrudController
                 ],
                 'default' => 0,
                 'prefix' => 'Rp',
-                'dependecies' => 'type_discount',
+                'dependencies' => 'type_discount',
                 'tab' => 'Product',
             ],
             [

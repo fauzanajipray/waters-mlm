@@ -167,7 +167,7 @@ class TransactionCrudController extends CrudController
             'attributes' => [
                 'rows' => 3,
             ],
-            'dependecies' => ['customer_id']
+            'dependencies' => ['customer_id']
         ]);
 
         $this->crud->addField([
