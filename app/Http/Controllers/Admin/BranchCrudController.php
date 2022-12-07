@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Requests\BranchRequest;
 use App\Models\Branch;
 use App\Models\Member;
+use App\Models\Stock;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Exception;
@@ -273,7 +274,12 @@ class BranchCrudController extends CrudController
 
         $this->data['entry'] = $this->crud->getEntry($id);
         $this->data['crud'] = $this->crud;
-        return view($this->crud->getShowView(), $this->data);
+        $this->data['stocks'] = Stock::join('products', 'products.id', '=', 'stocks.product_id')
+            ->where('branch_id', $id)
+            ->where('quantity', '>', 0)
+            ->select('stocks.*', 'products.*')
+            ->get();
+        return view('branch.show', $this->data);
     }
 
     public function getBranchesForFilter(Request $request) {
