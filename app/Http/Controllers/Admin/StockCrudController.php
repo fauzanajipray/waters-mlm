@@ -238,14 +238,14 @@ class StockCrudController extends CrudController
                 $stockOrigin->save();
                 $stockOutHistory = StockOutHistory::create([
                     'product_id' => $data['product_id'],
-                    'branch_origin' => $data['branch_id'],
-                    'branch_destination' => $data['origin_branch_id'],
+                    'branch_origin' => $data['origin_branch_id'],
+                    'branch_destination' => $data['branch_id'],
                     'quantity' => $data['quantity'],
                 ]);
                 $stockInHistory = StockInHistory::create([
                     'product_id' => $data['product_id'],
                     'quantity' => $data['quantity'],
-                    'branch_origin' => $data['origin_branch_id'],
+                    'branch_origin' => $data['branch_id'],
                 ]);
             }
             DB::commit();
