@@ -100,7 +100,7 @@ class BranchCrudController extends CrudController
         $this->setupCreateOperation();
         $this->crud->modifyField('type', [
             'attributes' => [
-                'disabled' => 'disabled',
+                'readonly' => 'readonly',
             ],
         ]);
     }
