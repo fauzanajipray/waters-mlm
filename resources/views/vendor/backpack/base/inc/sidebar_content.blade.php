@@ -17,7 +17,7 @@
   <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon la la-archive"></i> Stock</a>
   <ul class="nav-dropdown-items">
     <li class="nav-item"><a class="nav-link" href="{{ backpack_url('stock') }}"><i class="nav-icon la la-list"></i> List</a></li>
-    <li class="nav-item"><a class="nav-link" href="#"><i class="nav-icon la la-history"></i> Histories</a> </li>
+    <li class="nav-item"><a class="nav-link" href="{{ backpack_url('stock-history') }}"><i class="nav-icon la la-history"></i> Histories</a> </li>
   </ul>
 </li>
 

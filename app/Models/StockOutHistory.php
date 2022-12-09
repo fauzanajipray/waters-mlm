@@ -35,6 +35,16 @@ class StockOutHistory extends Model
     |--------------------------------------------------------------------------
     */
 
+    public function product()
+    {
+        return $this->belongsTo('App\Models\Product');
+    }
+    
+    public function branch()
+    {
+        return $this->belongsTo('App\Models\Branch', 'branch_origin');
+    }
+
     /*
     |--------------------------------------------------------------------------
     | SCOPES
