@@ -37,6 +37,7 @@ Route::group([
     Route::post('product/get-products', 'ProductCrudController@getProducts');
     Route::post('product/for-filter', 'ProductCrudController@getProductsForFilter');
     Route::post('product/for-stock', 'ProductCrudController@getProductForStock');
+    Route::post('product/for-transaction', 'ProductCrudController@getProductTransaction');
     Route::get('product/{id}/branch/{branch_id}', 'ProductCrudController@getProductStock');
     Route::crud('transaction', 'TransactionCrudController');
     Route::post('transaction/check-customer', 'TransactionCrudController@checkCustomer');
@@ -55,6 +56,7 @@ Route::group([
     Route::post('customer/get-customer-is-member', 'CustomerCrudController@getCustomerIsMember');
     Route::crud('configuration', 'ConfigurationCrudController');
     Route::crud('branch', 'BranchCrudController');
+    Route::post('branches', 'BranchCrudController@getBranches');
     Route::post('branches/member-not-exist', 'BranchCrudController@memberNotExist');
     Route::post('branches/member-exist', 'BranchCrudController@memberExist');
     Route::post('branches/origin', 'BranchCrudController@getOriginBranch');

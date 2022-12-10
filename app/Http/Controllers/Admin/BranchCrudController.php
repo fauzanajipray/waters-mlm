@@ -294,4 +294,24 @@ class BranchCrudController extends CrudController
         }
         return $branch->pluck('name', 'id');
     }
+
+    public function getBranches() {
+        $search_term = request()->input('q');
+
+        if($search_term) {
+            $branch = Branch::where('name', 'like', '%'.$search_term.'%')
+                ->get();
+
+        } else {
+            $branch = Branch::get();
+        }
+
+        $branch->map(function($item) {
+            if(isset($item->member)) $item->name = $item->name . ' | ' . $item->member->name;
+            
+            return $item;
+        });
+
+        return $branch;
+    }
 }

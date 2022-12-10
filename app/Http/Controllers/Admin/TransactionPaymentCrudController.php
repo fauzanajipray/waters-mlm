@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Requests\TransactionPaymentRequest;
 use App\Http\Traits\TransactionPaymentTrait;
 use App\Models\PaymentMethod;
+use App\Models\Stock;
 use App\Models\Transaction;
 use App\Models\TransactionPayment;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
@@ -176,9 +177,9 @@ class TransactionPaymentCrudController extends CrudController
         } else if ($transaction->type == 'Bebas Putus') {
             $totalPrice = $transaction->transactionProducts->sum(function($item){
                 $discount = 0;
-                if ($item->discrount_percentage > 0) {
-                    $discount = $item->price * $item->discrount_percentage / 100;
-                } else if ($item->discrount_price > 0) {
+                if ($item->discount_percentage > 0) {
+                    $discount = $item->price * $item->discount_percentage / 100;
+                } else if ($item->discount_price > 0) {
                     $discount = $item->discrount_price;
                 }
                 return $item->price * $item->quantity - $discount;
@@ -231,7 +232,7 @@ class TransactionPaymentCrudController extends CrudController
             $totalPrice = $transaction->transactionProducts->sum(function($item){
                 $discount = 0;
                 if ($item->discount_percentage > 0) {
-                    $discount = $item->price * $item->discrount_percentage / 100;
+                    $discount = $item->price * $item->discount_percentage / 100;
                 } else  {
                     $discount = $item->discount_amount;
                 }
@@ -284,6 +285,19 @@ class TransactionPaymentCrudController extends CrudController
             // status paid
             $payment = TransactionPayment::create($requests);
             $transaction = Transaction::with(['transactionPayments', 'transactionProducts', 'member'])->find($requests['transaction_id']);
+
+            /* Check Stock */
+            $transactionProducts = $transaction->transactionProducts;
+            foreach ($transactionProducts as $transactionProduct) {
+                $product = Stock::where('product_id', $transactionProduct->product_id)
+                    ->where('branch_id', $transaction->branch_id)
+                    ->first();
+                if ($product->quantity < $transactionProduct->quantity) {
+                    DB::rollBack();
+                    return redirect()->back()->with('error', 'Stock ' . $product->product->name . ' is not enough');
+                }
+            }
+
             $totalPrice =  0;
             if ($transaction->type == 'Normal') {
                 $totalPrice = $transaction->transactionProducts->sum(function($item){
@@ -309,7 +323,14 @@ class TransactionPaymentCrudController extends CrudController
                 $transaction->save();
                 $lastPaymentDate = $transaction->transactionPayments->sortByDesc('payment_date')->first()->payment_date;
                 $this->calculateBonus($transaction, $transaction->member, $lastPaymentDate);
-                
+                /* Minus stock */
+                foreach ($transactionProducts as $transactionProduct) {
+                    $product = Stock::where('product_id', $transactionProduct->product_id)
+                        ->where('branch_id', $transaction->branch_id)
+                        ->first();
+                    $product->quantity = $product->quantity - $transactionProduct->quantity;
+                    $product->save();
+                }                
             }
             DB::commit();
             return redirect($this->crud->route);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
 use App\Http\Requests\TransactionRequest;
+use App\Models\Branch;
 use App\Models\Customer;
 use App\Models\Level;
 use App\Models\Member;
@@ -179,6 +180,17 @@ class TransactionBebasPutusCrudController extends CrudController
 
         $this->crud->addFields([
             [
+                'name' => 'branch_id',
+                'label' => 'Branch',
+                'type' => 'select2_from_ajax',
+                'entity' => 'branch',
+                'attribute' => 'name',
+                'data_source' => url('branches'),
+                'delay' => 500,
+                'method' => 'POST',
+                'tab' => 'Product',
+            ],
+            [
                 'name' => 'product_id',
                 'type' => 'select2_from_ajax',
                 'label' => 'Product',
@@ -188,8 +200,9 @@ class TransactionBebasPutusCrudController extends CrudController
                 'wrapperAttributes' => [
                     'class' => 'form-group col-md-6'
                 ],
-                'dependencies' => ['member_id'],
+                'dependencies' => ['member_id', 'branch_id'],
                 'method' => 'POST',
+                'include_all_form_fields' => true,
                 'tab' => 'Product',
             ],
             [
@@ -436,6 +449,7 @@ class TransactionBebasPutusCrudController extends CrudController
             $requests['created_by'] = backpack_user()->id;
             $requests['updated_by'] = backpack_user()->id;
             $requests['type'] = 'Bebas Putus';
+            $requests['stock_from'] = Branch::find($requests['branch_id'])->name;
 
             $transaction = Transaction::create($requests);
             foreach ($products as $key => $item) {

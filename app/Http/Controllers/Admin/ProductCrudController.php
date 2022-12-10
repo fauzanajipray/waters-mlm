@@ -124,21 +124,30 @@ class ProductCrudController extends CrudController
     public function getDemokitProducts()
     {
         $search_term = request()->input('q');
-        $member_id = request()->input('form')[3];
-        if($member_id['name'] != 'member_id'){
-            return [];
+        $form = collect(request()->input('form'));
+        $member_id = $form->where('name', 'member_id')->first();
+        $branch_id = $form->where('name', 'branch_id')->first();
+        if(!$member_id || !$branch_id){
+            return response()->json([]);
         }
         if($search_term){
-            $products = Product::where('is_demokit', 1)
+            $products = Stock::leftJoin('products', 'products.id', '=', 'stocks.product_id')
+                ->where('branch_id', $branch_id['value'])
+                ->where('quantity', '>', 0)
+                ->where('is_demokit', 1)
                 ->where('name', 'like', '%'.$search_term.'%')
                 ->orWhere('model', 'like', '%'.$search_term.'%')
                 ->get();
         }else{
-            $products = Product::where('is_demokit', 1)->get();
+            $products = Stock::leftJoin('products', 'products.id', '=', 'stocks.product_id')
+                ->where('branch_id', $branch_id['value'])
+                ->where('quantity', '>', 0)
+                ->where('is_demokit', 1)
+                ->get();
         }
-        $products->map(function($product){
-            $product->name = $product->name.' - '.$product->model. ' - '.$product->price;
-            return $product;
+        $products->map(function ($stock) {
+            $stock->name = $stock->name.' - '.$stock->model. ' - '.number_format($stock->price). ' - Stock : '.$stock->quantity ;
+            return $stock;
         });
         $productBought = [];
         $transactions = Transaction::with('transactionProducts')
@@ -156,22 +165,31 @@ class ProductCrudController extends CrudController
 
     public function getDisplayProducts()
     {
-        $search_term = request()->input('q');
-        $member_id = request()->input('form')[3];
-        if($member_id['name'] != 'member_id'){
-            return [];
+        $search_term = request()->input('q');   
+        $form = collect(request()->input('form'));
+        $member_id = $form->where('name', 'member_id')->first();
+        $branch_id = $form->where('name', 'branch_id')->first();
+        if(!$member_id || !$branch_id){
+            return response()->json([]);
         }
 
         if($search_term){
-            $products = Product::where('name', 'like', '%'.$search_term.'%')
+            $products = Stock::leftJoin('products', 'products.id', '=', 'stocks.product_id')
+                ->where('branch_id', $branch_id['value'])
+                ->where('quantity', '>', 0)
+                ->where('name', 'like', '%'.$search_term.'%')
                 ->orWhere('model', 'like', '%'.$search_term.'%')
                 ->get();
         }else{
-            $products = Product::get();
+            $products = Stock::leftJoin('products', 'products.id', '=', 'stocks.product_id')
+                ->where('branch_id', $branch_id['value'])
+                ->where('quantity', '>', 0)
+                ->get();
         }
-        $products->map(function($product){
-            $product->name = $product->name.' - '.$product->model. ' - '.$product->price;
-            return $product;
+
+        $products->map(function ($stock) {
+            $stock->name = $stock->name.' - '.$stock->model. ' - '.number_format($stock->price). ' - Stock : '.$stock->quantity ;
+            return $stock;
         });
 
         // Filter Sudah Pernah Membeli
@@ -206,16 +224,27 @@ class ProductCrudController extends CrudController
     public function getProducts()
     {
         $search_term = request()->input('q');
+        $branch_id = collect(request()->form)->where('name', 'branch_id')->first();
+        if(!$branch_id){
+            return response()->json(['results' => []]);
+        }        
         if($search_term){
-            $products = Product::where('name', 'like', '%'.$search_term.'%')
+            $products = Stock::leftJoin('products', 'products.id', '=', 'stocks.product_id')
+                ->where('branch_id', $branch_id['value'])
+                ->where('quantity', '>', 0)
+                ->where('name', 'like', '%'.$search_term.'%')
                 ->orWhere('model', 'like', '%'.$search_term.'%')
                 ->get();
         }else{
-            $products = Product::get();
+            $products = Stock::leftJoin('products', 'products.id', '=', 'stocks.product_id')
+                ->where('branch_id', $branch_id['value'])
+                ->where('quantity', '>', 0)
+                ->get();
         }
-        $products->map(function($product){
-            $product->name = $product->name.' - '.$product->model. ' - '.$product->price;
-            return $product;
+
+        $products->map(function ($stock) {
+            $stock->name = $stock->name.' - '.$stock->model. ' - '.number_format($stock->price). ' - Stock : '.$stock->quantity ;
+            return $stock;
         });
 
         return $products;
@@ -292,6 +321,29 @@ class ProductCrudController extends CrudController
             ->where('branch_id', $branch_id)
             ->first();
         return $stocks->quantity ?? 0;
+    }
+
+    public function getProductTransaction() {
+        $search_term = request()->input('q');
+        $branch_id = collect(request()->form)->where('name', 'branch_id')->first();
+        if(!$branch_id){
+            return response()->json(['results' => []]);
+        }        
+        if($search_term){
+            $stocks = Stock::leftJoin('products', 'products.id', '=', 'stocks.product_id')
+                ->where('branch_id', $branch_id['value'])
+                ->where('quantity', '>', 0)
+                ->where('name', 'like', '%'.$search_term.'%')
+                ->orWhere('model', 'like', '%'.$search_term.'%')
+                ->get();
+        }else{
+            $stocks = Stock::leftJoin('products', 'products.id', '=', 'stocks.product_id')
+                ->where('branch_id', $branch_id['value'])
+                ->where('quantity', '>', 0)
+                ->get();
+        }
+
+        return $stocks;
     }
 }
 

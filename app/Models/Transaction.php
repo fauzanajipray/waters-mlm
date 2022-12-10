@@ -89,6 +89,10 @@ class Transaction extends Model
         return $this->hasMany(TransactionPayment::class, 'transaction_id');
     }
 
+    public function branch(){
+        return $this->belongsTo(Branch::class, 'branch_id');
+    }
+
     /*
     |--------------------------------------------------------------------------
     | SCOPES

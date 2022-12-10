@@ -114,6 +114,14 @@
             </div>
             <div class="card-body">
                 <table class="table table-bordered">
+                    <tbody>
+                        <tr>
+                            <th>Branch</th>
+                            <td>{{ $entry->stock_from }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="table table-bordered">
                     <thead>
                         <tr>
                             <th>Qty</th>

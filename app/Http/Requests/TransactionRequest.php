@@ -38,6 +38,7 @@ class TransactionRequest extends FormRequest
                 } 
             }],
             'member_id' => 'required|exists:members,id',
+            'branch_id' => 'required|exists:branches,id',
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|numeric|min:1|in:1',
             'shipping_address' => 'required|max:255',

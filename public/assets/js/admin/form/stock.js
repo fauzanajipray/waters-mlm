@@ -5,6 +5,8 @@ crud.field('branch_id').onChange(function(field) {
   if (field.value) {
     if(field.value != 1){
       crud.field('origin_branch_id').show();
+    } else {
+      crud.field('origin_branch_id').hide();
     }
   } else {
     crud.field('origin_branch_id').hide();

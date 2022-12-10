@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
 use App\Http\Requests\TransactionRequest;
+use App\Models\Branch;
 use App\Models\Customer;
 use App\Models\Level;
 use App\Models\Member;
@@ -11,12 +12,10 @@ use App\Models\Product;
 use App\Models\Transaction;
 use App\Models\TransactionProduct;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
-use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Backpack\CRUD\app\Library\Widget;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Prologue\Alerts\Facades\Alert;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 /**
  * Class TransactionCrudController
@@ -178,6 +177,17 @@ class TransactionDisplayCrudController extends CrudController
 
         $this->crud->addFields([
             [
+                'name' => 'branch_id',
+                'label' => 'Branch',
+                'type' => 'select2_from_ajax',
+                'entity' => 'branch',
+                'attribute' => 'name',
+                'data_source' => url('branches'),
+                'delay' => 500,
+                'method' => 'POST',
+                'tab' => 'Product',
+            ],
+            [
                 'name' => 'product_id',
                 'type' => 'select2_from_ajax',
                 'label' => 'Product',
@@ -187,7 +197,7 @@ class TransactionDisplayCrudController extends CrudController
                 'wrapperAttributes' => [
                     'class' => 'form-group col-md-12'
                 ],
-                'dependencies' => ['member_id'],
+                'dependencies' => ['member_id', 'branch_id'],
                 'include_all_form_fields' => ['member_id'],
                 'method' => 'POST',
                 'tab' => 'Product',
@@ -367,6 +377,7 @@ class TransactionDisplayCrudController extends CrudController
             $requests['created_by'] = backpack_user()->id;
             $requests['updated_by'] = backpack_user()->id;
             $requests['type'] = 'Display';
+            $requests['stock_from'] = Branch::find($requests['branch_id'])->name;
 
             $transaction = Transaction::create($requests);
             // Save Log Product Sold

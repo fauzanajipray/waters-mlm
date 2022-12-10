@@ -37,7 +37,7 @@ class DatabaseSeeder extends Seeder
         $this->office();
         $this->member();
         $this->customer();
-        $this->transaction();
+        // $this->transaction();
         $this->paymentMethod();
         // // $this->call(MemberSeeder::class);
     }
@@ -298,6 +298,8 @@ class DatabaseSeeder extends Seeder
                 "created_by" => 1,
                 "updated_by" => 1,
                 "type" => $csvData['Tipe Penjualan'] ?? "Normal",
+                "branch_id" => $csvData['Branch ID'],
+                "stock_from" => Branch::find($csvData['Branch ID'])->name,
             ];
 
             if (!$existTrans) {
