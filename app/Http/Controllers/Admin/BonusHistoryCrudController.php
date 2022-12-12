@@ -104,7 +104,7 @@ class BonusHistoryCrudController extends CrudController
                 } else {
                     $tax = Configuration::where('key', 'bonus_tax_percentage_non_npwp')->first()->value;
                 }
-                $bonusAfterTax = $entry->bonus - ($entry->bonus * $tax / 100);
+                $bonusAfterTax = $entry->bonus - ($entry->bonus * (50/100) * $tax / 100);
                 return "Rp. " . number_format($bonusAfterTax, 2, ',', '.');
             },
         ]);
@@ -221,7 +221,7 @@ class BonusHistoryCrudController extends CrudController
         $memberId = null;
         if ($requests->has('bonus_type')) {
             $bonusType = $requests->get('bonus_type');
-            $bonusType = json_decode($bonusType);
+            $bonusType = json_decode($requests->get('bonus_type'));
         }
         if ($requests->has('created_at')) {
             $dateRange = $requests->get('created_at');
@@ -230,8 +230,6 @@ class BonusHistoryCrudController extends CrudController
         if ($requests->has('member_id')) {
             $memberId = $requests->get('member_id');
         }
-        // $taxNpwp = Configuration::where('key', 'transaction_npwp_discount_percentage')->first()->value;
-        // $taxNonNpwp = Configuration::where('key', 'transaction_non_npwp_discount_percentage')->first()->value;
         $bonus = BonusHistory::
             leftJoin(
                 DB::raw("( 
@@ -258,11 +256,10 @@ class BonusHistoryCrudController extends CrudController
             ->whereMember($memberId)
             ->select(
                 DB::raw('SUM(bonus) as total_bonus'), 
-                DB::raw('SUM(bonus - (bonus * members.tax_percentage / 100)) as total_bonus_after_tax'), 
+                DB::raw('SUM(bonus - (bonus * (50/100) * (members.tax_percentage / 100) )) as total_bonus_after_tax'), 
                 DB::raw('COUNT(*) as total_transaction')
             )
             ->first();
-            // dd($bonus);
         return response()->json([
             'total_bonus' => 'Rp. ' . number_format($bonus->total_bonus, 2, ',', ','),
             'total_transactions' => $bonus->total_transaction,
