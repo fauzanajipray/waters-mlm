@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\BonusHistoryRequest;
 use App\Models\BonusHistory;
+use App\Models\Configuration;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class BonusHistoryCrudController
@@ -92,6 +94,20 @@ class BonusHistoryCrudController extends CrudController
         $this->crud->column('bonus')->value(function ($entry) {
             return "Rp. " . number_format($entry->bonus, 2, ',', '.');
         });
+        $this->crud->addColumn([
+            'name' => 'bonus_after_tax',
+            'label' => 'Bonus After Tax',
+            'type' => 'text',
+            'value' => function ($entry) {
+                if($entry->member->npwp){
+                    $tax = Configuration::where('key', 'bonus_tax_percentage_npwp')->first()->value;
+                } else {
+                    $tax = Configuration::where('key', 'bonus_tax_percentage_non_npwp')->first()->value;
+                }
+                $bonusAfterTax = $entry->bonus - ($entry->bonus * $tax / 100);
+                return "Rp. " . number_format($bonusAfterTax, 2, ',', '.');
+            },
+        ]);
         $this->crud->column('created_at');
         $this->crud->column('updated_at');
 
@@ -214,20 +230,43 @@ class BonusHistoryCrudController extends CrudController
         if ($requests->has('member_id')) {
             $memberId = $requests->get('member_id');
         }
-        $totalBonus = BonusHistory::
-            whereBonusType($bonusType)
+        // $taxNpwp = Configuration::where('key', 'transaction_npwp_discount_percentage')->first()->value;
+        // $taxNonNpwp = Configuration::where('key', 'transaction_non_npwp_discount_percentage')->first()->value;
+        $bonus = BonusHistory::
+            leftJoin(
+                DB::raw("( 
+                    SELECT 
+                        `members`.`id` as `id`,
+                        `members`.`npwp` as `npwp`,
+                        `configurations`.`value` as `tax_percentage`
+                    from
+                        `members`
+                    LEFT JOIN
+                        `configurations`
+                    ON CASE
+                        WHEN `members`.`npwp` = '' OR `members`.`npwp` = NULL THEN
+                            `configurations`.`key` = 'bonus_tax_percentage_non_npwp'
+                        ELSE
+                            `configurations`.`key` = 'bonus_tax_percentage_npwp'
+                        END
+                    ) as `members`
+                "),
+                'bonus_histories.member_id', '=', 'members.id'
+            )
+            ->whereBonusType($bonusType)
             ->whereCreatedAt($dateRange)
             ->whereMember($memberId)
-            ->sum('bonus');
-        $totalTransactions = BonusHistory::
-            whereBonusType($bonusType)
-            ->whereCreatedAt($dateRange)
-            ->whereMember($memberId)
-            ->count();
-        
+            ->select(
+                DB::raw('SUM(bonus) as total_bonus'), 
+                DB::raw('SUM(bonus - (bonus * members.tax_percentage / 100)) as total_bonus_after_tax'), 
+                DB::raw('COUNT(*) as total_transaction')
+            )
+            ->first();
+            // dd($bonus);
         return response()->json([
-            'total_bonus' => 'Rp. ' . number_format($totalBonus, 2, ',', ','),
-            'total_transactions' => $totalTransactions
+            'total_bonus' => 'Rp. ' . number_format($bonus->total_bonus, 2, ',', ','),
+            'total_transactions' => $bonus->total_transaction,
+            'total_bonus_after_tax' => 'Rp. ' . number_format($bonus->total_bonus_after_tax, 2, ',', ','),
         ]);
     }
 }

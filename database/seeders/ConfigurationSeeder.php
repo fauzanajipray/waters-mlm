@@ -46,5 +46,21 @@ class ConfigurationSeeder extends Seeder
             'value' => '50',
             'description' => 'Transaction display discount amount',
         ]);
+
+        Configuration::updateOrCreate([
+            'key' => 'bonus_tax_percentage_non_npwp',
+        ],[
+            'key' => 'bonus_tax_percentage_non_npwp',
+            'value' => '6',
+            'description' => 'Bonus tax percentage for non npwp',
+        ]);
+
+        Configuration::updateOrCreate([
+            'key' => 'bonus_tax_percentage_npwp',
+        ],[
+            'key' => 'bonus_tax_percentage_npwp',
+            'value' => '5',
+            'description' => 'Bonus tax percentage for npwp',
+        ]);
     }
 }

@@ -48,6 +48,10 @@
                             <th>Total Bonus</th>
                             <td id="totalBonus"></td>
                         </tr>
+                        <tr>
+                          <th>Total Bonus After Tax</th>
+                          <td id="totalBonusAfterTax"></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -215,6 +219,7 @@
       // total transaction
       var totalTransaction = document.getElementById('totalTransaction');
       var totalBonus = document.getElementById('totalBonus');
+      var totalBonusAfterTax = document.getElementById('totalBonusAfterTax');
 
       var url = window.location.href;
       var params = url.split('?')[1];
@@ -251,6 +256,7 @@
         success: function(data) {
           totalTransaction.innerHTML = data.total_transactions;
           totalBonus.innerHTML = data.total_bonus;
+          totalBonusAfterTax.innerHTML = data.total_bonus_after_tax;
         }
       });
     });

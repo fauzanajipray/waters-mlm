@@ -144,6 +144,16 @@ class ConfigurationCrudController extends CrudController
                 'type' => 'number_format',
             ]);
         }
+        if ($this->data['entry']->key == 'bonus_tax_percentage_npwp' || $this->data['entry']->key == 'bonus_tax_percentage_non_npwp' || $this->data['entry']->key == 'transaction_demokit_discount_percentage') {
+            $this->crud->modifyField('value', [
+                'suffix' => '%',
+                'type' => 'number',
+                'attributes' => [
+                    'min' => 0,
+                    'max' => 100,
+                ],
+            ]);
+        }
         return view('crud::edit', $this->data);
     }
 }
