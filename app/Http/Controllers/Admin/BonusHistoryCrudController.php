@@ -191,7 +191,6 @@ class BonusHistoryCrudController extends CrudController
     public function index()
     {
         $this->crud->hasAccessOrFail('list');
-
         $this->data['crud'] = $this->crud;
         $this->data['title'] = $this->crud->getTitle() ?? mb_ucfirst($this->crud->entity_name_plural);
 

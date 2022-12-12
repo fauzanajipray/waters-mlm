@@ -292,6 +292,9 @@ class TransactionPaymentCrudController extends CrudController
                 $product = Stock::where('product_id', $transactionProduct->product_id)
                     ->where('branch_id', $transaction->branch_id)
                     ->first();
+                if(!$product) {
+                    throw new \Exception('Stock '. $transactionProduct->name.' '. $transactionProduct->model .' is not enough');
+                }  
                 if ($product->quantity < $transactionProduct->quantity) {
                     DB::rollBack();
                     return redirect()->back()->with('error', 'Stock ' . $product->product->name . ' is not enough');

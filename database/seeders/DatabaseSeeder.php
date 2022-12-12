@@ -30,7 +30,6 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(ConfigurationSeeder::class);
         $this->call(RoleSeeder::class);
-        // $this->call(BranchSeeder::class);
         $this->user();
         $this->product();
         $this->level();
