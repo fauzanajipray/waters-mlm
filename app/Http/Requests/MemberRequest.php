@@ -39,7 +39,7 @@ class MemberRequest extends FormRequest
             'dob' => 'required|date',
             'id_card_type' => 'required|in:KTP,SIM',
             'postal_code' => 'nullable|min:1|max:255',
-            'npwp' => 'nullable|integer',
+            'npwp' => 'nullable|min:1|max:255',
             'member_type' => 'required|in:PERSONAL,STOKIST,CABANG,PUSAT',
             'bank_account' => 'required|min:1|max:255',
             'bank_name' => 'required|min:1|max:255',

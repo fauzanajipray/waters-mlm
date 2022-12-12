@@ -231,7 +231,7 @@ class MemberCrudController extends CrudController
         $this->crud->addField([
             'name' => 'npwp',
             'label' => 'NPWP',
-            'type' => 'number',
+            'type' => 'text',
             'tab' => 'Personal Info',
         ]);
         $this->crud->addField([
