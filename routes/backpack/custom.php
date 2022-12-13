@@ -48,6 +48,7 @@ Route::group([
     Route::crud('transaction-bebas-putus', 'TransactionBebasPutusCrudController');
     Route::crud('level', 'LevelCrudController');
     Route::crud('bonus-history', 'BonusHistoryCrudController');
+    Route::post('bonus-history/total', 'BonusHistoryCrudController@totalTransactions');
     Route::crud('level-up-histories', 'LevelUpHistoriesCrudController');
     Route::crud('activation-payments', 'ActivationPaymentsCrudController');
     Route::crud('customer', 'CustomerCrudController');

@@ -37,7 +37,7 @@ class DatabaseSeeder extends Seeder
         $this->office();
         $this->member();
         $this->customer();
-        // $this->transaction();
+        $this->transaction();
         $this->paymentMethod();
         // // $this->call(MemberSeeder::class);
     }

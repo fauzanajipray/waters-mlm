@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\BonusHistoryRequest;
+use App\Models\BonusHistory;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Carbon\Carbon;
@@ -40,6 +41,24 @@ class BonusHistoryCrudController extends CrudController
      */
     protected function setupListOperation()
     {
+        $dateRange = request()->get('date_range');
+        if ($dateRange) {
+            $dateRange = json_decode($dateRange);
+            $startDate = Carbon::parse($dateRange->from)
+                ->startOfDay()
+                ->toDateTimeString();
+            $endDate = Carbon::parse($dateRange->to)
+                ->endOfDay()
+                ->toDateTimeString();
+        } else {
+            $startDate = Carbon::now()->startOfDay()->toDateTimeString();
+            $endDate = Carbon::now()->endOfDay()->toDateTimeString();
+        }
+        // dd($startDate, $endDate, request()->all());
+
+        // $this->crud->query = $this->customQuery($startDate, $endDate);
+        // dd($this->crud->query->get()->toArray());
+        // dd($this->crud->query->toSql());
         $this->crud->addColumn([
             'label' => 'Member',
             'type' => 'relationship',
@@ -176,7 +195,40 @@ class BonusHistoryCrudController extends CrudController
         $this->data['crud'] = $this->crud;
         $this->data['title'] = $this->crud->getTitle() ?? mb_ucfirst($this->crud->entity_name_plural);
 
-        // load the view from /resources/views/vendor/backpack/crud/ if it exists, otherwise load the one in the package
         return view('vendor.backpack.crud.list_bonus', $this->data);
+    }
+
+    public function totalTransactions() 
+    {
+        $requests = collect(request()->all());
+        $bonusType = null;
+        $dateRange = null;
+        $memberId = null;
+        if ($requests->has('bonus_type')) {
+            $bonusType = $requests->get('bonus_type');
+            $bonusType = json_decode($bonusType);
+        }
+        if ($requests->has('created_at')) {
+            $dateRange = $requests->get('created_at');
+            $dateRange = json_decode($dateRange);
+        }
+        if ($requests->has('member_id')) {
+            $memberId = $requests->get('member_id');
+        }
+        $totalBonus = BonusHistory::
+            whereBonusType($bonusType)
+            ->whereCreatedAt($dateRange)
+            ->whereMember($memberId)
+            ->sum('bonus');
+        $totalTransactions = BonusHistory::
+            whereBonusType($bonusType)
+            ->whereCreatedAt($dateRange)
+            ->whereMember($memberId)
+            ->count();
+        
+        return response()->json([
+            'total_bonus' => 'Rp. ' . number_format($totalBonus, 2, ',', ','),
+            'total_transactions' => $totalTransactions
+        ]);
     }
 }

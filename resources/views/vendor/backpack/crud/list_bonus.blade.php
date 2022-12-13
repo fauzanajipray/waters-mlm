@@ -216,25 +216,43 @@
       var totalTransaction = document.getElementById('totalTransaction');
       var totalBonus = document.getElementById('totalBonus');
 
-      totalTransaction.innerHTML = 0;
-      totalBonus.innerHTML = 0;
-      var sumBonus = 0;
-      if(tableRows[0].querySelector('td:nth-child(6)') != null) {
-        for (var i = 0; i < tableRows.length; i++) {
-          var spanhtmlBonus = tableRows[i].querySelector('td:nth-child(6)').querySelector('span').innerHTML;
-          var memberName = tableRows[i].querySelector('td:nth-child(1)').querySelector('span').querySelector('a').innerHTML;
-          var explodeBonus = spanhtmlBonus.split(',');
-          var bonus = explodeBonus[0].replace(/[^0-9]/g, '');
-          var oldBonus = sumBonus;
-          sumBonus += parseInt(bonus);
-          console.log(i+'. '+ oldBonus.toLocaleString('id-ID') + ' + ' + bonus.toLocaleString('id-ID') + ' = ' +sumBonus.toLocaleString('id-ID') );
-
-          if (spanhtmlBonus != null) {
+      var url = window.location.href;
+      var params = url.split('?')[1];
+      var bonusType, dateRange, MemberID;
+      if (params != undefined){
+        var params = params.split('&');
+        params.filter(function(param) {
+          if(param.includes('bonus_type=')) {
+            bonusType = param.split('=')[1];
+            bonusType = decodeURI(bonusType).replace(/%2C/g,",");
           }
-        }
-        totalTransaction.innerHTML = tableRows.length;
+        });
+        params.filter(function(param) {
+          if(param.includes('created_at=')) {
+            dateRange = param.split('=')[1];
+            dateRange = decodeURI(dateRange).replace(/%2C/g,",").replace(/%3A/g,":");
+          }
+        });
+        params.filter(function(param) {
+          if(param.includes('member_id=')) {
+            MemberID = param.split('=')[1];
+          }
+        });
       }
-      totalBonus.innerHTML = 'Rp. ' + sumBonus.toLocaleString('id-ID') +',00';
+
+      $.ajax({
+        url: '/bonus-history/total',
+        type: 'POST',
+        data: {
+          bonus_type: bonusType,
+          created_at: dateRange,
+          member_id: MemberID
+        },
+        success: function(data) {
+          totalTransaction.innerHTML = data.total_transactions;
+          totalBonus.innerHTML = data.total_bonus;
+        }
+      });
     });
   </script>
 @endsection
