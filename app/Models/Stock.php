@@ -29,6 +29,14 @@ class Stock extends Model
     |--------------------------------------------------------------------------
     */
 
+    public function detailStockButton($crud) {
+        if(isset($crud->startDate) && isset($crud->endDate)){
+            return '<a class="btn btn-sm btn-link" href="'.backpack_url('stock-card/'. $this->id . '/detail?start_date='.$crud->startDate.'&end_date='.$crud->endDate).'"><i class="la la-eye"></i> Detail</a>';
+        } else {
+            return '<a class="btn btn-sm btn-link" href="'.backpack_url('stock-card/'. $this->id . '/detail').'"><i class="la la-eye"></i> Detail</a>';
+        }
+    }
+
     /*
     |--------------------------------------------------------------------------
     | RELATIONS

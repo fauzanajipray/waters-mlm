@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\StockRequest;
-use App\Models\Branch;
 use App\Models\Product;
 use App\Models\Stock;
-use App\Models\StockInHistory;
-use App\Models\StockOutHistory;
+use App\Models\StockHistory;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\Widget;
 use Illuminate\Support\Facades\DB;
@@ -95,18 +93,17 @@ class StockCrudController extends CrudController
         $request = request();
         if($request->has('branch_id')){
             $branch_id = $request->branch_id;
-
-            $this->crud->addField([
-                'name' => 'branch_id',
-                'label' => 'Branch',
-                'type' => 'select2',
-                'entity' => 'branch',
-                'attribute' => 'name',
-                'model' => "App\Models\Branch",
-                'options'   => (function ($query) use ($branch_id) {
-                    return $query->where('id', $branch_id)->orderBy('name', 'DESC')->get();
-                }),
-            ]);
+            // $this->crud->addField([
+            //     'name' => 'branch_id',
+            //     'label' => 'Branch',
+            //     'type' => 'select2',
+            //     'entity' => 'branch',
+            //     'attribute' => 'name',
+            //     'model' => "App\Models\Branch",
+            //     'options'   => (function ($query) use ($branch_id) {
+            //         return $query->where('id', $branch_id)->orderBy('name', 'DESC')->get();
+            //     }),
+            // ]);
         }else{
             $this->crud->addField([
                 'name' => 'branch_id',
@@ -116,7 +113,7 @@ class StockCrudController extends CrudController
                 'attribute' => 'name',
                 'model' => "App\Models\Branch",
                 'options'   => (function ($query) {
-                    $data = $query->with('member')->orderBy('name', 'DESC')->get();
+                    $data = $query->where('id', '1')->with('member')->orderBy('name', 'DESC')->get();
                     $data->map(function($item){ 
                         if(isset($item->member)){
                             $item->name = $item->name . ' | ' . $item->member->name;
@@ -219,10 +216,18 @@ class StockCrudController extends CrudController
                 }else{
                     $stock = Stock::create($data);
                 }
-                $stockInHistory = StockInHistory::create([
+                // TODO: Delete this
+                // $stockInHistory = StockInHistory::create([
+                //     'product_id' => $data['product_id'],
+                //     'quantity' => $data['quantity'],
+                //     'branch_origin' => $data['branch_id'],
+                // ]);
+                StockHistory::create([
                     'product_id' => $data['product_id'],
                     'quantity' => $data['quantity'],
-                    'branch_origin' => $data['branch_id'],
+                    'branch_id' => $data['branch_id'],
+                    'type' => 'in',
+                    'in_from' => null,
                 ]);
             } else {
                 $stock = Stock::where('product_id', $data['product_id'])->where('branch_id', $data['branch_id'])->first();
@@ -236,17 +241,36 @@ class StockCrudController extends CrudController
                 $stockOrigin = Stock::where('product_id', $data['product_id'])->where('branch_id', $data['origin_branch_id'])->first();
                 $stockOrigin->quantity = $stockOrigin->quantity - $data['quantity'];
                 $stockOrigin->save();
-                $stockOutHistory = StockOutHistory::create([
-                    'product_id' => $data['product_id'],
-                    'branch_origin' => $data['origin_branch_id'],
-                    'branch_destination' => $data['branch_id'],
-                    'quantity' => $data['quantity'],
-                ]);
-                $stockInHistory = StockInHistory::create([
+                // stock out
+                StockHistory::create([
                     'product_id' => $data['product_id'],
                     'quantity' => $data['quantity'],
-                    'branch_origin' => $data['branch_id'],
+                    'branch_id' => $data['origin_branch_id'],
+                    'type' => 'out',
+                    'out_to' => $data['branch_id'],
                 ]);
+                // stock in
+                StockHistory::create([
+                    'product_id' => $data['product_id'],
+                    'quantity' => $data['quantity'],
+                    'branch_id' => $data['branch_id'],
+                    'type' => 'in',
+                    'in_from' => $data['origin_branch_id'],
+                ]);
+                
+                // TODO: Delete this
+                // $stockOutHistory = StockOutHistory::create([
+                //     'product_id' => $data['product_id'],
+                //     'branch_origin' => $data['origin_branch_id'],
+                //     'branch_destination' => $data['branch_id'],
+                //     'quantity' => $data['quantity'],
+                // ]);
+                // $stockInHistory = StockInHistory::create([
+                //     'product_id' => $data['product_id'],
+                //     'quantity' => $data['quantity'],
+                //     'branch_origin' => $data['branch_id'],
+                // ]);
+
             }
             DB::commit();
             return redirect()->route('stock.index');

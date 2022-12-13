@@ -5,7 +5,7 @@ namespace App\Models;
 use Backpack\CRUD\app\Models\Traits\CrudTrait;
 use Illuminate\Database\Eloquent\Model;
 
-class StockInHistory extends Model
+class StockHistory extends Model
 {
     use CrudTrait;
 
@@ -15,7 +15,7 @@ class StockInHistory extends Model
     |--------------------------------------------------------------------------
     */
 
-    protected $table = 'stock_in_histories';
+    protected $table = 'stock_histories';
     // protected $primaryKey = 'id';
     // public $timestamps = false;
     protected $guarded = ['id'];
