@@ -1,18 +1,14 @@
 <?php
 namespace App\Http\Traits;
 
-use App\Http\Requests\MemberRequest;
 use App\Models\BonusHistory;
+use App\Models\Branch;
 use App\Models\Configuration;
-use App\Models\Level;
 use App\Models\Member;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Validator;
 use Prologue\Alerts\Facades\Alert;
 
 trait MemberTrait {
@@ -210,6 +206,28 @@ trait MemberTrait {
         });
         $options = $members->pluck('name', 'id');
         return $options;
+    }
+
+    public function getBranchOwner(Request $request)
+    {
+        $term = $request->input('q');
+        if($term){
+            $branch = Branch::whereHas('member')->with(['member' => function ($query) use ($term) {
+                return $query->where('name', 'like', '%'.$term.'%')
+                    ->orWhere('member_numb', 'LIKE', '%'.$term.'%');
+            }])->where('id', '!=', 1)->get();
+        }else{
+            $branch = Branch::whereHas('member')->with(['member'])->where('id', '!=', 1)->get();
+        }
+        $members = null;
+        foreach($branch as $b){
+            if(isset($b->member)){
+                $members[$b->member->id] = $b->member;
+                $members[$b->member->id]->name = $b->member->member_numb . ' - ' . $b->member->name . ' - ' . $b->name;
+            }
+        }
+        $members = collect($members);
+        return $members;
     }
 }
 

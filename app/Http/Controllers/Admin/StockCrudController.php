@@ -216,12 +216,6 @@ class StockCrudController extends CrudController
                 }else{
                     $stock = Stock::create($data);
                 }
-                // TODO: Delete this
-                // $stockInHistory = StockInHistory::create([
-                //     'product_id' => $data['product_id'],
-                //     'quantity' => $data['quantity'],
-                //     'branch_origin' => $data['branch_id'],
-                // ]);
                 StockHistory::create([
                     'product_id' => $data['product_id'],
                     'quantity' => $data['quantity'],
@@ -257,20 +251,6 @@ class StockCrudController extends CrudController
                     'type' => 'in',
                     'in_from' => $data['origin_branch_id'],
                 ]);
-                
-                // TODO: Delete this
-                // $stockOutHistory = StockOutHistory::create([
-                //     'product_id' => $data['product_id'],
-                //     'branch_origin' => $data['origin_branch_id'],
-                //     'branch_destination' => $data['branch_id'],
-                //     'quantity' => $data['quantity'],
-                // ]);
-                // $stockInHistory = StockInHistory::create([
-                //     'product_id' => $data['product_id'],
-                //     'quantity' => $data['quantity'],
-                //     'branch_origin' => $data['branch_id'],
-                // ]);
-
             }
             DB::commit();
             return redirect()->route('stock.index');

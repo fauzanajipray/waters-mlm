@@ -192,6 +192,7 @@ class ProductCrudController extends CrudController
             return $stock;
         });
 
+        /* Revision Display
         // Filter Sudah Pernah Membeli
         $productBought = [];
         $transactions = Transaction::with('transactionProducts')
@@ -217,7 +218,7 @@ class ProductCrudController extends CrudController
         $products = $products->filter(function($product) use ($productBought){
             return !isset($productBought[$product->id]);
         });
-
+        */
         return $products;
     }
 
@@ -226,7 +227,7 @@ class ProductCrudController extends CrudController
         $search_term = request()->input('q');
         $branch_id = collect(request()->form)->where('name', 'branch_id')->first();
         if(!$branch_id){
-            return response()->json(['results' => []]);
+            return response()->json([]);
         }        
         if($search_term){
             $products = Stock::leftJoin('products', 'products.id', '=', 'stocks.product_id')
@@ -273,7 +274,7 @@ class ProductCrudController extends CrudController
         $branch_id = request()->form[2];
         $origin_branch_id = request()->form[3];
         if($branch_id['name'] != 'branch_id' ) { 
-            return response()->json(['results' => []]);
+            return response()->json([]);
         }
         if ($branch_id['value'] != 1) {
             if($origin_branch_id['name'] == 'origin_branch_id' ) { 
@@ -297,7 +298,7 @@ class ProductCrudController extends CrudController
 
                 return $stocks;
             } else {
-                return response()->json(['results' => []]);
+                return response()->json([]);
             }
         } else {
             if($search_term){
@@ -327,7 +328,7 @@ class ProductCrudController extends CrudController
         $search_term = request()->input('q');
         $branch_id = collect(request()->form)->where('name', 'branch_id')->first();
         if(!$branch_id){
-            return response()->json(['results' => []]);
+            return response()->json([]);
         }        
         if($search_term){
             $stocks = Stock::leftJoin('products', 'products.id', '=', 'stocks.product_id')
@@ -342,6 +343,10 @@ class ProductCrudController extends CrudController
                 ->where('quantity', '>', 0)
                 ->get();
         }
+        $stocks = $stocks->map(function ($stock) {
+            $stock->name = $stock->name.' - '.$stock->model. ' - '.number_format($stock->price). ' - Stock : '.$stock->quantity ;
+            return $stock;
+        });
 
         return $stocks;
     }

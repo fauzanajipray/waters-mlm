@@ -103,6 +103,7 @@ class StockCardCrudController extends CrudController
                 // $this->crud->addClause('where', 'stock_in_histories_now.created_at', '<=', $endDate . ' 23:59:59');
             }
         );
+        
         $this->crud->addColumns([
             [
                 'name' => 'product_name',
@@ -377,6 +378,24 @@ class StockCardCrudController extends CrudController
                         ->whereRaw('`stocks`.`branch_id` = `stock_out_histories_now`.`branch_id`');
                 }
             )
+            ->leftJoin( // Sales
+                DB::raw("(
+                    SELECT
+                        stock_histories.product_id,
+                        stock_histories.branch_id,
+                        SUM(stock_histories.quantity) as quantity,
+                        stock_histories.created_at
+                    FROM stock_histories
+                    WHERE stock_histories.created_at 
+                        BETWEEN '$startDate' AND '$endDate'
+                    AND stock_histories.type = 'sales'
+                    GROUP BY stock_histories.product_id, stock_histories.branch_id
+                ) as `transactions_now` "),
+                function($join) {
+                    $join->on('stocks.product_id', '=', 'transactions_now.product_id')
+                        ->whereRaw('`stocks`.`branch_id` = `transactions_now`.`branch_id`');
+                }
+            )
             /* Yesterday */
             ->leftJoin( // Stock In
                 DB::raw("(
@@ -414,6 +433,23 @@ class StockCardCrudController extends CrudController
                         ->whereRaw('`stocks`.`branch_id` = `stock_out_histories_yesterday`.`branch_id`');
                 }
             )
+            ->leftJoin( // Sales Yesterday 
+                DB::raw("(
+                    SELECT
+                        stock_histories.product_id,
+                        stock_histories.branch_id,
+                        SUM(stock_histories.quantity) as quantity,
+                        stock_histories.created_at
+                    FROM stock_histories
+                    WHERE stock_histories.created_at <= '$startDateYesterdayEndOfDay'
+                    AND stock_histories.type = 'sales'
+                    GROUP BY stock_histories.product_id, stock_histories.branch_id
+                ) as `transactions_yesterday` "),
+                function($join) {
+                    $join->on('stocks.product_id', '=', 'transactions_yesterday.product_id')
+                        ->whereRaw('`stocks`.`branch_id` = `transactions_yesterday`.`branch_id`');
+                }
+            )
             ->leftJoin('products', 'stocks.product_id', '=', 'products.id')
             ->leftJoin('branches', 'stocks.branch_id', '=', 'branches.id')
             ->select(
@@ -430,14 +466,14 @@ class StockCardCrudController extends CrudController
                 // DB::raw('SUM(`stock_out_histories_now`.`quantity`) as `stock_out`'),
                 'stock_in_histories_now.quantity as stock_in',
                 'stock_out_histories_now.quantity as stock_out',
-                // DB::raw('SUM(`transactions_now`.`quantity`) as `stock_sales`'),                
+                DB::raw('SUM(`transactions_now`.`quantity`) as `stock_sales`'),                
                 
                 /* Yesterday */
                 // DB::raw('SUM(`stock_in_histories_yesterday`.`quantity`) as `stock_in_yesterday`'),
                 // DB::raw('SUM(`stock_out_histories_yesterday`.`quantity`) as `stock_out_yesterday`'),
                 'stock_in_histories_yesterday.quantity as stock_in_yesterday',
                 'stock_out_histories_yesterday.quantity as stock_out_yesterday',
-                // DB::raw('SUM(`transactions_yesterday`.`quantity`) as `stock_sales_yesterday`'),
+                DB::raw('SUM(`transactions_yesterday`.`quantity`) as `stock_sales_yesterday`'),
                 
                 // DB::raw('SUM(`stock_in_histories_yesterday`.`quantity`) - SUM(`stock_out_histories_yesterday`.`quantity`) + SUM(`stock_in_histories_now`.`quantity`) - SUM(`stock_out_histories_now`.`quantity`) as `final_stock`'),
             )

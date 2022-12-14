@@ -130,11 +130,12 @@ class TransactionDisplayCrudController extends CrudController
             'name' => 'member_id',
             'type' => 'select2_from_ajax',
             'entity' => 'member',
-            'attribute' => 'text',
-            'data_source' => url('members/only-actived'),
+            'attribute' => 'name',
+            'data_source' => url('members/branch-owner'),
             'delay' => 500
         ]);
         
+        /* Revision 1 
         $this->crud->addField([
             'name' => 'customer_id',
             'type' => 'relationship',
@@ -152,6 +153,7 @@ class TransactionDisplayCrudController extends CrudController
             'data_source' => url('customer/get-customer-by-member-id'),
             'placeholder' => 'Select a customer',
         ]);
+        */
         
         $this->crud->addField([
             'name' => 'shipping_address',
@@ -165,7 +167,7 @@ class TransactionDisplayCrudController extends CrudController
 
         $this->crud->addField([
             'name' => 'is_member',
-            'type' => 'checkbox',
+            'type' => 'hidden',
             'label' => 'Member is customer',
             'wrapperAttributes' => [
                 'class' => 'form-group col-md-12'
@@ -182,10 +184,11 @@ class TransactionDisplayCrudController extends CrudController
                 'type' => 'select2_from_ajax',
                 'entity' => 'branch',
                 'attribute' => 'name',
-                'data_source' => url('branches'),
+                'data_source' => url('branches/transaction-display'),
                 'delay' => 500,
                 'method' => 'POST',
                 'tab' => 'Product',
+                'include_all_form_fields' => true,
             ],
             [
                 'name' => 'product_id',

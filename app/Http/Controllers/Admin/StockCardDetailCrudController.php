@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Branch;
 use App\Models\Stock;
 use App\Models\StockHistory;
+use App\Models\Transaction;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Carbon\Carbon;
 
@@ -70,7 +71,6 @@ class StockCardDetailCrudController extends CrudController
         $this->crud->startDate = $startDate;
         $this->crud->endDate = $endDate;
         
-        // dd($this->crud->stock->product->id, $this->crud->stock->branch->id);
         $this->crud->addClause('where', 'stock_histories.branch_id', $this->crud->stock->branch->id);
         $this->crud->addClause('where', 'stock_histories.product_id', $this->crud->stock->product->id);
         $this->crud->addClause('where', 'stock_histories.created_at', '>=', $startDate);
@@ -155,21 +155,47 @@ class StockCardDetailCrudController extends CrudController
             'label' => 'In/Out Branch',
             'type' => 'text',
             'value' => function($entry) {
-                switch ($entry->type) {
-                    case 'in':
-                        $idBranch = $entry->in_from;
-                    case 'out':
-                        $idBranch = $entry->out_to;
-                    default:
-                        $idBranch = null;
+                $branchID = null;
+                if($entry->type == 'in') {
+                    $branchID = $entry->in_from;
+                } else if($entry->type == 'out') {
+                    $branchID = $entry->out_to;
+                } else {
+                    $branchID = null;
                 }
-                if ($idBranch) {
-                    $branch = Branch::find($idBranch);
+                if ($branchID) {
+                    $branch = Branch::find($branchID);
                     return $branch->name;
                 } else {
                     return '-';
                 }
             },
+        ]);
+    
+        $this->crud->addColumn([
+            'name' => 'sales_on',
+            'label' => 'Sales On',
+            'type' => 'text',
+            'value' => function($entry) {
+                if($entry->sales_on) {
+                    $sales = Transaction::find($entry->sales_on);
+                    return $sales->code;
+                } else {
+                    return '-';
+                }
+            },
+            'wrapper' => [
+                'element' => 'a',
+                'href' => function($crud, $column, $entry) {
+                    if($entry->sales_on) {
+                        $sales = Transaction::find($entry->sales_on);
+                        return route('transaction.show', $sales->id);
+                    } else {
+                        return '#';
+                    }
+                },
+                'target' => '_blank'
+            ],
         ]);
 
     }

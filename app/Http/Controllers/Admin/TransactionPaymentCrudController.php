@@ -6,10 +6,10 @@ use App\Http\Requests\TransactionPaymentRequest;
 use App\Http\Traits\TransactionPaymentTrait;
 use App\Models\PaymentMethod;
 use App\Models\Stock;
+use App\Models\StockHistory;
 use App\Models\Transaction;
 use App\Models\TransactionPayment;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
-use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Backpack\CRUD\app\Library\Widget;
 use Exception;
 use Illuminate\Http\Request;
@@ -327,11 +327,54 @@ class TransactionPaymentCrudController extends CrudController
                 $this->calculateBonus($transaction, $transaction->member, $lastPaymentDate);
                 /* Minus stock */
                 foreach ($transactionProducts as $transactionProduct) {
-                    $product = Stock::where('product_id', $transactionProduct->product_id)
+                    $stock = Stock::where('product_id', $transactionProduct->product_id)
                         ->where('branch_id', $transaction->branch_id)
                         ->first();
-                    $product->quantity = $product->quantity - $transactionProduct->quantity;
-                    $product->save();
+                    $stock->quantity = $stock->quantity - $transactionProduct->quantity;
+                    $stock->save();
+   
+                    /* Add stock history */
+                    if($transaction->type != "Display"){
+                        $stockHistory = new StockHistory();
+                        $stockHistory->type = 'sales';
+                        $stockHistory->branch_id = $transaction->branch_id;
+                        $stockHistory->sales_on = $transaction->id;
+                        $stockHistory->product_id = $transactionProduct->product_id;
+                        $stockHistory->quantity = $transactionProduct->quantity;
+                        $stockHistory->save();    
+                    } else {
+                        // out to branch
+                        $stockHistory = new StockHistory();
+                        $stockHistory->type = 'out';
+                        $stockHistory->branch_id = $transaction->branch_id;
+                        $stockHistory->sales_on = $transaction->id;
+                        $stockHistory->product_id = $transactionProduct->product_id;
+                        $stockHistory->quantity = $transactionProduct->quantity;
+                        $stockHistory->out_to = $transaction->member->branch->id;
+                        $stockHistory->save();
+                        
+                        // in to member branch
+                        $stockNew = Stock::where('product_id', $transactionProduct->product_id)
+                            ->where('branch_id', $transaction->member->branch->id)->first();
+                        if(!$stockNew) {
+                            $stockNew = new Stock();
+                            $stockNew->branch_id = $transaction->member->branch->id;
+                            $stockNew->product_id = $transactionProduct->product_id;
+                            $stockNew->quantity = $transactionProduct->quantity;
+                        } else {
+                            $stockNew->quantity = $stockNew->quantity + $transactionProduct->quantity;
+                        }
+                        $stockNew->save();
+                        
+                        $stockHistoryIn = new StockHistory();
+                        $stockHistoryIn->type = 'in';
+                        $stockHistoryIn->branch_id = $transaction->member->branch->id;
+                        $stockHistoryIn->sales_on = $transaction->id;
+                        $stockHistoryIn->product_id = $transactionProduct->product_id;
+                        $stockHistoryIn->quantity = $transactionProduct->quantity;
+                        $stockHistoryIn->in_from = $transaction->branch_id;
+                        $stockHistoryIn->save();   
+                    }
                 }                
             }
             DB::commit();

@@ -113,7 +113,7 @@ class BranchCrudController extends CrudController
         if($member_type['name'] != 'member_type') {
             $member_type = request()->form[4];
             if($member_type['name'] != 'member_type') {
-                return response()->json(['results' => []]);
+                return response()->json([]);
             }
         }
 
@@ -239,7 +239,7 @@ class BranchCrudController extends CrudController
         $search_term = $request->input('q');
         $branch_id = request()->form[2];
         if($branch_id['name'] != 'branch_id') { 
-            return response()->json(['results' => []]);
+            return response()->json([]);
         }
 
         $branch_type = Branch::find($branch_id['value'])->type;
@@ -250,7 +250,7 @@ class BranchCrudController extends CrudController
         } else if ($branch_type == "PUSAT") {
             $branch_type = null;
         } else {
-            return response()->json(['results' => []]);
+            return response()->json([]);
         }
 
         if($search_term) {
@@ -308,10 +308,49 @@ class BranchCrudController extends CrudController
 
         $branch->map(function($item) {
             if(isset($item->member)) $item->name = $item->name . ' | ' . $item->member->name;
-            
             return $item;
         });
 
         return $branch;
+    }
+
+    public function getBranchStock(){
+        $search_term = request()->input('q');
+        $form = collect(request()->form);
+        $memberId = $form->where('name', 'member_id')->first();
+        if(!$memberId) {
+            return response()->json([]);
+        }
+        $memberId = $memberId['value'];
+        $member = Member::with('branch')->find($memberId);
+        if($search_term) {
+            if($member->branch->type == 'STOKIST') {
+                $branches = Branch::where('type', 'CABANG')
+                    ->where('name', 'like', '%'.$search_term.'%')
+                    ->get();
+            } else if($member->branch->type == 'CABANG') {
+                $branches = Branch::where('type', 'PUSAT')
+                    ->where('name', 'like', '%'.$search_term.'%')
+                    ->get();
+            } else {
+                return response()->json([]);
+            }
+        } else {
+            if($member->branch->type == 'STOKIST') {
+                $branches = Branch::where('type', 'CABANG')
+                    ->get();
+            } else if($member->branch->type == 'CABANG') {
+                $branches = Branch::where('type', 'PUSAT')
+                    ->get();
+            } else {
+                return response()->json([]);
+            }
+        }
+        
+        $branches->map(function($item) {
+            if(isset($item->member)) $item->name = $item->name . ' | ' . $item->member->name;
+            return $item;
+        });
+        return $branches;
     }
 }

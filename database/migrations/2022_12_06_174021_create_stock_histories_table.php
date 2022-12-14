@@ -22,13 +22,13 @@ return new class extends Migration
             $table->unsignedBigInteger('in_from')->nullable();
             $table->unsignedBigInteger('out_to')->nullable();
             $table->unsignedBigInteger('adjustment_by')->nullable();
-            $table->unsignedBigInteger('sales_at')->nullable();
+            $table->unsignedBigInteger('sales_on')->nullable();
             $table->foreign('product_id')->references('id')->on('products');
             $table->foreign('branch_id')->references('id')->on('branches');
             $table->foreign('in_from')->references('id')->on('branches');
             $table->foreign('out_to')->references('id')->on('branches');
             $table->foreign('adjustment_by')->references('id')->on('users');
-            $table->foreign('sales_at')->references('id')->on('transactions');
+            $table->foreign('sales_on')->references('id')->on('transactions');
             $table->timestamps();
         });
     }
