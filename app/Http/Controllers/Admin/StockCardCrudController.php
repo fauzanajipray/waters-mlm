@@ -93,15 +93,7 @@ class StockCardCrudController extends CrudController
                 ]
             ],
             false,
-            function($value) { // if the filter is active
-                $dates = json_decode($value);
-                // $this->crud->addClause('where', 'stock_in_histories_now.created_at', '>=', $dates->from);
-                // $this->crud->addClause('where', 'stock_in_histories_now.created_at', '<=', $dates->to . ' 23:59:59');
-            },
-            function() use($startDate, $endDate) { // if the filter is not active
-                // $this->crud->addClause('where', 'stock_in_histories_now.created_at', '>=', $startDate);
-                // $this->crud->addClause('where', 'stock_in_histories_now.created_at', '<=', $endDate . ' 23:59:59');
-            }
+            function($value) { }
         );
         
         $this->crud->addColumns([
@@ -109,16 +101,28 @@ class StockCardCrudController extends CrudController
                 'name' => 'product_name',
                 'label' => 'Product Name',
                 'type' => 'text',
+                'orderable' => true,
+                'orderLogic' => function ($query, $column, $columnDirection) {
+                    $query->orderBy('products.name', $columnDirection);
+                },
             ],
             [
                 'name' => 'product_model',
                 'label' => 'Product Model',
                 'type' => 'text',
+                'orderable' => true,
+                'orderLogic' => function ($query, $column, $columnDirection) {
+                    $query->orderBy('products.model', $columnDirection);
+                },
             ],
             [
                 'name' => 'branch_name',
                 'label' => 'Branch Name',
                 'type' => 'text',
+                'orderable' => true,
+                'orderLogic' => function ($query, $column, $columnDirection) {
+                    $query->orderBy('branches.name', $columnDirection);
+                },
             ],
             [
                 'name' => 'initial_stock',
