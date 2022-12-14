@@ -33,6 +33,7 @@ class StockCardDetailCrudController extends CrudController
         $this->crud->stock = Stock::with(['product', 'branch' => function($query) {
             return $query->with('member');
         } ])->find($stockID);
+        if (!$this->crud->stock) abort(404);
         $this->crud->setModel(StockHistory::class);
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/stock-card/' . $stockID . '/detail');
         $this->crud->setEntityNameStrings('Stock Card Detail', 'Stock Card Detail');
@@ -130,7 +131,6 @@ class StockCardDetailCrudController extends CrudController
                         return $entry->quantity;
                 }
             },
-            // text color
             'wrapper' => [
                 'element' => 'span',
                 'class' => function($crud, $column, $entry) {
@@ -140,7 +140,7 @@ class StockCardDetailCrudController extends CrudController
                         case 'out':
                             return 'text-danger';
                         case 'adjustment':
-                            return 'text-warning';
+                            return 'text-black';
                         case 'sales':
                             return 'text-danger';
                         default:
@@ -166,6 +166,19 @@ class StockCardDetailCrudController extends CrudController
                 if ($branchID) {
                     $branch = Branch::find($branchID);
                     return $branch->name;
+                } else {
+                    return '-';
+                }
+            },
+        ]);
+
+        $this->crud->addColumn([
+            'name' => 'description',
+            'label' => 'Description',
+            'type' => 'text',
+            'value' => function($entry) {
+                if($entry->type == 'adjustment') {
+                    return $entry->descriptions;
                 } else {
                     return '-';
                 }

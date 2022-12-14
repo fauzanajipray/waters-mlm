@@ -37,6 +37,10 @@ class Stock extends Model
         }
     }
 
+    public function addAdjustmentButton($crud) {
+        return '<a class="btn btn-sm btn-link" href="'.backpack_url('stock-card/'. $this->id . '/adjustment/create').'"><i class="la la-plus"></i> Adjustment</a>';
+    }
+
     /*
     |--------------------------------------------------------------------------
     | RELATIONS

@@ -161,6 +161,14 @@ class StockCardCrudController extends CrudController
                 },
             ],
             [
+                'name' => 'adjustment',
+                'label' => 'Adjustment',
+                'type' => 'number',
+                'value' => function($entry) {
+                    return $entry->adjustments_now ?? 0;
+                },
+            ],
+            [
                 'name' => 'final_stock',
                 'label' => 'Akhir',
                 'type' => 'number',
@@ -168,8 +176,10 @@ class StockCardCrudController extends CrudController
                     $stockIn = $entry->stock_in_yesterday ?? 0;
                     $stockOut = $entry->stock_out_yesterday ?? 0;
                     $stockSalesYesterday = $entry->stock_sales_yesterday ?? 0;
-                    $initialStock = $stockIn - $stockOut - $stockSalesYesterday;
-                    $finalStock = $initialStock + $entry->stock_in - $entry->stock_out - $entry->stock_sales;
+                    $adjustmentsNow = $entry->adjustments_now ?? 0;
+                    $adjustmentsYesterday = $entry->adjustments_yesterday ?? 0;
+                    $initialStock = $stockIn - $stockOut - $stockSalesYesterday + $adjustmentsYesterday;
+                    $finalStock = $initialStock + $entry->stock_in - $entry->stock_out - $entry->stock_sales + $adjustmentsNow;
                     return $finalStock;
                 }
             ],
@@ -186,8 +196,8 @@ class StockCardCrudController extends CrudController
                 'value' => $endDate,
             ]
         ]);    
-        $this->crud->addButtonFromModelFunction('line', 'detail_stock', 'detailStockButton', 'beginning');
-    
+        $this->crud->addButtonFromModelFunction('line', 'detail_stock', 'detailStockButton', 'beginning');  
+        $this->crud->addButtonFromModelFunction('line', 'add_adjustment', 'addAdjustmentButton', 'end');
 
     }
 
@@ -204,145 +214,7 @@ class StockCardCrudController extends CrudController
 
     public function customQuery($startDate, $endDate){
         $startDateYesterdayEndOfDay = Carbon::parse($startDate)->endOfDay()->subDay()->toDateTimeString();
-        // $queryOld =  Stock::
-        //     /* Now */
-        //     leftJoin(
-        //         DB::raw("(
-        //             SELECT stock_in_histories.product_id, stock_in_histories.branch_origin, SUM(stock_in_histories.quantity) as quantity, stock_in_histories.created_at
-        //             FROM stock_in_histories 
-        //             WHERE stock_in_histories.created_at 
-        //             BETWEEN '$startDate' AND '$endDate'
-        //             GROUP BY stock_in_histories.product_id, stock_in_histories.branch_origin
-        //         ) as `stock_in_histories_now` "),
-        //             function($join) {
-        //                 $join->on('stocks.product_id', '=', 'stock_in_histories_now.product_id')
-        //                     ->whereRaw('`stocks`.`branch_id` = `stock_in_histories_now`.`branch_origin`');
-        //             }
-        //     )
-        //     ->leftJoin(
-        //         DB::raw("(
-        //             SELECT stock_out_histories.product_id, stock_out_histories.branch_origin, SUM(stock_out_histories.quantity) as quantity, stock_out_histories.created_at
-        //             FROM stock_out_histories 
-        //             WHERE stock_out_histories.created_at 
-        //             BETWEEN '$startDate' AND '$endDate'
-        //             GROUP BY stock_out_histories.product_id, stock_out_histories.branch_origin
-        //         ) as `stock_out_histories_now`"),
-        //             function($join) {
-        //                 $join->on('stocks.product_id', '=', 'stock_out_histories_now.product_id')
-        //                     ->whereRaw('`stocks`.`branch_id` = `stock_out_histories_now`.`branch_origin`');
-        //             }
-        //     )
-        //     // Transactions
-        //     ->leftJoin(
-        //         DB::raw("(
-        //             SELECT 
-        //                 `transactions`.`id` AS `transaction_id`,
-        //                 `transactions`.`branch_id` AS `branch_id`,
-        //                 `transaction_products`.`product_id` AS `product_id`,
-        //                 `transaction_products`.`quantity` AS `quantity`,
-        //                 `transaction_payments_last`.`payment_date` AS `payment_date`
-        //             FROM `transactions`
-        //             LEFT JOIN
-        //                 `transaction_products`
-        //                 ON `transactions`.`id` = `transaction_products`.`transaction_id`
-        //             LEFT JOIN
-        //                 (
-        //                     SELECT `transaction_payments`.`transaction_id`, MAX(`transaction_payments`.`payment_date`) AS `payment_date`
-        //                     FROM `transaction_payments`
-        //                     GROUP BY `transaction_payments`.`transaction_id`
-        //                 ) as `transaction_payments_last`
-        //                 ON `transactions`.`id` = `transaction_payments_last`.`transaction_id`
-        //             WHERE `transactions`.`status_paid` = 1
-        //             AND `transaction_payments_last`.`payment_date` BETWEEN '$startDate' AND '$endDate'
-        //         ) as `transactions_now`"),
-        //         function($join) {
-        //             $join->on('stocks.product_id', '=', 'transactions_now.product_id')
-        //                 ->whereRaw('`stocks`.`branch_id` = `transactions_now`.`branch_id`');
-        //         }
-        //     )       
-        //     /* Yesterday */
-        //     ->leftJoin(
-        //         DB::raw("(
-        //             SELECT stock_in_histories.product_id, stock_in_histories.branch_origin, SUM(stock_in_histories.quantity) as quantity, stock_in_histories.created_at
-        //             FROM stock_in_histories 
-        //             WHERE stock_in_histories.created_at <= '$startDateYesterdayEndOfDay' 
-        //             GROUP BY stock_in_histories.product_id, stock_in_histories.branch_origin
-        //         ) as `stock_in_histories_yesterday` "),
-        //             function($join) {
-        //                 $join->on('stocks.product_id', '=', 'stock_in_histories_yesterday.product_id')
-        //                     ->whereRaw('`stocks`.`branch_id` = `stock_in_histories_yesterday`.`branch_origin`');
-        //             }
-        //     )
-        //     ->leftJoin(
-        //         DB::raw("(
-        //             SELECT stock_out_histories.product_id, stock_out_histories.branch_origin, SUM(stock_out_histories.quantity) as quantity, stock_out_histories.created_at
-        //             FROM stock_out_histories 
-        //             WHERE stock_out_histories.created_at <= '$startDateYesterdayEndOfDay'
-        //             GROUP BY stock_out_histories.product_id, stock_out_histories.branch_origin
-        //         ) as `stock_out_histories_yesterday`"),
-        //             function($join) {
-        //                 $join->on('stocks.product_id', '=', 'stock_out_histories_yesterday.product_id')
-        //                     ->whereRaw('`stocks`.`branch_id` = `stock_out_histories_yesterday`.`branch_origin`');
-        //             }
-        //     )
-        //     ->leftJoin(
-        //         DB::raw("(
-        //             SELECT 
-        //                 `transactions`.`id` AS `transaction_id`,
-        //                 `transactions`.`branch_id` AS `branch_id`,
-        //                 `transaction_products`.`product_id` AS `product_id`,
-        //                 `transaction_products`.`quantity` AS `quantity`,
-        //                 `transaction_payments_last_2`.`payment_date` AS `payment_date`
-        //             FROM `transactions`
-        //             LEFT JOIN
-        //                 `transaction_products`
-        //                 ON `transactions`.`id` = `transaction_products`.`transaction_id`
-        //             LEFT JOIN
-        //                 (
-        //                     SELECT `transaction_payments`.`transaction_id`, MAX(`transaction_payments`.`payment_date`) AS `payment_date`
-        //                     FROM `transaction_payments`
-        //                     GROUP BY `transaction_payments`.`transaction_id`
-        //                 ) as `transaction_payments_last_2`
-        //                 ON `transactions`.`id` = `transaction_payments_last_2`.`transaction_id`
-        //             WHERE `transactions`.`status_paid` = 1
-        //             AND `transaction_payments_last_2`.`payment_date` <= '$startDateYesterdayEndOfDay'
-        //         ) as `transactions_yesterday`"),
-        //         function($join) {
-        //             $join->on('stocks.product_id', '=', 'transactions_yesterday.product_id')
-        //                 ->whereRaw('`stocks`.`branch_id` = `transactions_yesterday`.`branch_id`');
-        //         }
-        //     )
-        //     ->leftJoin('products', 'stocks.product_id', '=', 'products.id')
-        //     ->leftJoin('branches', 'stocks.branch_id', '=', 'branches.id')
-        //     ->select(
-        //         'stocks.id',
-        //         'stocks.product_id',
-        //         'stocks.branch_id',
-        //         'products.name as product_name',
-        //         'products.model as product_model',
-        //         'branches.name as branch_name',
-
-        //         /* Now */
-        //         // DB::raw('(SUM(`stock_in_histories_yesterday`.`quantity`) - SUM(`stock_out_histories_yesterday`.`quantity`)) as `initial_stock`'),
-        //         // DB::raw('SUM(`stock_in_histories_now`.`quantity`) as `stock_in`'),
-        //         // DB::raw('SUM(`stock_out_histories_now`.`quantity`) as `stock_out`'),
-        //         'stock_in_histories_now.quantity as stock_in',
-        //         'stock_out_histories_now.quantity as stock_out',
-        //         DB::raw('SUM(`transactions_now`.`quantity`) as `stock_sales`'),                
-                
-        //         /* Yesterday */
-        //         // DB::raw('SUM(`stock_in_histories_yesterday`.`quantity`) as `stock_in_yesterday`'),
-        //         // DB::raw('SUM(`stock_out_histories_yesterday`.`quantity`) as `stock_out_yesterday`'),
-        //         'stock_in_histories_yesterday.quantity as stock_in_yesterday',
-        //         'stock_out_histories_yesterday.quantity as stock_out_yesterday',
-        //         DB::raw('SUM(`transactions_yesterday`.`quantity`) as `stock_sales_yesterday`'),
-                
-        //         // DB::raw('SUM(`stock_in_histories_yesterday`.`quantity`) - SUM(`stock_out_histories_yesterday`.`quantity`) + SUM(`stock_in_histories_now`.`quantity`) - SUM(`stock_out_histories_now`.`quantity`) as `final_stock`'),
-        //     )
-        //     ->orderBy('branches.name', 'asc')
-        //     ->groupBy('products.name', 'products.model', 'branches.name');
         
-
         $query = Stock::
             /* Now */
             leftJoin( // Stock In
@@ -400,6 +272,24 @@ class StockCardCrudController extends CrudController
                         ->whereRaw('`stocks`.`branch_id` = `transactions_now`.`branch_id`');
                 }
             )
+            ->leftJoin( // Adjustment
+                DB::raw("(
+                    SELECT
+                        stock_histories.product_id,
+                        stock_histories.branch_id,
+                        SUM(stock_histories.quantity) as quantity,
+                        stock_histories.created_at
+                    FROM stock_histories
+                    WHERE stock_histories.created_at 
+                        BETWEEN '$startDate' AND '$endDate'
+                    AND stock_histories.type = 'adjustment'
+                    GROUP BY stock_histories.product_id, stock_histories.branch_id
+                ) as `adjustments_now` "),
+                function($join) {
+                    $join->on('stocks.product_id', '=', 'adjustments_now.product_id')
+                        ->whereRaw('`stocks`.`branch_id` = `adjustments_now`.`branch_id`');
+                }
+            )
             /* Yesterday */
             ->leftJoin( // Stock In
                 DB::raw("(
@@ -454,6 +344,23 @@ class StockCardCrudController extends CrudController
                         ->whereRaw('`stocks`.`branch_id` = `transactions_yesterday`.`branch_id`');
                 }
             )
+            ->leftJoin( // Adjustment Yesterday
+                DB::raw("(
+                    SELECT
+                        stock_histories.product_id,
+                        stock_histories.branch_id,
+                        SUM(stock_histories.quantity) as quantity,
+                        stock_histories.created_at
+                    FROM stock_histories
+                    WHERE stock_histories.created_at <= '$startDateYesterdayEndOfDay'
+                    AND stock_histories.type = 'adjustment'
+                    GROUP BY stock_histories.product_id, stock_histories.branch_id
+                ) as `adjustments_yesterday` "),
+                function($join) {
+                    $join->on('stocks.product_id', '=', 'adjustments_yesterday.product_id')
+                        ->whereRaw('`stocks`.`branch_id` = `adjustments_yesterday`.`branch_id`');
+                }
+            )
             ->leftJoin('products', 'stocks.product_id', '=', 'products.id')
             ->leftJoin('branches', 'stocks.branch_id', '=', 'branches.id')
             ->select(
@@ -470,7 +377,8 @@ class StockCardCrudController extends CrudController
                 // DB::raw('SUM(`stock_out_histories_now`.`quantity`) as `stock_out`'),
                 'stock_in_histories_now.quantity as stock_in',
                 'stock_out_histories_now.quantity as stock_out',
-                DB::raw('SUM(`transactions_now`.`quantity`) as `stock_sales`'),                
+                DB::raw('SUM(`transactions_now`.`quantity`) as `stock_sales`'),   
+                DB::raw('SUM(`adjustments_now`.`quantity`) as `adjustments_now`'),              
                 
                 /* Yesterday */
                 // DB::raw('SUM(`stock_in_histories_yesterday`.`quantity`) as `stock_in_yesterday`'),
@@ -478,7 +386,7 @@ class StockCardCrudController extends CrudController
                 'stock_in_histories_yesterday.quantity as stock_in_yesterday',
                 'stock_out_histories_yesterday.quantity as stock_out_yesterday',
                 DB::raw('SUM(`transactions_yesterday`.`quantity`) as `stock_sales_yesterday`'),
-                
+                DB::raw('SUM(`adjustments_yesterday`.`quantity`) as `adjustments_yesterday`'),             
                 // DB::raw('SUM(`stock_in_histories_yesterday`.`quantity`) - SUM(`stock_out_histories_yesterday`.`quantity`) + SUM(`stock_in_histories_now`.`quantity`) - SUM(`stock_out_histories_now`.`quantity`) as `final_stock`'),
             )
             ->orderBy('branches.name', 'asc')

@@ -76,6 +76,7 @@ Route::group([
     Route::crud('stock-card', 'StockCardCrudController');    
     Route::prefix('stock-card/{idStock}')->group(function () {
         Route::crud('detail', 'StockCardDetailCrudController');
+        Route::crud('adjustment', 'StockCardAdjustmentCrudController');
     });
 
 }); // this should be the absolute last line of this file
