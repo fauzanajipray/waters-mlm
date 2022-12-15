@@ -35,6 +35,11 @@ class StockCardAdjustmentCrudController extends CrudController
     }
     
     protected function setupCreateOperation(){
+        if($this->crud->stock->product->type == 'sparepart'){
+            $this->crud->stock->product->text = $this->crud->stock->product->name;
+        } else {
+            $this->crud->stock->product->text = $this->crud->stock->product->name . ' - ' . $this->crud->stock->product->model;
+        }
         $this->crud->setValidation([
             'stock_id' => 'required',
             'branch' => 'required',
@@ -65,7 +70,7 @@ class StockCardAdjustmentCrudController extends CrudController
                 'attributes' => [
                     'readonly' => 'readonly'
                 ],
-                'value' => $this->crud->stock->product->name . ' - ' . $this->crud->stock->product->model,
+                'value' => $this->crud->stock->product->text,
             ],
             [
                 'name' => 'stock_before',

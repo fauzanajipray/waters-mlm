@@ -6,6 +6,8 @@ use App\Models\Product;
 use App\Models\Stock;
 use App\Models\Transaction;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
+use Backpack\CRUD\app\Library\Widget;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;
 
 /**
@@ -47,6 +49,42 @@ class ProductCrudController extends CrudController
         $this->crud->column('model');
         $this->crud->column('capacity');
         $this->crud->column('price')->label('Netto Price')->prefix('Rp. ')->type('number_format');
+        $this->crud->addColumn([
+            'name' => 'type',
+            'label' => 'Type',
+            'type' => 'text',
+            'searchLogic' => function($query, $column, $searchTerm) {
+                $query->orWhere('type', 'like', '%'.$searchTerm.'%');
+            },
+            'wrapper' => [
+                'element' => 'span',
+                'class' => function($crud, $column, $entry, $related_key) {
+                    if($entry->type == 'product'){
+                        return 'badge badge-success';
+                    }else{
+                        return 'badge badge-warning';
+                    }
+                },
+            ],
+            'value' => function($entry) {
+                if($entry->type == 'product'){
+                    return 'Product';
+                }else{
+                    return 'Sparepart';
+                }
+            },
+        ]);
+
+        $this->crud->addFilter([
+            'name' => 'type',
+            'type' => 'dropdown',
+            'label'=> 'Type'
+        ], [
+            'product' => 'Product',
+            'sparepart' => 'Sparepart',
+        ], function($value) {
+            $this->crud->addClause('where', 'type', $value);
+        });
     }
 
     /**
@@ -58,22 +96,52 @@ class ProductCrudController extends CrudController
     protected function setupCreateOperation()
     {
         $this->crud->setValidation([
+            'type' => 'required|in:product,sparepart',
             'name' => 'required|min:5|max:255',
             'price' => 'required|numeric',
             'capacity' => 'nullable|string|max:20',
-            'model' => ['required', 'min:5', 'max:255', function($attribute, $value, $fail) {
+            'model' => ['max:255', function($attribute, $value, $fail) {
                 $name = request()->input('name');
-                $product = Product::select(['name', 'model'])->where('name', $name)->where('model', $value)->first();
-                if($product){
-                    $fail('Product with name '.$name.' and model '.$value.' already exists.');
+                $type = request()->input('type');
+                $model = request()->input('model');
+                if ($type == 'product') {
+                    if(strlen($model) < 5){
+                        $fail('Model must be at least 5 characters.');
+                    }
+                    $product = Product::select(['name', 'model'])->where('name', $name)->where('model', $value)->first();
+                    if($product){
+                        $fail('Product with name '.$name.' and model '.$value.' already exists.');
+                    }
+                } else {
+                    $sparepart = Product::select(['name'])->where('name', $name)->first();
+                    if($sparepart){
+                        $fail('Sparepart with name '.$name.' already exists.');
+                    }
                 }
             }],
         ]);
+        $this->crud->addField([
+            'name' => 'type',
+            'label' => 'Type',
+            'type' => 'select2_from_array',
+            'options' => [
+                'product' => 'Product',
+                'sparepart' => 'Sparepart',
+            ],
+            'default' => 'product',
+        ]);
+
         $this->crud->field('name')->label('Name');
-        $this->crud->field('model')->label('Model');
+        $this->crud->addField([
+            'name' => 'model',
+            'label' => 'Model',
+            'type' => 'text',
+            'dependencies' => ['type'],
+        ]);
         $this->crud->field('capacity')->label('Capacity');
         $this->crud->field('price')->label('Netto Price')->type('number_format')->prefix('Rp. ');
         $this->crud->field('is_demokit')->label('Is Demokit');
+        Widget::add()->type('script')->content(asset('assets/js/admin/form/product.js'));
     }
 
     /**
@@ -98,6 +166,7 @@ class ProductCrudController extends CrudController
                 }
             }],
         ]);
+        $this->crud->removeField('type');
     }
 
     /**
@@ -112,6 +181,28 @@ class ProductCrudController extends CrudController
         $this->crud->column('is_demokit')->label('Is Demokit')->type('boolean');
         $this->crud->column('updated_at');
         $this->crud->column('created_at');
+    }
+
+    public function store(){
+        $request = $this->crud->validateRequest();
+        DB::beginTransaction();
+        try {
+            $product = new Product();
+            $product->type = $request->input('type');
+            $product->name = $request->input('name');
+            $product->price = $request->input('price');
+            if($request->type == 'product'){
+                $product->model = $request->input('model');
+                $product->capacity = $request->input('capcity');
+                $product->is_demokit = $request->input('is_demokit');
+            }
+            $product->save();
+            DB::commit();
+            return redirect()->route('product.index');
+        } catch (\Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with('error', $e->getMessage());
+        }
     }
 
     public function getProduct()
@@ -135,6 +226,7 @@ class ProductCrudController extends CrudController
                 ->where('branch_id', $branch_id['value'])
                 ->where('quantity', '>', 0)
                 ->where('is_demokit', 1)
+                ->where('products.type', 'product')
                 ->where('name', 'like', '%'.$search_term.'%')
                 ->orWhere('model', 'like', '%'.$search_term.'%')
                 ->get();
@@ -142,6 +234,7 @@ class ProductCrudController extends CrudController
             $products = Stock::leftJoin('products', 'products.id', '=', 'stocks.product_id')
                 ->where('branch_id', $branch_id['value'])
                 ->where('quantity', '>', 0)
+                ->where('products.type', 'product')
                 ->where('is_demokit', 1)
                 ->get();
         }
@@ -188,7 +281,12 @@ class ProductCrudController extends CrudController
         }
 
         $products->map(function ($stock) {
-            $stock->name = $stock->name.' - '.$stock->model. ' - '.number_format($stock->price). ' - Stock : '.$stock->quantity ;
+            if ($stock->type == 'sparepart'){
+                $stock->name = $stock->name.' - '.number_format($stock->price). ' - Stock : '.$stock->quantity;
+            } else {
+                $stock->name = $stock->name.' - '.$stock->model. ' - '.number_format($stock->price). ' - Stock : '.$stock->quantity;
+            }
+            // $stock->name = $stock->name.' - '.$stock->model. ' - '.number_format($stock->price). ' - Stock : '.$stock->quantity ;
             return $stock;
         });
 
@@ -222,7 +320,7 @@ class ProductCrudController extends CrudController
         return $products;
     }
 
-    public function getProducts()
+    public function getBebasProducts()
     {
         $search_term = request()->input('q');
         $branch_id = collect(request()->form)->where('name', 'branch_id')->first();
@@ -233,6 +331,7 @@ class ProductCrudController extends CrudController
             $products = Stock::leftJoin('products', 'products.id', '=', 'stocks.product_id')
                 ->where('branch_id', $branch_id['value'])
                 ->where('quantity', '>', 0)
+                ->where('products.type', 'product')
                 ->where('name', 'like', '%'.$search_term.'%')
                 ->orWhere('model', 'like', '%'.$search_term.'%')
                 ->get();
@@ -240,6 +339,7 @@ class ProductCrudController extends CrudController
             $products = Stock::leftJoin('products', 'products.id', '=', 'stocks.product_id')
                 ->where('branch_id', $branch_id['value'])
                 ->where('quantity', '>', 0)
+                ->where('products.type', 'product')
                 ->get();
         }
 
@@ -309,7 +409,11 @@ class ProductCrudController extends CrudController
                 $products = Product::get();
             }
             $products->map(function($product){
-                $product->name = $product->name.' - '.$product->model. ' - '.$product->price;
+                if ($product->type == 'sparepart'){
+                    $product->name = $product->name.' - '.$product->price;
+                } else {
+                    $product->name = $product->name.' - '.$product->model. ' - '.$product->price;
+                }
                 return $product;
             });
             return $products;
@@ -334,6 +438,7 @@ class ProductCrudController extends CrudController
             $stocks = Stock::leftJoin('products', 'products.id', '=', 'stocks.product_id')
                 ->where('branch_id', $branch_id['value'])
                 ->where('quantity', '>', 0)
+                ->where('products.type', 'product')
                 ->where('name', 'like', '%'.$search_term.'%')
                 ->orWhere('model', 'like', '%'.$search_term.'%')
                 ->get();
@@ -341,6 +446,7 @@ class ProductCrudController extends CrudController
             $stocks = Stock::leftJoin('products', 'products.id', '=', 'stocks.product_id')
                 ->where('branch_id', $branch_id['value'])
                 ->where('quantity', '>', 0)
+                ->where('products.type', 'product')
                 ->get();
         }
         $stocks = $stocks->map(function ($stock) {

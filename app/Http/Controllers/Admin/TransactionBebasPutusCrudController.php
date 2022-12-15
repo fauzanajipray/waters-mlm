@@ -196,7 +196,7 @@ class TransactionBebasPutusCrudController extends CrudController
                 'label' => 'Product',
                 'entity' => 'product',
                 'attribute' => 'name',
-                'data_source' => url('product/get-products'),
+                'data_source' => url('product/get-bebas-putus'),
                 'wrapperAttributes' => [
                     'class' => 'form-group col-md-6'
                 ],

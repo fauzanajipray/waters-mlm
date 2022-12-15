@@ -126,8 +126,8 @@
                         <tr>
                             <th>Qty</th>
                             <th>Name</th>
-                            <th>Capacity</th>
                             <th>Model</th>
+                            <th>Capacity</th>
                             <th>Price</th>
                             @if ($entry->type == 'Demokit' || $entry->type == 'Display' || $entry->type == 'Bebas Putus')
                                 <th>Discount</th>
@@ -141,8 +141,8 @@
                             <tr>
                                 <td>{{ $item->quantity }}</td>
                                 <td>{{ $item->name }}</td>
-                                <td>{{ $item->capacity }}</td>
-                                <td>{{ $item->model }}</td>
+                                <td>{{ $item->model ?? '-' }}</td>
+                                <td>{{ $item->capacity ?? '-' }}</td>
                                 <td>Rp. {{ number_format($item->price, 2, ',', '.') }}</td>
                                 @if ($entry->type == 'Demokit' || $entry->type == 'Display')
                                     <td>{{ $item->discount_percentage }} %</td>

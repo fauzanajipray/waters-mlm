@@ -165,7 +165,7 @@
                 </tr>
                 @endforeach
                 <tr style="border: none !important;">
-                    <td style="border: none !important;" colspan="8">
+                    <td style="border: none !important;" colspan="@if($transaction->type == 'Demokit' || $transaction->type == 'Display' || $transaction->type == 'Bebas Putus') 9 @else 8 @endif">
                         <div>
                             <div style="margin-top: 4px;">
                                 <span>Terbilang : </span><span style="border-bottom: 1px solid black; width: 100%;">{{ $transaction->terbilang }}</span>

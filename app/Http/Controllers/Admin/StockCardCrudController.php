@@ -95,6 +95,17 @@ class StockCardCrudController extends CrudController
             false,
             function($value) { }
         );
+
+        $this->crud->addFilter([
+            'name' => 'type',
+            'type' => 'dropdown',
+            'label'=> 'Product Type'
+        ], [
+            'product' => 'Product',
+            'sparepart' => 'Sparepart',
+        ], function($value) {
+            $this->crud->addClause('where', 'products.type', $value);
+        });
         
         $this->crud->addColumns([
             [
@@ -113,6 +124,32 @@ class StockCardCrudController extends CrudController
                 'orderable' => true,
                 'orderLogic' => function ($query, $column, $columnDirection) {
                     $query->orderBy('products.model', $columnDirection);
+                },
+            ],
+            [
+                'name' => 'product_type',
+                'label' => 'Product Type',
+                'type' => 'text',
+                'orderable' => true,
+                'orderLogic' => function ($query, $column, $columnDirection) {
+                    $query->orderBy('products.type', $columnDirection);
+                },
+                'wrapper' => [
+                    'element' => 'span',
+                    'class' => function($crud, $column, $entry, $related_key) {
+                        if($entry->product_type == 'product'){
+                            return 'badge badge-success';
+                        }else{
+                            return 'badge badge-warning';
+                        }
+                    },
+                ],
+                'value' => function($entry) {
+                    if($entry->product_type == 'product'){
+                        return 'Product';
+                    }else{
+                        return 'Sparepart';
+                    }
                 },
             ],
             [
@@ -369,6 +406,7 @@ class StockCardCrudController extends CrudController
                 'stocks.branch_id',
                 'products.name as product_name',
                 'products.model as product_model',
+                'products.type as product_type',
                 'branches.name as branch_name',
 
                 /* Now */

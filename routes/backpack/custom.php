@@ -34,12 +34,12 @@ Route::group([
     Route::crud('product', 'ProductCrudController');
     Route::prefix('product')->group(function () {
         Route::post('get-product', 'ProductCrudController@getProduct');
-        Route::post('get-demokit-products', 'ProductCrudController@getDemokitProducts');
+        Route::post('get-demokit-products', 'ProductCrudController@getDemokitProducts'); //
         Route::post('get-display-products', 'ProductCrudController@getDisplayProducts');
-        Route::post('get-products', 'ProductCrudController@getProducts');
+        Route::post('get-bebas-putus', 'ProductCrudController@getBebasProducts'); //
         Route::post('for-filter', 'ProductCrudController@getProductsForFilter');
-        Route::post('for-stock', 'ProductCrudController@getProductForStock');
-        Route::post('for-transaction', 'ProductCrudController@getProductTransaction');
+        Route::post('for-stock', 'ProductCrudController@getProductForStock'); //
+        Route::post('for-transaction', 'ProductCrudController@getProductTransaction'); //
         Route::get('{id}/branch/{branch_id}', 'ProductCrudController@getProductStock');
     });
     Route::crud('transaction', 'TransactionCrudController');
