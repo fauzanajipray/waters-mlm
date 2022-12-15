@@ -166,7 +166,11 @@ class ProductCrudController extends CrudController
                 }
             }],
         ]);
-        $this->crud->removeField('type');
+        $this->crud->modifyField('type', [
+            'attributes' => [
+                'disabled' => 'disabled',
+            ],
+        ]);
     }
 
     /**
