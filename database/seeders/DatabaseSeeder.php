@@ -222,18 +222,6 @@ class DatabaseSeeder extends Seeder
                         "npwp" => $csvData["NPWP Number"],
                     ]);
             
-            // Create Customer From Member
-            $customer = Customer::updateOrCreate([
-                "is_member" => "1",
-                "member_id" => $member->id
-            ], [
-                "name" => $member->name,
-                "address" => $member->address,
-                "city" => null,
-                "phone" => $member->phone,
-                "member_id" => $member->id,
-                "is_member" => "1" 
-            ]);
 
             if (strtolower($csvData["Last Payment Status"]) == "paid") {
                 ActivationPayments::updateOrCreate([
@@ -267,6 +255,22 @@ class DatabaseSeeder extends Seeder
                 "phone" => $csvData["HP"],
                 "member_id" => $csvData["Member ID"],
                 "is_member" => $csvData["Is Member"],
+            ]);
+        }
+
+        $members = Member::all();
+        foreach ($members as $member) {
+            // Create Customer From Member
+            $customer = Customer::updateOrCreate([
+                "is_member" => "1",
+                "member_id" => $member->id
+            ], [
+                "name" => $member->name,
+                "address" => $member->address,
+                "city" => null,
+                "phone" => $member->phone,
+                "member_id" => $member->id,
+                "is_member" => "1" 
             ]);
         }
 
