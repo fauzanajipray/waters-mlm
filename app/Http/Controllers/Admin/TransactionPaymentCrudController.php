@@ -167,6 +167,7 @@ class TransactionPaymentCrudController extends CrudController
         $this->crud->hasAccessOrFail('create');
         $request = $request->all();
         $transaction_id = $request['transaction_id'] ?? 0;
+        if ($transaction_id == 0) abort(404);
         $transaction = Transaction::findOrfail($transaction_id);
         $check = Transaction::with(['transactionPayments', 'transactionProducts'])->find($transaction_id);
         $totalPrice =  0;
@@ -324,7 +325,9 @@ class TransactionPaymentCrudController extends CrudController
                 $transaction->status_paid = true;
                 $transaction->save();
                 $lastPaymentDate = $transaction->transactionPayments->sortByDesc('payment_date')->first()->payment_date;
-                $this->calculateBonus($transaction, $transaction->member, $lastPaymentDate);
+                if($transaction->type != "Sparepart") {
+                    $this->calculateBonus($transaction, $transaction->member, $lastPaymentDate);
+                }
                 /* Minus stock */
                 foreach ($transactionProducts as $transactionProduct) {
                     $stock = Stock::where('product_id', $transactionProduct->product_id)

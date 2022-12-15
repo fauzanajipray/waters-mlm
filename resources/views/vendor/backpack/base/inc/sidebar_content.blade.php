@@ -33,6 +33,9 @@
     <li class="nav-item"><a class="nav-link" href="{{ backpack_url('transaction-demokit') }}"><i class="nav-icon la la-dollar"></i> <span>Demokit</span></a></li>
     {{-- Transaction Bebas Putus --}}
     <li class="nav-item"><a class="nav-link" href="{{ backpack_url('transaction-bebas-putus') }}"><i class="nav-icon la la-dollar"></i> <span>Bebas Putus</span></a></li>
+    {{-- Transaction Sparepart --}}
+    <li class="nav-item"><a class="nav-link" href="{{ backpack_url('transaction-sparepart') }}"><i class="nav-icon la la-dollar"></i> <span>Sparepart</span></a></li>
+    {{-- Transaction Payment --}}
     <li class= "nav-item"><a class="nav-link" href="{{ backpack_url('transaction-payment') }}"><i class="nav-icon la la-money-bill"></i> <span>Payments</span></a></li>
   </ul>
 </li>

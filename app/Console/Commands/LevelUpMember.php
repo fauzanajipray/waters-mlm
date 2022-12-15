@@ -41,7 +41,9 @@ class LevelUpMember extends Command
                 ->where('status_paid', true)->get();
             // $this->table(['ID', 'Member', 'Total Price', 'Status Paid', 'Create At'], $transactions->toArray());
             foreach($transactions as $transaction){
-                $this->levelUpMember($transaction->member->id);
+                if($transaction->type != "Sparepart") {
+                    $this->levelUpMember($transaction->member->id);
+                }
             }
             $this->info('Level up member ended');
             $this->newLine();

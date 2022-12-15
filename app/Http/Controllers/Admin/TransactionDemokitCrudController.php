@@ -400,7 +400,7 @@ class TransactionDemokitCrudController extends CrudController
             $requests['transaction_id'] = $transaction->id;
             Alert::success(trans('backpack::crud.insert_success'))->flash();
             DB::commit();
-            return redirect($this->crud->route);
+            return redirect(backpack_url('transaction-payment') . '/create?transaction_id=' . $transaction->id);
         } catch (\Exception $e) {
             DB::rollback();
             Alert::error("Something when wrong")->flash();

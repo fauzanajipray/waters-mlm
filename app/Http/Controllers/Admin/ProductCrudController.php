@@ -456,6 +456,35 @@ class ProductCrudController extends CrudController
 
         return $stocks;
     }
+
+    public function getProductSparepartTransaction() {
+        $search_term = request()->input('q');
+        $branch_id = collect(request()->form)->where('name', 'branch_id')->first();
+        if(!$branch_id){
+            return response()->json([]);
+        }        
+        if($search_term){
+            $stocks = Stock::leftJoin('products', 'products.id', '=', 'stocks.product_id')
+                ->where('branch_id', $branch_id['value'])
+                ->where('quantity', '>', 0)
+                ->where('products.type', 'sparepart')
+                ->where('name', 'like', '%'.$search_term.'%')
+                ->orWhere('model', 'like', '%'.$search_term.'%')
+                ->get();
+        }else{
+            $stocks = Stock::leftJoin('products', 'products.id', '=', 'stocks.product_id')
+                ->where('branch_id', $branch_id['value'])
+                ->where('quantity', '>', 0)
+                ->where('products.type', 'sparepart')
+                ->get();
+        }
+        $stocks = $stocks->map(function ($stock) {
+            $stock->name = $stock->name.' - '.number_format($stock->price). ' - Stock : '.$stock->quantity ;
+            return $stock;
+        });
+
+        return $stocks;
+    }
 }
 
 

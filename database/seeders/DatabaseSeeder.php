@@ -257,10 +257,12 @@ class DatabaseSeeder extends Seeder
                 "is_member" => $csvData["Is Member"],
             ]);
         }
-
         $members = Member::all();
         foreach ($members as $member) {
+
+            $customer = Customer::where("member_id", $member->id)->where("is_member", "1")->first();
             // Create Customer From Member
+            if(isset($customer)) continue;
             $customer = Customer::updateOrCreate([
                 "is_member" => "1",
                 "member_id" => $member->id

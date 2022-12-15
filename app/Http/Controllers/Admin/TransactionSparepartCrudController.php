@@ -18,11 +18,11 @@ use Illuminate\Support\Facades\DB;
 use Prologue\Alerts\Facades\Alert;
 
 /**
- * Class TransactionCrudController
+ * Class TransactionSparepartCrudController
  * @package App\Http\Controllers\Admin
  * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
  */
-class TransactionDisplayCrudController extends CrudController
+class TransactionSparepartCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
@@ -39,8 +39,8 @@ class TransactionDisplayCrudController extends CrudController
     public function setup()
     {
         $this->crud->setModel(Transaction::class);
-        $this->crud->setRoute(config('backpack.base.route_prefix') . '/transaction-display');
-        $this->crud->setEntityNameStrings('display transaction', 'display transactions');
+        $this->crud->setRoute(config('backpack.base.route_prefix') . '/transaction-sparepart');
+        $this->crud->setEntityNameStrings('sparepart transaction', 'sparepart transactions');
     }
 
     /**
@@ -63,7 +63,7 @@ class TransactionDisplayCrudController extends CrudController
             'member_name',
             'total_price', 
             'id_card',
-            'member_id',
+            'customer_id',
             [
                 'name' => 'level_id',
                 'label' => 'Level',
@@ -77,10 +77,11 @@ class TransactionDisplayCrudController extends CrudController
         $this->crud->addButtonFromModelFunction('line', 'invoice', 'invoice', 'beginning');
         $this->crud->addButtonFromModelFunction('line', 'add_payment', 'buttonAddPayment', 'beginning');
         
-        $this->crud->addClause('where', 'type', 'Display');
+        $this->crud->addClause('where', 'type', 'Sparepart');
     }
 
-    protected function setupShowOperation(){
+    protected function setupShowOperation()
+    {
         $this->setupListOperation();
         $this->crud->addColumns([
             [
@@ -112,6 +113,12 @@ class TransactionDisplayCrudController extends CrudController
     {
         $this->crud->setValidation(TransactionRequest::class);
 
+        $product = Product::select('id', 'name', 'model', 'price')->orderBy('name', 'ASC')->get();
+        $product = $product->map(function($item){
+            $item->name = $item->name . ' | ' . $item->model . ' | ' . 'Rp ' . formatNumber($item->price);
+            return $item;
+        });
+
         Widget::add()->type('script')->content(asset('assets/js/admin/form/transaction.js'));
 
         $this->crud->addField([
@@ -130,12 +137,11 @@ class TransactionDisplayCrudController extends CrudController
             'name' => 'member_id',
             'type' => 'select2_from_ajax',
             'entity' => 'member',
-            'attribute' => 'name',
-            'data_source' => url('members/branch-owner'),
+            'attribute' => 'text',
+            'data_source' => url('members/only-actived'),
             'delay' => 500
         ]);
         
-        /* Revision 1 
         $this->crud->addField([
             'name' => 'customer_id',
             'type' => 'relationship',
@@ -153,7 +159,6 @@ class TransactionDisplayCrudController extends CrudController
             'data_source' => url('customer/get-customer-by-member-id'),
             'placeholder' => 'Select a customer',
         ]);
-        */
         
         $this->crud->addField([
             'name' => 'shipping_address',
@@ -167,7 +172,7 @@ class TransactionDisplayCrudController extends CrudController
 
         $this->crud->addField([
             'name' => 'is_member',
-            'type' => 'hidden',
+            'type' => 'checkbox',
             'label' => 'Member is customer',
             'wrapperAttributes' => [
                 'class' => 'form-group col-md-12'
@@ -184,11 +189,10 @@ class TransactionDisplayCrudController extends CrudController
                 'type' => 'select2_from_ajax',
                 'entity' => 'branch',
                 'attribute' => 'name',
-                'data_source' => url('branches/transaction-display'),
+                'data_source' => url('branches'),
                 'delay' => 500,
                 'method' => 'POST',
                 'tab' => 'Product',
-                'include_all_form_fields' => true,
             ],
             [
                 'name' => 'product_id',
@@ -196,13 +200,14 @@ class TransactionDisplayCrudController extends CrudController
                 'label' => 'Product',
                 'entity' => 'product',
                 'attribute' => 'name',
-                'data_source' => url('product/get-display-products'),
+                'data_source' => url('product/for-transaction/sparepart'),
+                'allows_null' => false,
                 'wrapperAttributes' => [
-                    'class' => 'form-group col-md-12'
+                    'class' => 'form-group col-md-6'
                 ],
-                'dependencies' => ['member_id', 'branch_id'],
-                'include_all_form_fields' => ['member_id'],
                 'method' => 'POST',
+                'dependencies' => ['branch_id'],
+                'include_all_form_fields' => true,
                 'tab' => 'Product',
             ],
             [
@@ -213,34 +218,15 @@ class TransactionDisplayCrudController extends CrudController
                 'wrapperAttributes' => [
                     'class' => 'form-group col-md-6'
                 ],
-                'value' => 1,
                 'tab' => 'Product',
+                'default' => 1,
                 'attributes' => [
                     'readonly' => 'readonly',
-                ]
-            ],
-            [
-                'name' => 'discount_percentage',
-                'type' => 'number',
-                'label' => 'Discount',
-                'allows_null' => false,
-                'wrapperAttributes' => [
-                    'class' => 'form-group col-md-6'
                 ],
-                'attributes' => [
-                    'min' => 0,
-                    'max' => 100,
-                    'readonly' => 'readonly',
-                ],
-                'default' => 0,
-                'hint' => 'Discount percentage for this product',
-                'suffix' => '%',
-                'default' => '50',
-                'tab' => 'Product',
             ],
             [
                 'name' => 'product_notes',
-                'type' => 'textarea',
+                'type' => 'text',
                 'label' => 'Product Notes',
                 'wrapperAttributes' => [
                     'class' => 'form-group col-md-12'
@@ -248,50 +234,7 @@ class TransactionDisplayCrudController extends CrudController
                 'tab' => 'Product',
             ],
         ]);
-    }
 
-    /**
-     * Define what happens when the Update operation is loaded.
-     * 
-     * @see https://backpackforlaravel.com/docs/crud-operation-update
-     * @return void
-     */
-    protected function setupUpdateOperation()
-    {
-        $this->crud->addField([
-            'name' => 'code',
-            'type' => 'text',
-            'label' => 'Code',
-            'attributes' => [
-                'readonly' => 'readonly',
-            ],
-        ]);
-        $this->setupCreateOperation();
-        $this->crud->removeField('qty');
-        $this->crud->addField([
-            'name' => 'qty',
-            'type' => 'number_format',
-            'label' => 'Quantity',
-        ]);
-    }
-
-    public function edit($id)
-    {   
-        $this->crud->hasAccessOrFail('update');
-
-        $this->data['entry'] = $this->crud->getEntry($id);
-        $this->data['crud'] = $this->crud;
-        $this->data['fields'] = $this->crud->getUpdateFields($id);
-        $this->data['saveAction'] = $this->crud->getSaveAction();
-        $this->data['id'] = $id;
-
-        $this->crud->modifyField('qty', [
-            'value' => optional($this->data['entry'])->qty_sold ?? 1,
-        ]);
-        $this->crud->modifyField('code', [
-            'value' => optional($this->data['entry'])->code ?? $this->generateCode(),
-        ]);
-        return view('crud::edit', $this->data);
     }
 
     public function create(Request $request)
@@ -328,16 +271,14 @@ class TransactionDisplayCrudController extends CrudController
             if(!isset($requests['products'])) {
                 $products = [
                     [
-                        'product_id' =>  $requests['product_id'],
-                        'quantity' =>  $requests['quantity'],
-                        'product_notes' =>  $requests['product_notes'],
-                        'discount_percentage' =>  $requests['discount_percentage'] ,
+                       'product_id' =>  $requests['product_id'],
+                       'quantity' =>  $requests['quantity'],
+                       'product_notes' =>  $requests['product_notes'],
                     ],
                 ];
             } else {
                 $products = $requests['products'];
             }
-            
             foreach ($products as $key => $item) {
                 for ($key2=$key; $key2 < count($products); $key2++) { 
                     if($item['product_id'] == $products[$key2]['product_id'] && $key != $key2){
@@ -346,7 +287,7 @@ class TransactionDisplayCrudController extends CrudController
                 }
             }
             if ($requests['is_member'] == 1 && $requests['member_id']) {
-                $customer = Customer::where('member_id', $requests['member_id'])->first();
+                $customer = Customer::where('member_id', $requests['member_id'])->where('is_member', '1')->first();
                 if ($customer) {
                     $requests['customer_id'] = strval($customer->id);
                 } else {
@@ -369,7 +310,7 @@ class TransactionDisplayCrudController extends CrudController
             $totalPrice = 0;
             foreach ($products as $key => $item) {
                 $product = Product::find($item['product_id']);
-                $totalPrice += $product->price * $item['quantity'] - ($product->price * $item['quantity'] * $item['discount_percentage'] / 100);
+                $totalPrice += $product->price * $item['quantity'];
             }
             $requests['code'] = $this->generateCode();
             $requests['id_card'] = $member->id_card;
@@ -379,7 +320,7 @@ class TransactionDisplayCrudController extends CrudController
             $requests['total_price'] = $totalPrice;
             $requests['created_by'] = backpack_user()->id;
             $requests['updated_by'] = backpack_user()->id;
-            $requests['type'] = 'Display';
+            $requests['type'] = 'Sparepart';
             $requests['stock_from'] = Branch::find($requests['branch_id'])->name;
 
             $transaction = Transaction::create($requests);
@@ -395,7 +336,6 @@ class TransactionDisplayCrudController extends CrudController
                     'capacity' => $product->capacity,
                     'quantity' => $item['quantity'],
                     'product_notes' => $item['product_notes'],
-                    'discount_percentage' => $item['discount_percentage'],
                 ]);
                 $transactionProduct[] = $tp->toArray();
             }
@@ -419,5 +359,76 @@ class TransactionDisplayCrudController extends CrudController
         $this->data['crud'] = $this->crud;
         $this->data['products'] = TransactionProduct::where('transaction_id', $id)->get();
         return view('transaction.show', $this->data);
+    }
+
+
+    public function createByImport($requests)
+    {
+        if(!isset($requests['products'])) {
+            $products = [
+                [
+                    'product_id' =>  $requests['product_id'],
+                    'quantity' =>  $requests['quantity'],
+                    'product_notes' =>  $requests['product_notes'] ?? '',
+                    'discount_percentage' =>  $requests['discount_percentage'] ?? 0,
+                    'discount_amount' =>  $requests['discount_amount'] ?? 0,
+                ],
+            ];
+        } else {
+            $products = $requests['products'];
+        }
+
+        $member = Member::with(['upline' => function($query) {
+            $query->with(['upline' => function($query) {
+                $query->with('level');
+            }]);
+        }])->find($requests['member_id']);
+
+        if ($requests['is_member'] == 1 && $requests['member_id']) {
+            $customer = Customer::where('member_id', $requests['member_id'])->first();
+            if ($customer) {
+                $requests['customer_id'] = strval($customer->id);
+            } else {
+                $errors['customer_id'] = 'Customer not found';
+            }
+        } else if (!$requests['customer_id']) {
+            $errors['customer_id'] = 'Customer is required';
+        }
+
+        $totalPrice = 0;
+            foreach ($products as $key => $item) {
+                $product = Product::find($item['product_id']);
+                $totalPrice += $product->price * $item['quantity'];
+            }
+            $requests['code'] = $this->generateCode();
+            $requests['id_card'] = $member->id_card;
+            $requests['member_name'] = $member->name;
+            $requests['member_numb'] = $member->member_numb;
+            $requests['level_id'] = $member->level_id;
+            $requests['total_price'] = $totalPrice;
+            // $requests['created_by'] = backpack_user()->id;
+            // $requests['updated_by'] = backpack_user()->id;
+            unset($requests['is_member']);
+            unset($requests['product_id']);
+            unset($requests['quantity']);
+            unset($requests['discount_percentage']);
+            unset($requests['discount_amount']);
+
+            $transaction = Transaction::create($requests);
+            // Save Log Product Sold
+            foreach ($products as $key => $item) {
+                $product = Product::find($item['product_id']);
+                $tp = TransactionProduct::create([
+                    'transaction_id' => $transaction->id,
+                    'product_id' => $product->id,
+                    'name' => $product->name,
+                    'model' => $product->model,
+                    'price' => $product->price,
+                    'capacity' => $product->capacity,
+                    'quantity' => $item['quantity'],
+                ]);
+                $transactionProduct[] = $tp->toArray();
+            }
+            $requests['transaction_id'] = $transaction->id;
     }
 }

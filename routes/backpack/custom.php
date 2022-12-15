@@ -40,6 +40,7 @@ Route::group([
         Route::post('for-filter', 'ProductCrudController@getProductsForFilter');
         Route::post('for-stock', 'ProductCrudController@getProductForStock'); //
         Route::post('for-transaction', 'ProductCrudController@getProductTransaction'); //
+        Route::post('for-transaction/sparepart', 'ProductCrudController@getProductSparepartTransaction'); //
         Route::get('{id}/branch/{branch_id}', 'ProductCrudController@getProductStock');
     });
     Route::crud('transaction', 'TransactionCrudController');
@@ -51,6 +52,7 @@ Route::group([
     Route::crud('transaction-display', 'TransactionDisplayCrudController');
     Route::crud('transaction-demokit', 'TransactionDemokitCrudController');
     Route::crud('transaction-bebas-putus', 'TransactionBebasPutusCrudController');
+    Route::crud('transaction-sparepart', 'TransactionSparepartCrudController');
     Route::crud('level', 'LevelCrudController');
     Route::crud('bonus-history', 'BonusHistoryCrudController');
     Route::post('bonus-history/total', 'BonusHistoryCrudController@totalTransactions');
