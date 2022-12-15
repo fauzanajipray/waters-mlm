@@ -17,7 +17,7 @@ return new class extends Migration
             $table->enum('type', ['product', 'sparepart'])->default('product')->after('price');
             $table->string('model')->nullable()->change();
         });
-        Schema::table('transaction_payments', function (Blueprint $table) {
+        Schema::table('transaction_products', function (Blueprint $table) {
             $table->string('model')->nullable()->change();
         });
     }
