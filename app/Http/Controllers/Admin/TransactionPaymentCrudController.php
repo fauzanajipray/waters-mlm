@@ -51,6 +51,8 @@ class TransactionPaymentCrudController extends CrudController
      */
     protected function setupListOperation()
     {
+        
+        $this->crud->column('code');
         $this->crud->addColumn([
             'name' => 'transaction_id',
             'label' => 'Transaction Code',
@@ -274,6 +276,14 @@ class TransactionPaymentCrudController extends CrudController
         return view('crud::create', $this->data);
     }
 
+    protected function generateCode() {
+        $lastPayment = TransactionPayment::orderBy('id', 'desc')->first();
+        $lastPaymentCode = $lastPayment->code ?? 'PY-000000-0000';
+        $paymentCode = explode('-', $lastPaymentCode)[2] + 1;
+        $paymentCode = 'PY-' . date('ymd') . '-' . str_pad($paymentCode, 4, '0', STR_PAD_LEFT);
+        return $paymentCode;
+    }
+
     public function store(Request $request)
     {
         $requests = request()->all();
@@ -286,6 +296,7 @@ class TransactionPaymentCrudController extends CrudController
             $paymentMethodCust = PaymentMethod::find($requests['payment_method_id']);
             $requests['payment_name'] = $paymentMethodCust->name;
             // status paid
+            $requests['code'] = $this->generateCode();
             $payment = TransactionPayment::create($requests);
             $transaction = Transaction::with(['transactionPayments', 'transactionProducts', 'member'])->find($requests['transaction_id']);
 
@@ -475,6 +486,7 @@ class TransactionPaymentCrudController extends CrudController
             $requests['payment_name'] = $paymentMethodCust->name;
             unset($requests['payment_method']);
             // status paid
+            $requests['code'] = $this->generateCode();
             $payment = TransactionPayment::create($requests);
             $transaction = $transaction = Transaction::with(['transactionPayments', 'transactionProducts'])->find($requests['transaction_id']);
             /* Check Stock */

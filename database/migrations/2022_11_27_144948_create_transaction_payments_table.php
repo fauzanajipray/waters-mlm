@@ -24,6 +24,7 @@ return new class extends Migration
         }); 
         Schema::create('transaction_payments', function (Blueprint $table) {
             $table->id();
+            $table->string('code')->unique();
             $table->foreignId('transaction_id')->constrained()->onDelete('restrict');
             $table->dateTime('payment_date');
             $table->unsignedBigInteger('payment_method_id');

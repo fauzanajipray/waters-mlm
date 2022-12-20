@@ -180,7 +180,8 @@
                 <table class="table table-bordered">
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <th>Code</th>
+                            <th>Date</th>
                             <th>Payment Type</th>
                             <th>Payment Method</th>
                             <th>Account Number</th>
@@ -191,8 +192,9 @@
                         @foreach ($entry->transactionPayments as $item)
                             <tr>
                                 <td>
-                                    <a href="{{ url('transaction-payment/' . $item->id . "/show") }}" target="_blank">{{ $item->id }}</a>
+                                    <a href="{{ url('transaction-payment/' . $item->id . "/show") }}" target="_blank">{{ $item->code }}</a>
                                 </td>
+                                <td>{{ $item->payment_date }}</td>
                                 <td>{{ $item->type }}</td>
                                 <td>{{ $item->payment_name }}</td>
                                 <td>{{ $item->payment_account_number }}</td>
@@ -200,7 +202,7 @@
                             </tr>
                         @endforeach
                         <tr>
-                            <td colspan="3" style="text-align: right; font-weight: bold;">Total</td>
+                            <td colspan="5" style="text-align: right; font-weight: bold;">Total</td>
                             <td>Rp. {{ number_format($entry->transactionPayments->sum('amount'), 2, ',', '.') }}</td>
                         </tr>
                     </tbody>
