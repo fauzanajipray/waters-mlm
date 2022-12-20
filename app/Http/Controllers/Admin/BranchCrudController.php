@@ -64,7 +64,7 @@ class BranchCrudController extends CrudController
                 },
             ],
         ]);        
-        $this->crud->addButtonFromModelFunction('line', 'add_stock', 'stockButton', 'beginning');
+        // $this->crud->addButtonFromModelFunction('line', 'add_stock', 'stockButton', 'beginning'); // TODO: add stock button
         $this->crud->addButtonFromModelFunction('line', 'add_owner', 'addOwnerButton', 'beginning');
     }
 
