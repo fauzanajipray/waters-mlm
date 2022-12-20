@@ -1,10 +1,11 @@
-ID,Name,Model,Capacity,Netto Price,Is Demokit
-1,Waters BIO Mineral Pot,BMP 3000,22 Liter,23840000,0
-2,Waters BIO Mineral Pot,BMP 2000,14 Liter,19600000,0
-3,Waters BIO Mineral Pot,BMP 1000,10 Liter,13800000,0
-4,Waters BIO Mineral Pot,NEW BMP 1100,11 Liter,14480000,0
-5,Waters BIO Mineral Pot,ACE BIO Plus,"1,2 Liter",3600000,1
-6,Therapy Shower,ROSE,,2000000,0
-7,Therapy Shower,LEMON,,1920000,0
-8,Therapy Shower,LAVENDER,,1920000,0
-9,BIO Ceramic ALION,AUTOMATIC,,35200000,0
+ID,Name,Model,Capacity,Netto Price,Is Demokit,Type
+1,Waters BIO Mineral Pot,BMP 3000,22 Liter,23840000,0,product
+2,Waters BIO Mineral Pot,BMP 2000,14 Liter,19600000,0,product
+3,Waters BIO Mineral Pot,BMP 1000,10 Liter,13800000,0,product
+4,Waters BIO Mineral Pot,NEW BMP 1100,11 Liter,14480000,0,product
+5,Waters BIO Mineral Pot,ACE BIO Plus,"1,2 Liter",3600000,1,product
+6,Therapy Shower,ROSE,,2000000,0,product
+7,Therapy Shower,LEMON,,1920000,0,product
+8,Therapy Shower,LAVENDER,,1920000,0,product
+9,BIO Ceramic ALION,AUTOMATIC,,35200000,0,product
+10,SPARE PART BMP 2nd FILTER 2000,,,1045000,0,sparepart

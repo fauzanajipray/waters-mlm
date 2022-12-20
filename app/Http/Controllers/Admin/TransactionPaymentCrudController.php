@@ -11,9 +11,11 @@ use App\Models\Transaction;
 use App\Models\TransactionPayment;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\Widget;
+use Error;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 /**
  * Class TransactionPaymentCrudController
@@ -171,23 +173,23 @@ class TransactionPaymentCrudController extends CrudController
         $transaction = Transaction::findOrfail($transaction_id);
         $check = Transaction::with(['transactionPayments', 'transactionProducts'])->find($transaction_id);
         $totalPrice =  0;
-        if ($transaction->type == 'Normal') {
-            $totalPrice = $transaction->transactionProducts->sum(function($item){
-                return $item->price * $item->quantity;
-            });
-        } else if ($transaction->type == 'Bebas Putus') {
+        if ($transaction->type == 'Bebas Putus') {
             $totalPrice = $transaction->transactionProducts->sum(function($item){
                 $discount = 0;
                 if ($item->discount_percentage > 0) {
                     $discount = $item->price * $item->discount_percentage / 100;
-                } else if ($item->discount_price > 0) {
-                    $discount = $item->discrount_price;
+                } else  {
+                    $discount = $item->discount_amount;
                 }
                 return $item->price * $item->quantity - $discount;
             });
-        } else {
+        } else if ($transaction->type == 'Demokit' || $transaction->type == 'Display') {
             $totalPrice = $transaction->transactionProducts->sum(function($item){
                 return $item->price * $item->quantity - ($item->price * $item->quantity * $item->discount_percentage / 100);
+            });
+        } else {
+            $totalPrice = $transaction->transactionProducts->sum(function($item){
+                return $item->price * $item->quantity;
             });
         }
         if ($check->transactionPayments->sum('amount') >= $totalPrice) {
@@ -225,11 +227,7 @@ class TransactionPaymentCrudController extends CrudController
             ],
         ])->beforeField('payment_method_id');
         $totalPrice =  0;
-        if ($transaction->type == 'Normal') {
-            $totalPrice = $transaction->transactionProducts->sum(function($item){
-                return $item->price * $item->quantity;
-            });
-        } else if ($transaction->type == 'Bebas Putus') {
+        if ($transaction->type == 'Bebas Putus') {
             $totalPrice = $transaction->transactionProducts->sum(function($item){
                 $discount = 0;
                 if ($item->discount_percentage > 0) {
@@ -239,9 +237,13 @@ class TransactionPaymentCrudController extends CrudController
                 }
                 return $item->price * $item->quantity - $discount;
             });
-        } else {
+        } else if ($transaction->type == 'Demokit' || $transaction->type == 'Display') {
             $totalPrice = $transaction->transactionProducts->sum(function($item){
                 return $item->price * $item->quantity - ($item->price * $item->quantity * $item->discount_percentage / 100);
+            });
+        } else {
+            $totalPrice = $transaction->transactionProducts->sum(function($item){
+                return $item->price * $item->quantity;
             });
         }
         $this->crud->addField([
@@ -396,5 +398,166 @@ class TransactionPaymentCrudController extends CrudController
 
         // load the view from /resources/views/vendor/backpack/crud/ if it exists, otherwise load the one in the package
         return view('transaction.list_payment', $this->data);
+    }
+
+    public function createByImport($requests){
+        
+        // $transaction = Transaction::findOrfail($requests['transaction_id']);
+        $transaction = Transaction::with(['transactionPayments', 'transactionProducts'])->find($requests['transaction_id']);
+        $totalPrice =  0;
+        if ($transaction->type == 'Bebas Putus') {
+            $totalPrice = $transaction->transactionProducts->sum(function($item){
+                $discount = 0;
+                if ($item->discount_percentage > 0) {
+                    $discount = $item->price * $item->discount_percentage / 100;
+                } else  {
+                    $discount = $item->discount_amount;
+                }
+                return $item->price * $item->quantity - $discount;
+            });
+        } else if ($transaction->type == 'Demokit' || $transaction->type == 'Display') {
+            $totalPrice = $transaction->transactionProducts->sum(function($item){
+                return $item->price * $item->quantity - ($item->price * $item->quantity * $item->discount_percentage / 100);
+            });
+        } else {
+            $totalPrice = $transaction->transactionProducts->sum(function($item){
+                return $item->price * $item->quantity;
+            });
+        }
+        if ($transaction->transactionPayments->sum('amount') >= $totalPrice) {
+            return throw new Exception('Transaction already paid');
+        }
+        $transactionBill = $totalPrice - $transaction->transactionPayments->sum('amount');
+        if($transactionBill < $requests['amount']) {
+            return throw new Exception('Transaction bill is less than payment amount');
+        }
+        $paymentMethodCust = PaymentMethod::where('name', $requests['payment_method'])->first();
+
+        if(!$paymentMethodCust) {
+            return throw new Exception('Payment method '.$requests['payment_method']. ' transaction id' . $requests['transaction_id'] . ' not found', 400);
+        }
+        $requests['payment_method_id'] = $paymentMethodCust->id;
+
+        // make validator
+        $validator = Validator::make($requests, [
+            'transaction_id' => 'required|exists:transactions,id',
+            'payment_method_id' => 'required|exists:payment_methods,id',
+            'payment_account_number' => 'nullable',
+            'photo_url' => 'nullable',
+            'type' => 'required|in:Full,Partial',
+            'amount' => function ($attribute, $value, $fail) use ($transaction, $requests) {
+                $typePayment = $requests['type'];
+                if ($typePayment = 'Partial') {
+                    $totalBill = $transaction->transactionProducts->sum(function($item){
+                        return $item->price * $item->quantity;
+                    }) - $transaction->transactionPayments->sum('amount');
+                    if ($totalBill < $value) {
+                        $fail('The amount must be less than the total bill');
+                    }
+                } else {
+                    $total = $transaction->transactionProducts->sum(function ($item) {
+                        return $item->price * $item->quantity;
+                    });
+                    if ($total != $value) {
+                        $fail('The amount must be equal to the total transaction');
+                    }
+                }
+            },
+            'payment_date' => 'required|date',
+        ]);
+
+        if ($validator->fails()) {
+            return throw new Exception($validator->errors()->first());
+        }
+
+        DB::beginTransaction();
+        try {
+            $requests['payment_name'] = $paymentMethodCust->name;
+            unset($requests['payment_method']);
+            // status paid
+            $payment = TransactionPayment::create($requests);
+            $transaction = $transaction = Transaction::with(['transactionPayments', 'transactionProducts'])->find($requests['transaction_id']);
+            /* Check Stock */
+            $transactionProducts = $transaction->transactionProducts;
+            foreach ($transactionProducts as $transactionProduct) {
+                $product = Stock::where('product_id', $transactionProduct->product_id)
+                    ->where('branch_id', $transaction->branch_id)
+                    ->first();
+                if(!$product) {
+                    throw new \Exception('Stock '. $transactionProduct->name.' '. $transactionProduct->model .' is not enough');
+                }  
+                if ($product->quantity < $transactionProduct->quantity) {
+                    throw new \Exception('Stock '. $transactionProduct->name.' '. $transactionProduct->model .' is not enough');
+                }
+            }
+            if ($transaction->transactionPayments->sum('amount') == $totalPrice) {
+                $transaction->status_paid = true;
+                $transaction->save();
+                $lastPaymentDate = $transaction->transactionPayments->sortByDesc('payment_date')->first()->payment_date;
+                if($transaction->type != "Sparepart") {
+                    $this->calculateBonus($transaction, $transaction->member, $lastPaymentDate);
+                }
+                /* Minus stock */
+                foreach ($transactionProducts as $transactionProduct) {
+                    $stock = Stock::where('product_id', $transactionProduct->product_id)
+                        ->where('branch_id', $transaction->branch_id)
+                        ->first();
+                    $stock->quantity = $stock->quantity - $transactionProduct->quantity;
+                    $stock->save();
+   
+                    /* Add stock history */
+                    if($transaction->type != "Display"){
+                        $stockHistory = new StockHistory();
+                        $stockHistory->type = 'sales';
+                        $stockHistory->branch_id = $transaction->branch_id;
+                        $stockHistory->sales_on = $transaction->id;
+                        $stockHistory->product_id = $transactionProduct->product_id;
+                        $stockHistory->quantity = $transactionProduct->quantity;
+                        $stockHistory->created_at = $lastPaymentDate;
+                        $stockHistory->save();    
+                    } else {
+                        // out to branch
+                        $stockHistory = new StockHistory();
+                        $stockHistory->type = 'out';
+                        $stockHistory->branch_id = $transaction->branch_id;
+                        $stockHistory->sales_on = $transaction->id;
+                        $stockHistory->product_id = $transactionProduct->product_id;
+                        $stockHistory->quantity = $transactionProduct->quantity;
+                        $stockHistory->out_to = $transaction->member->branch->id;
+                        $stockHistory->created_at = $lastPaymentDate;
+                        $stockHistory->save();
+                        
+                        // in to member branch
+                        $stockNew = Stock::where('product_id', $transactionProduct->product_id)
+                            ->where('branch_id', $transaction->member->branch->id)->first();
+                        if(!$stockNew) {
+                            $stockNew = new Stock();
+                            $stockNew->branch_id = $transaction->member->branch->id;
+                            $stockNew->product_id = $transactionProduct->product_id;
+                            $stockNew->quantity = $transactionProduct->quantity;
+                        } else {
+                            $stockNew->quantity = $stockNew->quantity + $transactionProduct->quantity;
+                        }
+                        $stockNew->created_at = $lastPaymentDate;
+                        $stockNew->save();
+                        
+                        $stockHistoryIn = new StockHistory();
+                        $stockHistoryIn->type = 'in';
+                        $stockHistoryIn->branch_id = $transaction->member->branch->id;
+                        $stockHistoryIn->sales_on = $transaction->id;
+                        $stockHistoryIn->product_id = $transactionProduct->product_id;
+                        $stockHistoryIn->quantity = $transactionProduct->quantity;
+                        $stockHistoryIn->in_from = $transaction->branch_id;
+                        $stockHistoryIn->created_at = $lastPaymentDate;
+                        $stockHistoryIn->save();   
+                    }
+                }                
+            }
+            DB::commit();
+            return ;
+        } catch (Exception $e) {
+            DB::rollBack();
+            return throw new Exception($e->getMessage());
+        }        
     }
 }

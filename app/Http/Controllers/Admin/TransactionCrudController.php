@@ -433,7 +433,6 @@ class TransactionCrudController extends CrudController
         return view('transaction.show', $this->data);
     }
 
-
     public function createByImport($requests)
     {
         if(!isset($requests['products'])) {
@@ -468,41 +467,58 @@ class TransactionCrudController extends CrudController
         }
 
         $totalPrice = 0;
+        if ($requests['type'] == "Bebas Putus") {
+            foreach ($products as $key => $item) {
+                $product = Product::find($item['product_id']);
+                if($requests['discount_percentage']) {
+                    $discount = $product->price * $item['quantity'] * $requests['discount_percentage'] / 100;
+                } else {
+                    $discount = $item['discount_amount'];
+                }
+                $totalPrice += $product->price * $item['quantity'] - $discount;
+            }
+        } else if ($requests['type'] == "Demokit" || $requests['type'] == "Display") {
+            foreach ($products as $key => $item) {
+                $product = Product::find($item['product_id']);
+                $totalPrice += $product->price * $item['quantity'] - ($product->price * $item['quantity'] * $item['discount_percentage'] / 100);
+            }
+        } else {
             foreach ($products as $key => $item) {
                 $product = Product::find($item['product_id']);
                 $totalPrice += $product->price * $item['quantity'];
             }
-            $requests['code'] = $this->generateCode();
-            $requests['id_card'] = $member->id_card;
-            $requests['member_name'] = $member->name;
-            $requests['member_numb'] = $member->member_numb;
-            $requests['level_id'] = $member->level_id;
-            $requests['total_price'] = $totalPrice;
-            // $requests['created_by'] = backpack_user()->id;
-            // $requests['updated_by'] = backpack_user()->id;
-            unset($requests['is_member']);
-            unset($requests['product_id']);
-            unset($requests['quantity']);
-            unset($requests['discount_percentage']);
-            unset($requests['discount_amount']);
-
-            $transaction = Transaction::create($requests);
-            // Save Log Product Sold
-            foreach ($products as $key => $item) {
-                $product = Product::find($item['product_id']);
-                $tp = TransactionProduct::create([
-                    'transaction_id' => $transaction->id,
-                    'product_id' => $product->id,
-                    'name' => $product->name,
-                    'model' => $product->model,
-                    'price' => $product->price,
-                    'capacity' => $product->capacity,
-                    'quantity' => $item['quantity'],
-                ]);
-                $transactionProduct[] = $tp->toArray();
-            }
-            $requests['transaction_id'] = $transaction->id;
-            // $this->calculateBonus($requests, $member);
-            // $this->levelUpMember($member->id);
+        }
+        
+        $requests['code'] = $this->generateCode();
+        $requests['id_card'] = $member->id_card;
+        $requests['member_name'] = $member->name;
+        $requests['member_numb'] = $member->member_numb;
+        $requests['level_id'] = $member->level_id;
+        $requests['total_price'] = $totalPrice;
+        unset($requests['is_member']);
+        unset($requests['product_id']);
+        unset($requests['quantity']);
+        unset($requests['discount_percentage']);
+        unset($requests['discount_amount']);
+        
+        $transaction = Transaction::create($requests);
+        // Save Log Product Sold
+        foreach ($products as $key => $item) {
+            $product = Product::find($item['product_id']);
+            $tp = TransactionProduct::create([
+                'transaction_id' => $transaction->id,
+                'product_id' => $product->id,
+                'name' => $product->name,
+                'model' => $product->model,
+                'price' => $product->price,
+                'capacity' => $product->capacity,
+                'quantity' => $item['quantity'],
+                'discount_percentage' => $item['discount_percentage'] ?? 0,
+                'discount_amount' => $item['discount_amount'] ?? 0,
+                'product_notes' => $item['product_notes'],
+            ]);
+            $transactionProduct[] = $tp->toArray();
+        }
+        $requests['transaction_id'] = $transaction->id;
     }
 }

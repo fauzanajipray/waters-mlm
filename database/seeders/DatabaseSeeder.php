@@ -4,7 +4,9 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Http\Controllers\Admin\StockCrudController;
 use App\Http\Controllers\Admin\TransactionCrudController;
+use App\Http\Controllers\Admin\TransactionPaymentCrudController;
 use App\Models\ActivationPayments;
 use App\Models\Branch;
 use App\Models\Configuration;
@@ -14,7 +16,9 @@ use App\Models\Member;
 use App\Models\PaymentMethod;
 use App\Models\Product;
 use App\Models\Transaction;
+use App\Models\TransactionPayment;
 use App\Models\User;
+use Exception;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -38,6 +42,8 @@ class DatabaseSeeder extends Seeder
         $this->customer();
         $this->transaction();
         $this->paymentMethod();
+        $this->stocks();
+        $this->transactionPayment();
         // // $this->call(MemberSeeder::class);
     }
 
@@ -131,6 +137,7 @@ class DatabaseSeeder extends Seeder
                 "capacity" => $csvData["Capacity"],
                 "price" => $csvData["Netto Price"],
                 "is_demokit" => $csvData["Is Demokit"],
+                "type" => $csvData["Type"],
             ]);
         }
 
@@ -289,7 +296,6 @@ class DatabaseSeeder extends Seeder
         foreach ($csvDatas as $csvData) {
             $existTrans = Transaction::where("code", $csvData['Code'] ?? 0)->exists();
             $customer = Customer::where("id", $csvData['Customer ID'])->first();
-
             $requests = [
                 "transaction_date" => date("Y-m-d H:i:s", strtotime($csvData['Transaction Date'])),
                 "customer_id" => $csvData['Customer ID'],
@@ -302,7 +308,7 @@ class DatabaseSeeder extends Seeder
                 "quantity" => $csvData['Qty'],
                 "created_by" => 1,
                 "updated_by" => 1,
-                "type" => $csvData['Tipe Penjualan'] ?? "Normal",
+                "type" => $csvData['Tipe Penjualan'] ,
                 "branch_id" => $csvData['Branch ID'],
                 "stock_from" => Branch::find($csvData['Branch ID'])->name,
             ];
@@ -352,6 +358,13 @@ class DatabaseSeeder extends Seeder
         ]);
 
         PaymentMethod::updateOrCreate([
+            "name" => "Debit BCA",
+        ],[
+            "name" => "Debit BCA",
+            "description" => "",
+        ]);
+
+        PaymentMethod::updateOrCreate([
             "name" => "Kartu Kredit",
         ],[
             "name" => "Kartu Kredit",
@@ -364,6 +377,55 @@ class DatabaseSeeder extends Seeder
             "name" => "Transfer",
             "description" => "",
         ]);
+
+        PaymentMethod::updateOrCreate([
+            "name" => "Tunai",
+        ],[
+            "name" => "Tunai",
+            "description" => "",
+        ]);
+    }
+
+    private function stocks(){
+        $filename = Storage::path('sample/stock.csv');
+        $csvDatas = $this->csvToArray($filename);
+        $stockCrud = new StockCrudController();
+
+        foreach ($csvDatas as $csvData) {
+            $requests = [
+                "branch_id" => $csvData['Branch ID'],
+                "product_id" => $csvData['Product ID'],
+                "quantity" => $csvData['Quantity'],
+                "created_at" =>  date("Y-m-d H:i:s", strtotime($csvData['Date'])),
+            ];
+            $stockCrud->createByImport($requests);
+        }
+        $this->command->line("Completed --> Stock");
+    }
+    
+    private function transactionPayment()
+    {
+        $filename = Storage::path('sample/payment.csv');
+        $csvDatas = $this->csvToArray($filename);
+        $transPaymentCrud = new TransactionPaymentCrudController();
+        foreach ($csvDatas as $csvData) {
+            
+            $requests = [
+                "transaction_id" => $csvData['Transaction ID'],
+                "payment_date" => date("Y-m-d H:i:s", strtotime($csvData['Tanggal Payment'])),
+                "payment_method" => $csvData['Payment Method'],
+                "amount" => $csvData['Nominal'],
+                "type" => $csvData['Status'],
+             ];
+            try {
+                $transPaymentCrud->createByImport($requests);
+            } catch (Exception $e) {
+                $this->command->line("Error --> Transaction Payment");
+                $this->command->line($e->getMessage());
+            }
+        }
+
+        $this->command->line("Completed --> Transaction Payments");
     }
 
 }

@@ -8,6 +8,7 @@ use App\Models\Stock;
 use App\Models\StockHistory;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\Widget;
+use Exception;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -290,5 +291,64 @@ class StockCrudController extends CrudController
                 $this->crud->addClause('where', 'product_id', $value);
             }
         );
+    }
+
+    public function createByImport($requests) {
+        $data = $requests;
+        DB::beginTransaction();
+        try {
+            if($data['branch_id'] == 1) {
+                $stock = Stock::where('product_id', $data['product_id'])->where('branch_id', $data['branch_id'])->first();
+                if($stock){
+                    $stock->quantity = $stock->quantity + $data['quantity'];
+                    $stock->save();
+                }else{
+                    $stock = Stock::create($data);
+                }
+                StockHistory::create([
+                    'product_id' => $data['product_id'],
+                    'quantity' => $data['quantity'],
+                    'branch_id' => $data['branch_id'],
+                    'type' => 'in',
+                    'in_from' => null,
+                    'created_at' => $data['created_at'],
+                ]);
+            } else {
+                $stock = Stock::where('product_id', $data['product_id'])->where('branch_id', $data['branch_id'])->first();
+                if($stock){
+                    $stock->quantity = $stock->quantity + $data['quantity'];
+                    $stock->save();
+                }else{
+                    $stock = Stock::create($data);
+
+                }
+                $stockOrigin = Stock::where('product_id', $data['product_id'])->where('branch_id', $data['origin_branch_id'])->first();
+                $stockOrigin->quantity = $stockOrigin->quantity - $data['quantity'];
+                $stockOrigin->save();
+                // stock out
+                StockHistory::create([
+                    'product_id' => $data['product_id'],
+                    'quantity' => $data['quantity'],
+                    'branch_id' => $data['origin_branch_id'],
+                    'type' => 'out',
+                    'out_to' => $data['branch_id'],
+                    'created_at' => $data['created_at'],
+                ]);
+                // stock in
+                StockHistory::create([
+                    'product_id' => $data['product_id'],
+                    'quantity' => $data['quantity'],
+                    'branch_id' => $data['branch_id'],
+                    'type' => 'in',
+                    'in_from' => $data['origin_branch_id'],
+                    'created_at' => $data['created_at'],
+                ]);
+            }
+            DB::commit();
+            return ;
+        } catch (\Exception $e) {
+            DB::rollback();
+            return throw new Exception($e->getMessage());
+        }      
     }
 }
