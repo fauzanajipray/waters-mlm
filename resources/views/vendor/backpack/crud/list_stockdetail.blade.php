@@ -56,6 +56,14 @@
                           <th>Owner</th>
                           <td>{{ $crud->stock->branch->member->name ?? '-' }}</td>
                         </tr>
+                        <tr>
+                          <th>Stock Awal</th>
+                          <td id="stock-awal"></td>
+                        </tr>
+                        <tr>
+                          <th>Stock Akhir</th>
+                          <td id="stock-akhir"></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -227,15 +235,15 @@
           $('#period-name').text('-');
         }
   
-        if(json.stock_awal != null && json.stock_awal.length != 0){
-          $('#stock-awal').text(json.stock_awal);
+        if(json.initial_stock != null && json.initial_stock.length != 0){
+          $('#stock-awal').text(json.initial_stock);
         }
         else{
           $('#stock-awal').text('-');
         }
   
-        if(json.stock_akhir != null && json.stock_akhir.length != 0){
-          $('#stock-akhir').text(json.stock_akhir);
+        if(json.final_stock != null && json.final_stock.length != 0){
+          $('#stock-akhir').text(json.final_stock);
         }
         else{
           $('#stock-akhir').text('-');

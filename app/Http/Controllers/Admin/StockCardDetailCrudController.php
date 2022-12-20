@@ -8,6 +8,7 @@ use App\Models\StockHistory;
 use App\Models\Transaction;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class StockCardDetailCrudController
@@ -288,6 +289,189 @@ class StockCardDetailCrudController extends CrudController
         $this->crud->setOperationSetting('totalEntryCount', $totalEntryCount);
         $response = $this->crud->getEntriesAsJsonForDatatables($entries, $totalEntryCount, $filteredEntryCount, $start);
         $response['period_name'] = Carbon::parse($this->crud->startDate)->format('Y F d') . ' - ' . Carbon::parse($this->crud->endDate)->format('Y F d');
+       
+        $data = $this->detailCustomQuery($this->crud->startDate, $this->crud->endDate, $this->crud->stock->branch_id, $this->crud->stock->product_id)->first();
+        $response['initial_stock'] = $data->initial_stock;
+        $response['final_stock'] = $data->final_stock;
         return $response;
+    }
+
+    public function detailCustomQuery($startDate, $endDate, $branchID, $productID){
+        // dd($startDate, $endDate, $branchID, $productID);
+        $startDateYesterdayEndOfDay = Carbon::parse($startDate)->endOfDay()->subDay()->toDateTimeString();
+        $query = Stock::
+            /* Now */
+            leftJoin( // Stock In
+                DB::raw("(
+                    SELECT 
+                        stock_histories.product_id, 
+                        stock_histories.branch_id, 
+                        SUM(stock_histories.quantity) as quantity, 
+                        stock_histories.created_at
+                    FROM stock_histories 
+                    WHERE stock_histories.created_at 
+                        BETWEEN '$startDate' AND '$endDate'
+                    AND stock_histories.type = 'in'
+                    GROUP BY stock_histories.product_id, stock_histories.branch_id
+                ) as `stock_in_histories_now` "),
+                function($join) {
+                    $join->on('stocks.product_id', '=', 'stock_in_histories_now.product_id')
+                        ->whereRaw('`stocks`.`branch_id` = `stock_in_histories_now`.`branch_id`');
+                }
+            )
+            ->leftJoin( // Stock Out
+                DB::raw("(
+                    SELECT 
+                        stock_histories.product_id, 
+                        stock_histories.branch_id, 
+                        SUM(stock_histories.quantity) as quantity, 
+                        stock_histories.in_from,
+                        stock_histories.created_at
+                    FROM stock_histories 
+                    WHERE stock_histories.created_at 
+                        BETWEEN '$startDate' AND '$endDate'
+                    AND stock_histories.type = 'out'
+                    GROUP BY stock_histories.product_id, stock_histories.branch_id
+                ) as `stock_out_histories_now` "),
+                function($join) {
+                    $join->on('stocks.product_id', '=', 'stock_out_histories_now.product_id')
+                        ->whereRaw('`stocks`.`branch_id` = `stock_out_histories_now`.`branch_id`');
+                }
+            )
+            ->leftJoin( // Sales
+                DB::raw("(
+                    SELECT
+                        stock_histories.product_id,
+                        stock_histories.branch_id,
+                        SUM(stock_histories.quantity) as quantity,
+                        stock_histories.created_at
+                    FROM stock_histories
+                    WHERE stock_histories.created_at 
+                        BETWEEN '$startDate' AND '$endDate'
+                    AND stock_histories.type = 'sales'
+                    GROUP BY stock_histories.product_id, stock_histories.branch_id
+                ) as `transactions_now` "),
+                function($join) {
+                    $join->on('stocks.product_id', '=', 'transactions_now.product_id')
+                        ->whereRaw('`stocks`.`branch_id` = `transactions_now`.`branch_id`');
+                }
+            )
+            ->leftJoin( // Adjustment
+                DB::raw("(
+                    SELECT
+                        stock_histories.product_id,
+                        stock_histories.branch_id,
+                        SUM(stock_histories.quantity) as quantity,
+                        stock_histories.created_at
+                    FROM stock_histories
+                    WHERE stock_histories.created_at 
+                        BETWEEN '$startDate' AND '$endDate'
+                    AND stock_histories.type = 'adjustment'
+                    GROUP BY stock_histories.product_id, stock_histories.branch_id
+                ) as `adjustments_now` "),
+                function($join) {
+                    $join->on('stocks.product_id', '=', 'adjustments_now.product_id')
+                        ->whereRaw('`stocks`.`branch_id` = `adjustments_now`.`branch_id`');
+                }
+            )
+            /* Yesterday */
+            ->leftJoin( // Stock In
+                DB::raw("(
+                    SELECT 
+                        stock_histories.product_id, 
+                        stock_histories.branch_id, 
+                        SUM(stock_histories.quantity) as quantity, 
+                        stock_histories.in_from,
+                        stock_histories.created_at
+                    FROM stock_histories 
+                    WHERE stock_histories.created_at <= '$startDateYesterdayEndOfDay'
+                    AND stock_histories.type = 'in'
+                    GROUP BY stock_histories.product_id, stock_histories.branch_id
+                ) as `stock_in_histories_yesterday` "),
+                function($join) {
+                    $join->on('stocks.product_id', '=', 'stock_in_histories_yesterday.product_id')
+                        ->whereRaw('`stocks`.`branch_id` = `stock_in_histories_yesterday`.`branch_id`');
+                }
+            )
+            ->leftJoin( // Stock Out
+                DB::raw("(
+                    SELECT 
+                        stock_histories.product_id, 
+                        stock_histories.branch_id, 
+                        SUM(stock_histories.quantity) as quantity, 
+                        stock_histories.in_from,
+                        stock_histories.created_at
+                    FROM stock_histories 
+                    WHERE stock_histories.created_at <= '$startDateYesterdayEndOfDay'
+                    AND stock_histories.type = 'out'
+                    GROUP BY stock_histories.product_id, stock_histories.branch_id
+                ) as `stock_out_histories_yesterday` "),
+                function($join) {
+                    $join->on('stocks.product_id', '=', 'stock_out_histories_yesterday.product_id')
+                        ->whereRaw('`stocks`.`branch_id` = `stock_out_histories_yesterday`.`branch_id`');
+                }
+            )
+            ->leftJoin( // Sales Yesterday 
+                DB::raw("(
+                    SELECT
+                        stock_histories.product_id,
+                        stock_histories.branch_id,
+                        SUM(stock_histories.quantity) as quantity,
+                        stock_histories.created_at
+                    FROM stock_histories
+                    WHERE stock_histories.created_at <= '$startDateYesterdayEndOfDay'
+                    AND stock_histories.type = 'sales'
+                    GROUP BY stock_histories.product_id, stock_histories.branch_id
+                ) as `transactions_yesterday` "),
+                function($join) {
+                    $join->on('stocks.product_id', '=', 'transactions_yesterday.product_id')
+                        ->whereRaw('`stocks`.`branch_id` = `transactions_yesterday`.`branch_id`');
+                }
+            )
+            ->leftJoin( // Adjustment Yesterday
+                DB::raw("(
+                    SELECT
+                        stock_histories.product_id,
+                        stock_histories.branch_id,
+                        SUM(stock_histories.quantity) as quantity,
+                        stock_histories.created_at
+                    FROM stock_histories
+                    WHERE stock_histories.created_at <= '$startDateYesterdayEndOfDay'
+                    AND stock_histories.type = 'adjustment'
+                    GROUP BY stock_histories.product_id, stock_histories.branch_id
+                ) as `adjustments_yesterday` "),
+                function($join) {
+                    $join->on('stocks.product_id', '=', 'adjustments_yesterday.product_id')
+                        ->whereRaw('`stocks`.`branch_id` = `adjustments_yesterday`.`branch_id`');
+                }
+            )
+            ->leftJoin('products', 'stocks.product_id', '=', 'products.id')
+            ->leftJoin('branches', 'stocks.branch_id', '=', 'branches.id')
+            ->select(
+                'stocks.id',
+                // Initial Stock
+                DB::raw('(
+                    IFNULL(`stock_in_histories_yesterday`.`quantity`, 0) - 
+                    IFNULL(`stock_out_histories_yesterday`.`quantity`, 0) - 
+                    IFNULL(SUM(`transactions_yesterday`.`quantity`), 0) + 
+                    IFNULL(SUM(`adjustments_yesterday`.`quantity`), 0)
+                ) as `initial_stock`'),
+                // Final Stock
+                DB::raw('(
+                    IFNULL(`stock_in_histories_yesterday`.`quantity`, 0) - 
+                    IFNULL(`stock_out_histories_yesterday`.`quantity`, 0) - 
+                    IFNULL(SUM(`transactions_yesterday`.`quantity`), 0) + 
+                    IFNULL(SUM(`adjustments_yesterday`.`quantity`), 0) +
+                    IFNULL(`stock_in_histories_now`.`quantity`, 0) -
+                    IFNULL(`stock_out_histories_now`.`quantity`, 0) -
+                    IFNULL(SUM(`transactions_now`.`quantity`), 0) +
+                    IFNULL(SUM(`adjustments_now`.`quantity`), 0) 
+                ) as `final_stock`'),                
+            )
+            ->orderBy('branches.name', 'asc')
+            ->where('stocks.branch_id', $branchID)
+            ->where('stocks.product_id', $productID)
+            ->groupBy('products.name', 'products.model', 'branches.name');
+        return $query;
     }
 }

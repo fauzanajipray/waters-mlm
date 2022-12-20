@@ -180,6 +180,7 @@
                 <table class="table table-bordered">
                     <thead>
                         <tr>
+                            <th>ID</th>
                             <th>Payment Type</th>
                             <th>Payment Method</th>
                             <th>Account Number</th>
@@ -189,6 +190,9 @@
                     <tbody>
                         @foreach ($entry->transactionPayments as $item)
                             <tr>
+                                <td>
+                                    <a href="{{ url('transaction-payment/' . $item->id . "/show") }}" target="_blank">{{ $item->id }}</a>
+                                </td>
                                 <td>{{ $item->type }}</td>
                                 <td>{{ $item->payment_name }}</td>
                                 <td>{{ $item->payment_account_number }}</td>

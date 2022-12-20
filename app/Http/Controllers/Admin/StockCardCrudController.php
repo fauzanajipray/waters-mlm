@@ -53,7 +53,7 @@ class StockCardCrudController extends CrudController
         $this->crud->startDate = $startDate;
         $this->crud->endDate = $endDate;
         $this->crud->query = $this->customQuery($startDate, $endDate);
-        
+         
         $this->crud->addFilter(
             [
                 'name' => 'branch_id',
@@ -166,12 +166,8 @@ class StockCardCrudController extends CrudController
                 'label' => 'Awal',
                 'type' => 'number',
                 'value' => function($entry) {
-                    $stockIn = $entry->stock_in_yesterday ?? 0;
-                    $stockOut = $entry->stock_out_yesterday ?? 0;
-                    $stockSalesYesterday = $entry->stock_sales_yesterday ?? 0;
-                    return $stockIn - $stockOut - $stockSalesYesterday;
+                    return $entry->initial_stock ?? 0;
                 },
-                    
             ],
             [
                 'name' => 'stock_in',
@@ -210,14 +206,7 @@ class StockCardCrudController extends CrudController
                 'label' => 'Akhir',
                 'type' => 'number',
                 'value' => function ($entry) {
-                    $stockIn = $entry->stock_in_yesterday ?? 0;
-                    $stockOut = $entry->stock_out_yesterday ?? 0;
-                    $stockSalesYesterday = $entry->stock_sales_yesterday ?? 0;
-                    $adjustmentsNow = $entry->adjustments_now ?? 0;
-                    $adjustmentsYesterday = $entry->adjustments_yesterday ?? 0;
-                    $initialStock = $stockIn - $stockOut - $stockSalesYesterday + $adjustmentsYesterday;
-                    $finalStock = $initialStock + $entry->stock_in - $entry->stock_out - $entry->stock_sales + $adjustmentsNow;
-                    return $finalStock;
+                    return $entry->final_stock;
                 }
             ],
             [
@@ -251,7 +240,6 @@ class StockCardCrudController extends CrudController
 
     public function customQuery($startDate, $endDate){
         $startDateYesterdayEndOfDay = Carbon::parse($startDate)->endOfDay()->subDay()->toDateTimeString();
-        
         $query = Stock::
             /* Now */
             leftJoin( // Stock In
@@ -408,24 +396,34 @@ class StockCardCrudController extends CrudController
                 'products.model as product_model',
                 'products.type as product_type',
                 'branches.name as branch_name',
-
                 /* Now */
-                // DB::raw('(SUM(`stock_in_histories_yesterday`.`quantity`) - SUM(`stock_out_histories_yesterday`.`quantity`)) as `initial_stock`'),
-                // DB::raw('SUM(`stock_in_histories_now`.`quantity`) as `stock_in`'),
-                // DB::raw('SUM(`stock_out_histories_now`.`quantity`) as `stock_out`'),
                 'stock_in_histories_now.quantity as stock_in',
                 'stock_out_histories_now.quantity as stock_out',
                 DB::raw('SUM(`transactions_now`.`quantity`) as `stock_sales`'),   
                 DB::raw('SUM(`adjustments_now`.`quantity`) as `adjustments_now`'),              
-                
                 /* Yesterday */
-                // DB::raw('SUM(`stock_in_histories_yesterday`.`quantity`) as `stock_in_yesterday`'),
-                // DB::raw('SUM(`stock_out_histories_yesterday`.`quantity`) as `stock_out_yesterday`'),
                 'stock_in_histories_yesterday.quantity as stock_in_yesterday',
                 'stock_out_histories_yesterday.quantity as stock_out_yesterday',
                 DB::raw('SUM(`transactions_yesterday`.`quantity`) as `stock_sales_yesterday`'),
-                DB::raw('SUM(`adjustments_yesterday`.`quantity`) as `adjustments_yesterday`'),             
-                // DB::raw('SUM(`stock_in_histories_yesterday`.`quantity`) - SUM(`stock_out_histories_yesterday`.`quantity`) + SUM(`stock_in_histories_now`.`quantity`) - SUM(`stock_out_histories_now`.`quantity`) as `final_stock`'),
+                DB::raw('SUM(`adjustments_yesterday`.`quantity`) as `adjustments_yesterday`'),   
+                // Initial Stock
+                DB::raw('(
+                    IFNULL(`stock_in_histories_yesterday`.`quantity`, 0) - 
+                    IFNULL(`stock_out_histories_yesterday`.`quantity`, 0) - 
+                    IFNULL(SUM(`transactions_yesterday`.`quantity`), 0) + 
+                    IFNULL(SUM(`adjustments_yesterday`.`quantity`), 0)
+                ) as `initial_stock`'),
+                // Final Stock
+                DB::raw('(
+                    IFNULL(`stock_in_histories_yesterday`.`quantity`, 0) - 
+                    IFNULL(`stock_out_histories_yesterday`.`quantity`, 0) - 
+                    IFNULL(SUM(`transactions_yesterday`.`quantity`), 0) + 
+                    IFNULL(SUM(`adjustments_yesterday`.`quantity`), 0) +
+                    IFNULL(`stock_in_histories_now`.`quantity`, 0) -
+                    IFNULL(`stock_out_histories_now`.`quantity`, 0) -
+                    IFNULL(SUM(`transactions_now`.`quantity`), 0) +
+                    IFNULL(SUM(`adjustments_now`.`quantity`), 0) 
+                ) as `final_stock`'),                
             )
             ->orderBy('branches.name', 'asc')
             ->groupBy('products.name', 'products.model', 'branches.name');
