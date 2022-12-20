@@ -62,7 +62,10 @@ class TransactionDemokitCrudController extends CrudController
                 'label' => 'Unique Number',
             ], 
             'member_name',
-            'total_price', 
+            [
+                'name' => 'total_price',
+                'type' => 'number_format',
+            ], 
             'id_card',
             'customer_id',
             [
@@ -79,6 +82,19 @@ class TransactionDemokitCrudController extends CrudController
         $this->crud->addButtonFromModelFunction('line', 'add_payment', 'buttonAddPayment', 'beginning');
         
         $this->crud->addClause('where', 'type', 'Demokit');
+
+        // FILTER
+        $this->crud->addFilter([
+            'type' => 'date_range',
+            'name' => 'transaction_date',
+            'label'=> 'Transaction Date',
+        ], 
+        false, 
+        function($value) {
+            $dates = json_decode($value);
+            $this->crud->addClause('where', 'transaction_date', '>=', $dates->from);
+            $this->crud->addClause('where', 'transaction_date', '<=', $dates->to . ' 23:59:59');
+        });
     }
 
     protected function setupShowOperation(){

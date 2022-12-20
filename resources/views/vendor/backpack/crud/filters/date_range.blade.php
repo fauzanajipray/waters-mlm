@@ -26,12 +26,11 @@
 
     ], $filter->options['date_range_options'] ?? []);
 
-	$initValue = $filter->options['init_selection'];
-	if(isset($initValue)){
-		$dates = $initValue;
-        $filter->options['date_range_options']['startDate'] = $dates['from'];
-        $filter->options['date_range_options']['endDate'] = $dates['to'];
-	}
+		if(isset($filter->options['init_selection'])) {
+			$dates = $filter->options['init_selection'];
+					$filter->options['date_range_options']['startDate'] = $dates['from'];
+					$filter->options['date_range_options']['endDate'] = $dates['to'];
+		}
     if($filter->currentValue) {
 	    $dates = (array)json_decode($filter->currentValue);
         $filter->options['date_range_options']['startDate'] = $dates['from'];
