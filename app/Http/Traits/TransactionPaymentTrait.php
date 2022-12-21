@@ -93,115 +93,115 @@ trait TransactionPaymentTrait {
         }
     }
 
-    protected function levelUpMember($id, $isCheckAgain = false, $historyLevelUp = []) 
-    {
+    // protected function levelUpMember($id, $isCheckAgain = false, $historyLevelUp = []) 
+    // {
         
-        $this->info('Check Level Up Member ID : ' . $id);
-        /* Logic kenaikan level member */
-        $member = Member::with(['upline' => function($query) {
-            $query->with([
-                'upline' => function($query) { $query->with('level'); }, 
-                'downlines' => function($query) { 
-                    $query->with(['level']); 
-                },
-                'level'
-            ]);
-        }, 'level'])->find($id);
-        $uplineMember = $member->upline;
-        if ($isCheckAgain){ $uplineMember = $member; }
-        if (!$uplineMember) return ;
-        $uplineLevel = Level::where('id', $uplineMember->level_id)->first();
-        $levelNext =  Level::where('ordering_level', $uplineLevel->ordering_level + 1)->first();
-        if(!$levelNext) return ;
-        $levels = Level::orderBy('ordering_level', 'asc')->get();
-        $minimumDownlineNext = $levels[$uplineLevel->ordering_level]->minimum_downline;
-        $minimumSoldByDownlineNext = $levels[$uplineLevel->ordering_level]->minimum_sold_by_downline;
-        $downline = $this->getDownline($uplineMember->id, $uplineLevel);
-        if(!$downline){ return ; }
+    //     $this->info('Check Level Up Member ID : ' . $id);
+    //     /* Logic kenaikan level member */
+    //     $member = Member::with(['upline' => function($query) {
+    //         $query->with([
+    //             'upline' => function($query) { $query->with('level'); }, 
+    //             'downlines' => function($query) { 
+    //                 $query->with(['level']); 
+    //             },
+    //             'level'
+    //         ]);
+    //     }, 'level'])->find($id);
+    //     $uplineMember = $member->upline;
+    //     if ($isCheckAgain){ $uplineMember = $member; }
+    //     if (!$uplineMember) return ;
+    //     $uplineLevel = Level::where('id', $uplineMember->level_id)->first();
+    //     $levelNext =  Level::where('ordering_level', $uplineLevel->ordering_level + 1)->first();
+    //     if(!$levelNext) return ;
+    //     $levels = Level::orderBy('ordering_level', 'asc')->get();
+    //     $minimumDownlineNext = $levels[$uplineLevel->ordering_level]->minimum_downline;
+    //     $minimumSoldByDownlineNext = $levels[$uplineLevel->ordering_level]->minimum_sold_by_downline;
+    //     $downline = $this->getDownline($uplineMember->id);
+    //     if(!$downline){ return ; }
         
-        $removeDownline = $this->removeDownlineWhereTransaction($downline, $minimumSoldByDownlineNext, $uplineLevel);
-        $downline = $removeDownline['downline'];
-        $downlineCountLevelNow = $removeDownline['downlineCountLevelNow'];
+    //     $removeDownline = $this->removeDownlineWhereTransaction($downline, $minimumSoldByDownlineNext, $uplineLevel);
+    //     $downline = $removeDownline['downline'];
+    //     $downlineCountLevelNow = $removeDownline['downlineCountLevelNow'];
 
-        if ($downlineCountLevelNow >= $minimumDownlineNext) {
-            if ($this->isActiveMember($uplineMember)){
-                $uplineMember = Member::find($uplineMember->id);
-                $uplineMember->level_id = $levelNext->id; // Naik Level
-                $uplineMember->update();
-                $levelHistory = LevelUpHistories::with('level')->create([
-                    'member_id' => $uplineMember->id,
-                    'old_level_id' => $uplineLevel->id,
-                    'new_level_id' => $uplineMember->level_id,
-                    'old_level_code' => $uplineLevel->code,
-                    'new_level_code' => $uplineMember->level->code,
-                ]);
-                Alert::info('Member '.$uplineMember->name.' level up to '.$uplineMember->level->name)->flash();
-                $historyLevelUp[] = 'Member '.$uplineMember->name.' level up to '.$uplineMember->level->name; 
+    //     if ($downlineCountLevelNow >= $minimumDownlineNext) {
+    //         if ($this->isActiveMember($uplineMember)){
+    //             $uplineMember = Member::find($uplineMember->id);
+    //             $uplineMember->level_id = $levelNext->id; // Naik Level
+    //             $uplineMember->update();
+    //             $levelHistory = LevelUpHistories::with('level')->create([
+    //                 'member_id' => $uplineMember->id,
+    //                 'old_level_id' => $uplineLevel->id,
+    //                 'new_level_id' => $uplineMember->level_id,
+    //                 'old_level_code' => $uplineLevel->code,
+    //                 'new_level_code' => $uplineMember->level->code,
+    //             ]);
+    //             Alert::info('Member '.$uplineMember->name.' level up to '.$uplineMember->level->name)->flash();
+    //             $historyLevelUp[] = 'Member '.$uplineMember->name.' level up to '.$uplineMember->level->name; 
     
-                /* check apakah bisa level up lagi */
-                $levelNow = Level::where('id', $levelHistory->new_level_id)->first();
-                $levelNext = Level::where('ordering_level', $levelNow->ordering_level + 1)->first();
-                if(!$levelNext) { return ; }
+    //             /* check apakah bisa level up lagi */
+    //             $levelNow = Level::where('id', $levelHistory->new_level_id)->first();
+    //             $levelNext = Level::where('ordering_level', $levelNow->ordering_level + 1)->first();
+    //             if(!$levelNext) { return ; }
 
-                $minimumDownlineNext = $levelNext->minimum_downline;
-                $minimumSoldByDownlineNext = $levelNext->minimum_sold_by_downline;
-                $removedDownline = $this->removeDownlineWhereTransaction($downline, $minimumSoldByDownlineNext, $levelNow);
-                $downline = $removedDownline['downline'];
-                $downlineCountLevelNow = $removedDownline['downlineCountLevelNow'];
-                if ($downlineCountLevelNow >= $minimumDownlineNext) {
-                    $this->levelUpMember($uplineMember->id, true, $historyLevelUp);
-                }
-            } 
-            else {
-                // For Testing purpose
-                // Alert::error('Member '.$uplineMember->name.' is not active')->flash();
-                // $historyLevelUp[] = 'Member '.$uplineMember->name.' tidak bisa level up karena tidak aktif';
-            }
-            $this->levelUpMember($uplineMember->id, false, $historyLevelUp);
-        }
-        if($historyLevelUp) {
-            foreach($historyLevelUp as $l) {
-                $this->info($l);
-            }
-        }
-    }
+    //             $minimumDownlineNext = $levelNext->minimum_downline;
+    //             $minimumSoldByDownlineNext = $levelNext->minimum_sold_by_downline;
+    //             $removedDownline = $this->removeDownlineWhereTransaction($downline, $minimumSoldByDownlineNext, $levelNow);
+    //             $downline = $removedDownline['downline'];
+    //             $downlineCountLevelNow = $removedDownline['downlineCountLevelNow'];
+    //             if ($downlineCountLevelNow >= $minimumDownlineNext) {
+    //                 $this->levelUpMember($uplineMember->id, true, $historyLevelUp);
+    //             }
+    //         } 
+    //         else {
+    //             // For Testing purpose
+    //             // Alert::error('Member '.$uplineMember->name.' is not active')->flash();
+    //             $historyLevelUp[] = 'Member '.$uplineMember->name.' tidak bisa level up karena tidak aktif';
+    //         }
+    //         $this->levelUpMember($uplineMember->id, false, $historyLevelUp);
+    //     }
+    //     if($historyLevelUp) {
+    //         foreach($historyLevelUp as $l) {
+    //             $this->info($l);
+    //         }
+    //     }
+    // }
 
-    private function getDownline($uplineID) 
-    {
-        $downline = Member::with(['transactions' => function($query) {
-            $query
-                ->with('transactionProducts')
-                ->WhereMonth('transaction_date', date('m'))
-                ->whereYear('transaction_date', date('Y'));
-        }])->where('upline_id', $uplineID)
-        ->get();
-        return $downline;
-    }
+    // private function getDownline($uplineID) 
+    // {
+    //     $downline = Member::with(['transactions' => function($query) {
+    //         $query
+    //             ->with('transactionProducts')
+    //             ->WhereMonth('transaction_date', date('m'))
+    //             ->whereYear('transaction_date', date('Y'));
+    //     }])->where('upline_id', $uplineID)
+    //     ->get();
+    //     return $downline;
+    // }
 
-    private function removeDownlineWhereTransaction($downline, $minimumSoldByDownlineNext, $uplineLevel){
-        foreach ($downline as $key => $value) {
-            $downlineSold = 0;
-            foreach ($value->transactions as $key => $transaction) {
-                if($transaction->type != 'Normal') continue;
-                foreach ($transaction->transactionProducts as $key => $transactionProduct) {
-                    $downlineSold += $transactionProduct->quantity;
-                }
-            }
-            if ($downlineSold < $minimumSoldByDownlineNext) { 
-                $downline->forget($key); // remove downline yang belum melakukan transaksi
-            }
-        }
-        $downlineCountLevelNow = 0;
-        foreach ($downline as $key => $value) {
-            if ($value->level->ordering_level >= $uplineLevel->ordering_level) {
-                $downlineCountLevelNow++; // hitung downline yang sudah melakukan transaksi dan levelnya sama atau lebih tinggi
-            }
-        }
-        return [ 
-            "downline" => $downline, 
-            "downlineCountLevelNow" => $downlineCountLevelNow,
-        ];
-    }
+    // private function removeDownlineWhereTransaction($downline, $minimumSoldByDownlineNext, $uplineLevel){
+    //     foreach ($downline as $key => $value) {
+    //         $downlineSold = 0;
+    //         foreach ($value->transactions as $key => $transaction) {
+    //             if($transaction->type != 'Normal') continue;
+    //             foreach ($transaction->transactionProducts as $key => $transactionProduct) {
+    //                 $downlineSold += $transactionProduct->quantity;
+    //             }
+    //         }
+    //         if ($downlineSold < $minimumSoldByDownlineNext) { 
+    //             $downline->forget($key); // remove downline yang belum melakukan transaksi
+    //         }
+    //     }
+    //     $downlineCountLevelNow = 0;
+    //     foreach ($downline as $key => $value) {
+    //         if ($value->level->ordering_level >= $uplineLevel->ordering_level) {
+    //             $downlineCountLevelNow++; // hitung downline yang sudah melakukan transaksi dan levelnya sama atau lebih tinggi
+    //         }
+    //     }
+    //     return [ 
+    //         "downline" => $downline, 
+    //         "downlineCountLevelNow" => $downlineCountLevelNow,
+    //     ];
+    // }
 
     private function isActiveMember($member) 
     {

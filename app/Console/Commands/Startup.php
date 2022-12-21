@@ -3,28 +3,29 @@
 namespace App\Console\Commands;
 
 use App\Http\Traits\LevelUpTrait;
-use App\Http\Traits\TransactionPaymentTrait;
 use App\Models\Transaction;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
-class LevelUpMember extends Command
+class Startup extends Command
 {
     use LevelUpTrait;
+
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'level-up-member';
+    protected $signature = 'start-up';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Level up member';
+    protected $description = 'Command description';
 
     /**
      * Execute the console command.
@@ -35,11 +36,11 @@ class LevelUpMember extends Command
     {
         DB::beginTransaction();
         try {
-            $this->info('Level up member started, Date : '. date('Y-m-d H:i:s'));
-            $transactions = Transaction::with(['member', 'transactionPayments'])
-                ->thisMonthAndYear()
+            $this->info('Level up member started');
+            $transactions = Transaction::where("transaction_date", "<", Carbon::now()->startOfMonth()->toDateString())
                 ->where('type', 'Normal')
-                ->where('status_paid', true)->get();
+                ->where('status_paid', 1)
+                ->get();
             foreach($transactions as $transaction){
                 if($transaction->type != "Sparepart") {
                     $this->levelUpMember($transaction->member->id, $transaction->transaction_date);
@@ -49,10 +50,6 @@ class LevelUpMember extends Command
             $this->newLine();
             DB::commit();
             return Command::SUCCESS;
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            $this->error($th->getMessage());
-            return Command::FAILURE;
         } catch (Exception $e) {
             DB::rollBack();
             $this->error($e->getMessage());
