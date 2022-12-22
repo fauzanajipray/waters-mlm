@@ -78,6 +78,12 @@ class BonusHistory extends Model
         return $query;
     }
 
+    public function scopeMonthYear($query, $monthYear)
+    {
+        return $query->whereMonth('created_at', $monthYear->month)
+            ->whereYear('created_at', $monthYear->year);
+    }
+
     /*
     |--------------------------------------------------------------------------
     | ACCESSORS

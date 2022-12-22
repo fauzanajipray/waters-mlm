@@ -43,24 +43,6 @@ class BonusHistoryCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        $dateRange = request()->get('date_range');
-        if ($dateRange) {
-            $dateRange = json_decode($dateRange);
-            $startDate = Carbon::parse($dateRange->from)
-                ->startOfDay()
-                ->toDateTimeString();
-            $endDate = Carbon::parse($dateRange->to)
-                ->endOfDay()
-                ->toDateTimeString();
-        } else {
-            $startDate = Carbon::now()->startOfDay()->toDateTimeString();
-            $endDate = Carbon::now()->endOfDay()->toDateTimeString();
-        }
-        // dd($startDate, $endDate, request()->all());
-
-        // $this->crud->query = $this->customQuery($startDate, $endDate);
-        // dd($this->crud->query->get()->toArray());
-        // dd($this->crud->query->toSql());
         $this->crud->addColumn([
             'label' => 'Member',
             'type' => 'relationship',
