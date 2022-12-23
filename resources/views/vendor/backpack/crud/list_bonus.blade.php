@@ -246,7 +246,7 @@
       }
 
       $.ajax({
-        url: '/bonus-history/total',
+        url: "{{ url('') }}" + '/bonus-history/total',
         type: 'POST',
         data: {
           bonus_type: bonusType,

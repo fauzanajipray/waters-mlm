@@ -1,5 +1,5 @@
 
-
+var baseURL = crud.field('url').value;
 
 crud.field('branch_id').onChange(function(field) {
   if (field.value) {
@@ -20,7 +20,7 @@ crud.field('product_id').onChange(function(field) {
       var product_stock = document.getElementsByName('product_stock')[0];
       var quantity = document.getElementsByName('quantity')[0];
       $.ajax({
-        url: '/product/'+field.value+'/branch/'+crud.field('origin_branch_id').value,
+        url: baseURL+'/product/'+field.value+'/branch/'+crud.field('origin_branch_id').value,
         type: 'GET',
         success: function(data) {
           product_stock.setAttribute('value', data);

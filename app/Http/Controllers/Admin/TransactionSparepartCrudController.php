@@ -135,6 +135,7 @@ class TransactionSparepartCrudController extends CrudController
             return $item;
         });
 
+        $this->crud->addField([ 'name' => 'url', 'type' => 'hidden', 'value' => url(''), 'attributes' => ['disabled' => 'disabled'] ]);
         Widget::add()->type('script')->content(asset('assets/js/admin/form/transaction.js'));
 
         $this->crud->addField([
