@@ -80,5 +80,5 @@ Route::group([
         Route::crud('detail', 'StockCardDetailCrudController');
         Route::crud('adjustment', 'StockCardAdjustmentCrudController');
     });
-
+    Route::crud('branch-product', 'BranchProductCrudController');
 }); // this should be the absolute last line of this file

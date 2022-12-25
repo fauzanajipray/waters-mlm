@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\TransactionCrudController;
 use App\Http\Controllers\Admin\TransactionPaymentCrudController;
 use App\Models\ActivationPayments;
 use App\Models\Branch;
+use App\Models\BranchProduct;
 use App\Models\Configuration;
 use App\Models\Customer;
 use App\Models\Level;
@@ -16,7 +17,6 @@ use App\Models\Member;
 use App\Models\PaymentMethod;
 use App\Models\Product;
 use App\Models\Transaction;
-use App\Models\TransactionPayment;
 use App\Models\User;
 use Exception;
 use Illuminate\Database\Seeder;
@@ -39,6 +39,7 @@ class DatabaseSeeder extends Seeder
         $this->level();
         $this->office();
         $this->member();
+        $this->branchProduct();
         $this->customer();
         $this->transaction();
         $this->paymentMethod();
@@ -142,6 +143,24 @@ class DatabaseSeeder extends Seeder
         }
 
         $this->command->line("Completed --> Product");
+    }
+
+    private function branchProduct()
+    {
+        $branch = Branch::all();
+        // create branch product
+        foreach ($branch as $b) {
+            foreach (Product::all() as $p) {
+                BranchProduct::updateOrCreate([
+                    'branch_id' => $b->id,
+                    'product_id' => $p->id,
+                ], [
+                    'branch_id' => $b->id,
+                    'product_id' => $p->id,
+                    'additional_price' => 0,
+                ]);
+            }
+        }
     }
 
     private function level()

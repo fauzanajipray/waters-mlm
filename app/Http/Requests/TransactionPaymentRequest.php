@@ -28,7 +28,7 @@ class TransactionPaymentRequest extends FormRequest
         return [
             'transaction_id' => 'required|exists:transactions,id',
             'payment_method_id' => 'required|exists:payment_methods,id',
-            'payment_account_number' => 'required',
+            'payment_account_number' => 'nullable',
             'photo_url' => 'nullable',
             'type' => 'required|in:Full,Partial',
             'amount' => function ($attribute, $value, $fail) {

@@ -1,6 +1,13 @@
 {{-- This file is used to store sidebar items, inside the Backpack admin panel --}}
 <li class="nav-item"><a class="nav-link" href="{{ backpack_url('dashboard') }}"><i class="la la-home nav-icon"></i> {{ trans('backpack::base.dashboard') }}</a></li>
-<li class="nav-item"><a class="nav-link" href="{{ backpack_url('product') }}"><i class="nav-icon la la-box"></i> Products</a></li>
+<!-- Product -->
+<li class="nav-item nav-dropdown">
+  <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon la la-box"></i> Product</a>
+  <ul class="nav-dropdown-items">
+    <li class="nav-item"><a class="nav-link" href="{{ backpack_url('product') }}"><i class="nav-icon la la-box"></i> Products</a></li>
+    <li class="nav-item"><a class="nav-link" href="{{ backpack_url('branch-product') }}"><i class="nav-icon la la-box"></i> Branch Products</a></li>
+  </ul>
+</li>
 
 <!-- Member -->
 <li class="nav-item nav-dropdown">
