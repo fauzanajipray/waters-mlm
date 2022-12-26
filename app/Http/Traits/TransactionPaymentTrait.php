@@ -47,7 +47,6 @@ trait TransactionPaymentTrait {
                     $query->where('member_id', $upline->id);
                 })->sum('quantity');
                 $uplineLevel = Level::where('id', $upline->level_id)->first();
-                // dd($uplineProductSold, $upline->toArray(), $member->toArray(), $uplineLevel->toArray());
                 if ($uplineProductSold >= $upline->level->minimum_sold && $uplineLevel->gm_percentage > 0 && $this->isActiveMember($upline)) {  // Cek apakah pernah melakukan transaksi
                     
                     $bonus = BonusHistory::create([

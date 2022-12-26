@@ -301,7 +301,6 @@ class BranchCrudController extends CrudController
         if($search_term) {
             $branch = Branch::where('name', 'like', '%'.$search_term.'%')
                 ->get();
-
         } else {
             $branch = Branch::get();
         }
@@ -310,7 +309,6 @@ class BranchCrudController extends CrudController
             if(isset($item->member)) $item->name = $item->name . ' | ' . $item->member->name;
             return $item;
         });
-
         return $branch;
     }
 

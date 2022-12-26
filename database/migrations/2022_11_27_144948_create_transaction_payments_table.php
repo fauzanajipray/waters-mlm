@@ -30,7 +30,7 @@ return new class extends Migration
             $table->unsignedBigInteger('payment_method_id');
             $table->foreign('payment_method_id')->references('id')->on('payment_methods')->onDelete('restrict');
             $table->string('payment_name');
-            $table->string('payment_account_number');
+            $table->string('payment_account_number')->nullable();
             $table->bigInteger('amount')->default(0);
             $table->string('photo_url')->nullable();
             $table->enum('type', ['Full', 'Partial'])->default('Full');

@@ -297,7 +297,6 @@ class StockCardDetailCrudController extends CrudController
     }
 
     public function detailCustomQuery($startDate, $endDate, $branchID, $productID){
-        // dd($startDate, $endDate, $branchID, $productID);
         $startDateYesterdayEndOfDay = Carbon::parse($startDate)->endOfDay()->subDay()->toDateTimeString();
         $query = Stock::
             /* Now */
