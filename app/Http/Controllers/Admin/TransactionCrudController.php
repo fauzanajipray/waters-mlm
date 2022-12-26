@@ -535,13 +535,19 @@ class TransactionCrudController extends CrudController
         $transaction = Transaction::create($requests);
         // Save Log Product Sold
         foreach ($products as $key => $item) {
-            $product = Product::find($item['product_id']);
+            $product = Product::
+                    leftJoin(DB::raw('( SELECT * FROM branch_products WHERE branch_id = '.$requests['branch_id'].' ) as branch_products2'), 
+                        function($join) { $join->on('branch_products2.product_id', '=', 'products.id'); }
+                    )
+                    ->where('products.id', $item['product_id'])
+                    ->select('products.*', DB::raw('(products.price + branch_products2.additional_price) as netto_price'))
+                    ->first();
             $tp = TransactionProduct::create([
                 'transaction_id' => $transaction->id,
                 'product_id' => $product->id,
                 'name' => $product->name,
                 'model' => $product->model,
-                'price' => $product->price,
+                'price' => $product->netto_price,
                 'capacity' => $product->capacity,
                 'quantity' => $item['quantity'],
                 'discount_percentage' => $item['discount_percentage'] ?? 0,

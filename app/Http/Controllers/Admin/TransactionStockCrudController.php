@@ -18,11 +18,11 @@ use Illuminate\Support\Facades\DB;
 use Prologue\Alerts\Facades\Alert;
 
 /**
- * Class TransactionSparepartCrudController
+ * Class TransactionStockCrudController
  * @package App\Http\Controllers\Admin
  * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
  */
-class TransactionSparepartCrudController extends CrudController
+class TransactionStockCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
@@ -39,16 +39,10 @@ class TransactionSparepartCrudController extends CrudController
     public function setup()
     {
         $this->crud->setModel(Transaction::class);
-        $this->crud->setRoute(config('backpack.base.route_prefix') . '/transaction-sparepart');
-        $this->crud->setEntityNameStrings('sparepart transaction', 'sparepart transactions');
+        $this->crud->setRoute(config('backpack.base.route_prefix') . '/transaction-stock');
+        $this->crud->setEntityNameStrings('stock transaction', 'stock transactions');
     }
 
-    /**
-     * Define what happens when the List operation is loaded.
-     * 
-     * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
-     * @return void
-     */
     protected function setupListOperation()
     {
         $this->crud->viewAfterContent = ['image_preview_helper'];
@@ -80,7 +74,7 @@ class TransactionSparepartCrudController extends CrudController
         $this->crud->addButtonFromModelFunction('line', 'invoice', 'invoice', 'beginning');
         $this->crud->addButtonFromModelFunction('line', 'add_payment', 'buttonAddPayment', 'beginning');
         
-        $this->crud->addClause('where', 'type', 'Sparepart');
+        $this->crud->addClause('where', 'type', 'Stock');
 
         // FILTER
         $this->crud->addFilter([
@@ -119,12 +113,6 @@ class TransactionSparepartCrudController extends CrudController
         ]);
     }
 
-    /**
-     * Define what happens when the Create operation is loaded.
-     * 
-     * @see https://backpackforlaravel.com/docs/crud-operation-create
-     * @return void
-     */
     protected function setupCreateOperation()
     {
         $this->crud->setValidation(TransactionRequest::class);
@@ -154,8 +142,8 @@ class TransactionSparepartCrudController extends CrudController
             'name' => 'member_id',
             'type' => 'select2_from_ajax',
             'entity' => 'member',
-            'attribute' => 'text',
-            'data_source' => url('members/only-actived'),
+            'attribute' => 'name',
+            'data_source' => url('members/branch-owner'),
             'delay' => 500
         ]);
         
@@ -206,10 +194,11 @@ class TransactionSparepartCrudController extends CrudController
                 'type' => 'select2_from_ajax',
                 'entity' => 'branch',
                 'attribute' => 'name',
-                'data_source' => url('branches'),
+                'data_source' => url('branches/transaction-stock'),
                 'delay' => 500,
                 'method' => 'POST',
                 'tab' => 'Product',
+                'include_all_form_fields' => true,
             ],
             [
                 'name' => 'product_id',
@@ -217,7 +206,7 @@ class TransactionSparepartCrudController extends CrudController
                 'label' => 'Product',
                 'entity' => 'product',
                 'attribute' => 'name',
-                'data_source' => url('product/for-transaction/sparepart'),
+                'data_source' => url('product/for-transaction/stock'),
                 'allows_null' => false,
                 'wrapperAttributes' => [
                     'class' => 'form-group col-md-6'
@@ -337,7 +326,7 @@ class TransactionSparepartCrudController extends CrudController
             $requests['total_price'] = $totalPrice;
             $requests['created_by'] = backpack_user()->id;
             $requests['updated_by'] = backpack_user()->id;
-            $requests['type'] = 'Sparepart';
+            $requests['type'] = 'Stock';
             $requests['stock_from'] = Branch::find($requests['branch_id'])->name;
 
             $transaction = Transaction::create($requests);
@@ -372,7 +361,6 @@ class TransactionSparepartCrudController extends CrudController
             return redirect()->back()->withInput()->withErrors($e->getMessage());
         }
     }
-
 
     public function show($id)
     {

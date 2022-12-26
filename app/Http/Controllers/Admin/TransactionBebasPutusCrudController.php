@@ -449,13 +449,19 @@ class TransactionBebasPutusCrudController extends CrudController
         try {
             $totalPrice = 0;
             foreach ($products as $key => $item) {
-                $product = Product::find($item['product_id']);
+                $product = Product::
+                    leftJoin(DB::raw('( SELECT * FROM branch_products WHERE branch_id = '.$requests['branch_id'].' ) as branch_products2'), 
+                        function($join) { $join->on('branch_products2.product_id', '=', 'products.id'); }
+                    )
+                    ->where('products.id', $item['product_id'])
+                    ->select(DB::raw('(products.price + branch_products2.additional_price) as netto_price'))
+                    ->first();
                 if($requests['type_discount'] == 'percent'){
-                    $discount = $product->price * $item['quantity'] * $item['discount_percentage'] / 100;
+                    $discount = $product->netto_price * $item['quantity'] * $item['discount_percentage'] / 100;
                 } else {
                     $discount = $item['discount_amount'];
                 }
-                $totalPrice += $product->price * $item['quantity'] - $discount;
+                $totalPrice += $product->netto_price * $item['quantity'] - $discount;
             }
             $requests['code'] = $this->generateCode();
             $requests['id_card'] = $member->id_card;
@@ -470,13 +476,19 @@ class TransactionBebasPutusCrudController extends CrudController
 
             $transaction = Transaction::create($requests);
             foreach ($products as $key => $item) {
-                $product = Product::find($item['product_id']);
+                $product = Product::
+                    leftJoin(DB::raw('( SELECT * FROM branch_products WHERE branch_id = '.$requests['branch_id'].' ) as branch_products2'), 
+                        function($join) { $join->on('branch_products2.product_id', '=', 'products.id'); }
+                    )
+                    ->where('products.id', $item['product_id'])
+                    ->select('products.*', DB::raw('(products.price + branch_products2.additional_price) as netto_price'))
+                    ->first();
                 $tp = TransactionProduct::create([
                     'transaction_id' => $transaction->id,
                     'product_id' => $product->id,
                     'name' => $product->name,
                     'model' => $product->model,
-                    'price' => $product->price,
+                    'price' => $product->netto_price,
                     'capacity' => $product->capacity,
                     'quantity' => $item['quantity'],
                     'product_notes' => $item['product_notes'],

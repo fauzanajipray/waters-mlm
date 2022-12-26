@@ -34,13 +34,14 @@ Route::group([
     Route::crud('product', 'ProductCrudController');
     Route::prefix('product')->group(function () {
         Route::post('get-product', 'ProductCrudController@getProduct');
-        Route::post('get-demokit-products', 'ProductCrudController@getDemokitProducts'); //
+        Route::post('get-demokit-products', 'ProductCrudController@getDemokitProducts'); 
         Route::post('get-display-products', 'ProductCrudController@getDisplayProducts');
-        Route::post('get-bebas-putus', 'ProductCrudController@getBebasProducts'); //
+        Route::post('get-bebas-putus', 'ProductCrudController@getBebasProducts'); 
         Route::post('for-filter', 'ProductCrudController@getProductsForFilter');
-        Route::post('for-stock', 'ProductCrudController@getProductForStock'); //
-        Route::post('for-transaction', 'ProductCrudController@getProductTransaction'); //
-        Route::post('for-transaction/sparepart', 'ProductCrudController@getProductSparepartTransaction'); //
+        Route::post('for-stock', 'ProductCrudController@getProductForStock'); 
+        Route::post('for-transaction', 'ProductCrudController@getProductTransaction'); 
+        Route::post('for-transaction/sparepart', 'ProductCrudController@getProductSparepartTransaction'); 
+        Route::post('for-transaction/stock', 'ProductCrudController@getProductStockTransaction'); 
         Route::get('{id}/branch/{branch_id}', 'ProductCrudController@getProductStock');
     });
     Route::crud('transaction', 'TransactionCrudController');
@@ -53,6 +54,7 @@ Route::group([
     Route::crud('transaction-demokit', 'TransactionDemokitCrudController');
     Route::crud('transaction-bebas-putus', 'TransactionBebasPutusCrudController');
     Route::crud('transaction-sparepart', 'TransactionSparepartCrudController');
+    Route::crud('transaction-stock', 'TransactionStockCrudController');
     Route::crud('level', 'LevelCrudController');
     Route::crud('bonus-history', 'BonusHistoryCrudController');
     Route::post('bonus-history/total', 'BonusHistoryCrudController@totalTransactions');
@@ -70,7 +72,7 @@ Route::group([
         Route::post('member-exist', 'BranchCrudController@memberExist');
         Route::post('origin', 'BranchCrudController@getOriginBranch');
         Route::post('for-filter', 'BranchCrudController@getBranchesForFilter');
-        Route::post('transaction-display', 'BranchCrudController@getBranchStock');
+        Route::post('transaction-stock', 'BranchCrudController@getBranchStock');
     });
     Route::crud('payment-method', 'PaymentMethodCrudController');
     Route::crud('transaction-payment', 'TransactionPaymentCrudController');

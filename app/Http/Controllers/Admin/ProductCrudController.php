@@ -715,6 +715,87 @@ class ProductCrudController extends CrudController
         });
         return $products;
     }
+
+    public function getProductStockTransaction()
+    {
+        $search_term = request()->input('q');   
+        $form = collect(request()->input('form'));
+        $member_id = $form->where('name', 'member_id')->first();
+        $branch_id = $form->where('name', 'branch_id')->first();
+        if(!$member_id || !$branch_id){
+            return response()->json([]);
+        }
+
+        if($search_term){
+            $products = Stock::
+                leftJoin(
+                    DB::raw('(
+                        SELECT `products`.*, `branch_products2`.`additional_price` AS `additional_price`
+                        FROM `products`
+                        LEFT JOIN (
+                            SELECT * FROM branch_products WHERE `branch_id` = '.$branch_id['value'].'
+                        ) AS `branch_products2` 
+                        ON `products`.`id` = `branch_products2`.`product_id`
+                    ) AS `products2`' ),
+                    function($join) {
+                        $join->on('products2.id', '=', 'stocks.product_id');
+                    }
+                )
+                ->where('stocks.branch_id', $branch_id['value'])
+                ->where('stocks.quantity', '>', 0)
+                ->where('name', 'like', '%'.$search_term.'%')
+                ->orWhere('model', 'like', '%'.$search_term.'%')
+                ->select(
+                    'stocks.*',
+                    'products2.name',
+                    'products2.model',
+                    'products2.price',
+                    'products2.additional_price',
+                    DB::raw('(products2.additional_price + products2.price) AS netto_price')
+                )
+                ->get();
+        }else{
+            $products = Stock::
+                leftJoin(
+                    DB::raw('(
+                        SELECT `products`.*, `branch_products2`.`additional_price` AS `additional_price`
+                        FROM `products`
+                        LEFT JOIN (
+                            SELECT * FROM branch_products WHERE `branch_id` = '.$branch_id['value'].'
+                        ) AS `branch_products2` 
+                        ON `products`.`id` = `branch_products2`.`product_id`
+                    ) AS `products2`' ),
+                    function($join) {
+                        $join->on('products2.id', '=', 'stocks.product_id');
+                    }
+                )
+                ->where('stocks.branch_id', $branch_id['value'])
+                ->where('stocks.quantity', '>', 0)
+                ->where('name', 'like', '%'.$search_term.'%')
+                ->orWhere('model', 'like', '%'.$search_term.'%')
+                ->select(
+                    'stocks.*',
+                    'products2.name',
+                    'products2.model',
+                    'products2.price',
+                    'products2.additional_price',
+                    DB::raw('(products2.additional_price + products2.price) AS netto_price')
+                )
+                ->get();
+        }
+
+        $products->map(function ($stock) {
+            if ($stock->type == 'sparepart'){
+                $stock->name = $stock->name.' - '.number_format($stock->price). ' - Stock : '.$stock->quantity;
+            } else {
+                $stock->name = $stock->name.' - '.$stock->model. ' - '.number_format($stock->price). ' - Stock : '.$stock->quantity;
+            }
+            $stock->id = $stock->product_id;
+            return $stock;
+        });
+
+        return $products;
+    }
 }
 
 

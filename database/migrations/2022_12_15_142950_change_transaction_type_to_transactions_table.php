@@ -14,7 +14,7 @@ return new class extends Migration
      */
     public function up()
     {
-        DB::statement('ALTER TABLE transactions MODIFY COLUMN type ENUM("Normal", "Demokit", "Display", "Bebas Putus", "Sparepart") DEFAULT "Normal"');
+        DB::statement('ALTER TABLE transactions MODIFY COLUMN type ENUM("Normal", "Demokit", "Display", "Bebas Putus", "Sparepart", "Stock") DEFAULT "Normal"');
     }
 
     /**
