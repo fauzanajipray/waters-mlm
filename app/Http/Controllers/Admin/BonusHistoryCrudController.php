@@ -203,7 +203,7 @@ class BonusHistoryCrudController extends CrudController
         $memberId = null;
         if ($requests->has('bonus_type')) {
             $bonusType = $requests->get('bonus_type');
-            $bonusType = json_decode($requests->get('bonus_type'));
+            $bonusType = json_decode($requests->get('bonus_type'));        
         }
         if ($requests->has('created_at')) {
             $dateRange = $requests->get('created_at');
