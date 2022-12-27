@@ -338,9 +338,8 @@ class TransactionPaymentCrudController extends CrudController
                 $transaction->status_paid = true;
                 $transaction->save();
                 $lastPaymentDate = $transaction->transactionPayments->sortByDesc('payment_date')->first()->payment_date;
-                if($transaction->type != "Sparepart") {
-                    $this->calculateBonus($transaction, $transaction->member, $lastPaymentDate);
-                }
+                $this->calculateBonus($transaction, $transaction->member, $lastPaymentDate);
+                // dd($transaction->member);
                 /* Minus stock */
                 foreach ($transactionProducts as $transactionProduct) {
                     $stock = Stock::where('product_id', $transactionProduct->product_id)
@@ -505,9 +504,9 @@ class TransactionPaymentCrudController extends CrudController
                 $transaction->status_paid = true;
                 $transaction->save();
                 $lastPaymentDate = $transaction->transactionPayments->sortByDesc('payment_date')->first()->payment_date;
-                if($transaction->type != "Sparepart") {
-                    $this->calculateBonus($transaction, $transaction->member, $lastPaymentDate);
-                }
+                // dd($lastPaymentDate);
+                $this->calculateBonus($transaction, $transaction->member, $lastPaymentDate);
+                
                 /* Minus stock */
                 foreach ($transactionProducts as $transactionProduct) {
                     $stock = Stock::where('product_id', $transactionProduct->product_id)

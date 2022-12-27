@@ -197,6 +197,7 @@ class TransactionStockCrudController extends CrudController
                 'data_source' => url('branches/transaction-stock'),
                 'delay' => 500,
                 'method' => 'POST',
+                'dependencies' => ['member_id'],
                 'tab' => 'Product',
                 'include_all_form_fields' => true,
             ],

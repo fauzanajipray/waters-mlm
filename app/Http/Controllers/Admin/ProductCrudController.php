@@ -268,6 +268,7 @@ class ProductCrudController extends CrudController
                     'products2.name',
                     'products2.model',
                     'products2.price',
+                    'products2.type',
                     'products2.additional_price',
                     DB::raw('(products2.additional_price + products2.price) AS netto_price')
                 )
@@ -295,6 +296,7 @@ class ProductCrudController extends CrudController
                     'products2.name',
                     'products2.model',
                     'products2.price',
+                    'products2.type',
                     'products2.additional_price',
                     DB::raw('(products2.additional_price + products2.price) AS netto_price')
                 )
@@ -353,6 +355,7 @@ class ProductCrudController extends CrudController
                     'products2.name',
                     'products2.model',
                     'products2.price',
+                    'products2.type',
                     'products2.additional_price',
                     DB::raw('(products2.additional_price + products2.price) AS netto_price')
                 )
@@ -379,6 +382,7 @@ class ProductCrudController extends CrudController
                     'products2.name',
                     'products2.model',
                     'products2.price',
+                    'products2.type',
                     'products2.additional_price',
                     DB::raw('(products2.additional_price + products2.price) AS netto_price')
                 )
@@ -455,6 +459,7 @@ class ProductCrudController extends CrudController
                     'products2.name',
                     'products2.model',
                     'products2.price',
+                    'products2.type',
                     'products2.additional_price',
                     DB::raw('(products2.additional_price + products2.price) AS netto_price')
                 )
@@ -482,6 +487,7 @@ class ProductCrudController extends CrudController
                     'products2.name',
                     'products2.model',
                     'products2.price',
+                    'products2.type',
                     'products2.additional_price',
                     DB::raw('(products2.additional_price + products2.price) AS netto_price')
                 )
@@ -605,6 +611,7 @@ class ProductCrudController extends CrudController
                     'products2.name',
                     'products2.model',
                     'products2.price',
+                    'products2.type',
                     'products2.additional_price',
                     DB::raw('(products2.additional_price + products2.price) AS netto_price')
                 )
@@ -632,6 +639,7 @@ class ProductCrudController extends CrudController
                     'products2.name',
                     'products2.model',
                     'products2.price',
+                    'products2.type',
                     'products2.additional_price',
                     DB::raw('(products2.additional_price + products2.price) AS netto_price')
                 )
@@ -676,6 +684,7 @@ class ProductCrudController extends CrudController
                     'products2.name',
                     'products2.model',
                     'products2.price',
+                    'products2.type',
                     'products2.additional_price',
                     DB::raw('(products2.additional_price + products2.price) AS netto_price')
                 )
@@ -703,6 +712,7 @@ class ProductCrudController extends CrudController
                     'products2.name',
                     'products2.model',
                     'products2.price',
+                    'products2.type',
                     'products2.additional_price',
                     DB::raw('(products2.additional_price + products2.price) AS netto_price')
                 )
@@ -750,6 +760,7 @@ class ProductCrudController extends CrudController
                     'products2.name',
                     'products2.model',
                     'products2.price',
+                    'products2.type',
                     'products2.additional_price',
                     DB::raw('(products2.additional_price + products2.price) AS netto_price')
                 )
@@ -771,13 +782,12 @@ class ProductCrudController extends CrudController
                 )
                 ->where('stocks.branch_id', $branch_id['value'])
                 ->where('stocks.quantity', '>', 0)
-                ->where('name', 'like', '%'.$search_term.'%')
-                ->orWhere('model', 'like', '%'.$search_term.'%')
                 ->select(
                     'stocks.*',
                     'products2.name',
                     'products2.model',
                     'products2.price',
+                    'products2.type',
                     'products2.additional_price',
                     DB::raw('(products2.additional_price + products2.price) AS netto_price')
                 )

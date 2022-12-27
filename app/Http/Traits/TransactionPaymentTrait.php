@@ -2,17 +2,13 @@
 namespace App\Http\Traits;
 
 use App\Models\BonusHistory;
-use App\Models\Customer;
+use App\Models\Branch;
 use App\Models\Level;
-use App\Models\LevelUpHistories;
 use App\Models\Member;
-use App\Models\Transaction;
 use App\Models\TransactionProduct;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
-use Prologue\Alerts\Facades\Alert;
-use Nasution\Terbilang;
+use Illuminate\Support\Facades\DB;
+use Prologue\Alerts\Facades\Alert;;
 
 trait TransactionPaymentTrait {
 
@@ -22,9 +18,7 @@ trait TransactionPaymentTrait {
         if ($this->isMemberTypePusat($member)){
             return;
         } 
-        if ($transaction->type != 'Normal'){
-            return;
-        } else {
+        if ($transaction->type == 'Normal') {
             /* Bonus Penjualan Pribadi */
             if ($this->isActiveMember($member)) {
                 $bonus = BonusHistory::create([
@@ -39,7 +33,6 @@ trait TransactionPaymentTrait {
                 ]);
                 $log[] = $member->name . " mendapatkan Bonus Penjualan sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
             } 
-    
             /* Bonus Sponsor */
             $upline = $member->upline;
             if ($upline) {
@@ -83,124 +76,226 @@ trait TransactionPaymentTrait {
                     } 
                 }
             }
-        }
+        } 
+        /* Bonus Penjualan Sparepart */
+        else if ($transaction->type == 'Sparepart') {
+            $member = Member::where('id', $transaction->member_id)->first();
+            $products = TransactionProduct::
+                leftJoin('products', 'products.id', '=', 'transaction_products.product_id')
+                ->leftJoin(DB::raw('(SELECT * FROM branch_products WHERE branch_id = ' . $transaction->branch_id . ') as branch_products'), 
+                    'branch_products.product_id', '=', 'products.id')
+                ->where('transaction_id', $transaction->id)->get();
+            foreach ($products as $p) {
+                
+                $branchMember = Branch::with('member')->where('id', $member->branch_id)->first();
+                $isMemberOwner = $branchMember->member->id == $member->id;
+                $branch = Branch::where('id', $transaction->branch_id)->first();
 
+                if ($transaction->branch_id == 1) {
+                    // Jika member membeli sparepart di pusat
+                    if(!$isMemberOwner) {
+                        $bonus = BonusHistory::create([
+                            'member_id' => $member->id,
+                            'member_numb' => $member->member_numb,
+                            'transaction_id' => $transaction['id'],
+                            'level_id' => $member->level_id,
+                            'bonus_type' => "SS",
+                            'bonus_percent' => 10, // TODO : Tanyain percentnya
+                            'bonus' => ($p->price + $p->additional_price) * $p->quantity * 10 / 100,
+                            'ss_type' => 'MEMBER',
+                            'ss_product_id' => $p->product_id,
+                            'created_at' => $lastPaymentDate,
+                        ]);
+                    }
+                    // Jika owner cabang,stokist membeli sparepart di pusat
+                    else {
+                        $bonus = BonusHistory::create([
+                            'member_id' => $member->id,
+                            'member_numb' => $member->member_numb,
+                            'transaction_id' => $transaction['id'],
+                            'level_id' => $member->level_id,
+                            'bonus_type' => "SS",
+                            'bonus_percent' => 20, // TODO : Tanyain percentnya
+                            'bonus' => ($p->price + $p->additional_price) * $p->quantity * 20 / 100,
+                            'ss_type' => 'MEMBER',
+                            'ss_product_id' => $p->product_id,
+                            'created_at' => $lastPaymentDate,
+                        ]);
+                    } 
+                    $log[] = $member->name . " mendapatkan Bonus Penjualan Sparepart sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
+                } else {
+                    if (!$isMemberOwner) {
+                        // Jika member membeli dari cabang
+                        if ($branch->type == 'CABANG') {
+                            $member = Member::with('branch')->where('id', $transaction->member_id)->first();
+                            $bonus = BonusHistory::create([
+                                'member_id' => $member->id,
+                                'member_numb' => $member->member_numb,
+                                'transaction_id' => $transaction['id'],
+                                'level_id' => $member->level_id,
+                                'bonus_type' => "SS",
+                                'bonus_percent' => 10,
+                                'bonus' => ($p->price + $p->additional_price) * 10 / 100 * $p->quantity,
+                                'ss_type' => 'MEMBER',
+                                'created_at' => $lastPaymentDate,
+                            ]);
+                            $log[] = $member->name . " mendapatkan Bonus Penjualan Sparepart sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
+                            $bonusHistoryCabang = BonusHistory::
+                                where('ss_product_id', $p->product_id)
+                                ->where('bonus_type', 'SS')
+                                ->where('bonus_percent', 20)
+                                ->where('ss_type', 'CABANG')
+                                ->orderBy('created_at', 'desc')
+                                ->first();    
+                            if($bonusHistoryCabang) {
+                                $bonusHistoryCabang->bonus = $bonusHistoryCabang->bonus * 10 / $bonusHistoryCabang->bonus_percent;
+                                $bonusHistoryCabang->bonus_percent = 10;
+                                $bonusHistoryCabang->save();
+                                $log[] = 'Bonus Penjualan Sparepart Cabang member ' . $bonusHistoryCabang->member_numb . " diperbarui menjadi Rp. " . number_format($bonusHistoryCabang->bonus, 0, ',', '.');
+                            } else {
+                                $log[] = "Bonus Penjualan Sparepart Cabang tidak ditemukan"; 
+                            }
+                        } 
+                        // Jika member membeli dari stokist
+                        else if ($branch->type == 'STOKIST') {
+                            $member = Member::with('branch')->where('id', $transaction->member_id)->first();
+                            $bonus = BonusHistory::create([
+                                'member_id' => $member->id,
+                                'member_numb' => $member->member_numb,
+                                'transaction_id' => $transaction['id'],
+                                'level_id' => $member->level_id,
+                                'bonus_type' => "SS",
+                                'bonus_percent' => 10,
+                                'bonus' => ($p->price + $p->additional_price) * 10 / 100 * $p->quantity,
+                                'ss_type' => 'MEMBER',
+                                'created_at' => $lastPaymentDate,
+                            ]);
+                            $log[] = $member->name . " mendapatkan Bonus Penjualan Sparepart sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
+                            $bonusHistoryStokist = BonusHistory::
+                                where('ss_product_id', $p->product_id)
+                                ->where('bonus_type', 'SS')
+                                ->where('bonus_percent', 15)
+                                ->where('ss_type', 'STOKIST')
+                                ->orderBy('created_at', 'desc')
+                                ->first();
+                            if($bonusHistoryStokist) {
+                                $bonusHistoryStokist->bonus = $bonusHistoryStokist->bonus * 5 / $bonusHistoryStokist->bonus_percent;
+                                $bonusHistoryStokist->bonus_percent = 10;
+                                $bonusHistoryStokist->save();
+                                $log[] = 'Bonus Penjualan Sparepart Sparepart member ' . $bonusHistoryStokist->member_numb . " diperbarui menjadi Rp. " . number_format($bonusHistoryStokist->bonus, 0, ',', '.');
+                            } else {
+                                $log[] = "Bonus Penjualan Sparepart Stokist tidak ditemukan"; 
+                            }
+                        }
+                    } else {
+                        // Jika owner stokist membeli sparepart di cabang
+                        if ($branchMember->type == 'STOKIST') {
+                            $bonus = BonusHistory::create([
+                                'member_id' => $member->id,
+                                'member_numb' => $member->member_numb,
+                                'transaction_id' => $transaction['id'],
+                                'level_id' => $member->level_id,
+                                'bonus_type' => "SS",
+                                'bonus_percent' => 15,
+                                'bonus' => ($p->price + $p->additional_price) * 15 / 100 * $p->quantity,
+                                'ss_type' => 'MEMBER',
+                                'ss_product_id' => $p->product_id,
+                                'created_at' => $lastPaymentDate,
+                            ]);
+                            $log[] = $member->name . " mendapatkan Bonus Penjualan Sparepart sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
+                            $bonusHistoryCabang = BonusHistory::
+                                where('ss_product_id', $p->product_id)
+                                ->where('bonus_type', 'SS')
+                                ->where('bonus_percent', 20)
+                                ->where('ss_type', 'CABANG')
+                                ->orderBy('created_at', 'desc')
+                                ->first();
+                            if($bonusHistoryCabang) { 
+                                $bonusHistoryCabang->bonus = $bonusHistoryCabang->bonus * 5 / $bonusHistoryCabang->bonus_percent;
+                                $bonusHistoryCabang->bonus_percent = 5;
+                                $bonusHistoryCabang->save();
+                                $log[] = 'Bonus Penjualan Sparepart Cabang member ' . $bonusHistoryCabang->member_numb . " diperbarui menjadi Rp. " . number_format($bonusHistoryCabang->bonus, 0, ',', '.');
+                            } else {
+                                $log[] = "Bonus Penjualan Sparepart Cabang tidak ditemukan"; 
+                            }
+                        }
+
+                        // TODO : Jika owner cabang membeli sparepart di cabang?
+                        // TODO : Jika owner stokist membeli sparepart di stokist?
+                        
+                    }
+                }
+            }
+        }
+        /* Bonus Penjualan Stock */ 
+        else if ($transaction->type = 'Stock') {
+            $product = TransactionProduct::
+                leftJoin('products', 'products.id', '=', 'transaction_products.product_id')
+                ->leftJoin(DB::raw('(SELECT * FROM branch_products WHERE branch_id = ' . $transaction->branch_id . ') as branch_products'), 
+                    'branch_products.product_id', '=', 'products.id')
+                ->where('transaction_id', $transaction->id)->get();
+            foreach ($product as $p) {
+                if($p->type == 'sparepart') {
+                    $member = Member::with('branch')->where('id', $transaction->member_id)->first();
+                    // Jika menambah stok sparepart di cabang
+                    if($member->branch->type == 'CABANG'){
+                        $bonus = BonusHistory::create([
+                            'member_id' => $member->id,
+                            'member_numb' => $member->member_numb,
+                            'transaction_id' => $transaction['id'],
+                            'level_id' => $member->level_id,
+                            'bonus_type' => "SS",
+                            'bonus_percent' => 20,
+                            'bonus' => ($p->price + $p->additional_price) * 20 / 100 * $p->quantity,
+                            'ss_type' => 'CABANG',
+                            'ss_product_id' => $p->product_id,
+                            'created_at' => $lastPaymentDate,
+                        ]);
+                        $log[] = 'Bonus Komisi Sparepart Cabang member ' . $member->member_numb . " ditambahkan sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
+                    } 
+                    // Jika menambah stok sparepart di stokist
+                    else if ($member->branch->type == 'STOKIST') { 
+                        $bonusHistoryCabang = BonusHistory::
+                            where('ss_product_id', $p->product_id)
+                            ->where('bonus_type', 'SS')
+                            ->where('bonus_percent', 20)
+                            ->where('ss_type', 'CABANG')
+                            ->orderBy('created_at', 'desc')
+                            ->first();
+                        $bonus = BonusHistory::create([ // Harusnya didalam if tapi karena ada fitur adjustment stock dikeluarkan dari if
+                                'member_id' => $member->id,
+                                'member_numb' => $member->member_numb,
+                                'transaction_id' => $transaction['id'],
+                                'level_id' => $member->level_id,
+                                'bonus_type' => "SS",
+                                'bonus_percent' => 15,
+                                'bonus' => ($p->price + $p->additional_price) * 15 / 100 * $p->quantity,
+                                'created_at' => $lastPaymentDate, 
+                                'ss_type' => 'STOKIST',
+                                'ss_product_id' => $p->product_id,
+                            ]);
+                        $log[] = 'Bonus Komisi Sparepart Stokist member ' . $member->member_numb . " ditambahkan sebesar Rp. " . 
+                            number_format($bonus->bonus, 0, ',', '.');
+                        if($bonusHistoryCabang) {
+                            $bonusHistoryCabang->bonus = $bonusHistoryCabang->bonus * 5 / $bonusHistoryCabang->bonus_percent;
+                            $bonusHistoryCabang->bonus_percent = 5;
+                            $bonusHistoryCabang->save();
+                            $log[] = 'Bonus Komisi Sparepart Cabang member ' . $bonusHistoryCabang->member_numb . " diperbarui menjadi Rp. " . number_format($bonusHistoryCabang->bonus, 0, ',', '.');
+                        } else {
+                            $log[] = "Bonus Komisi Sparepart Cabang tidak ditemukan";
+                        }
+                    }
+                }                    
+            }
+        } else {
+            return;
+        }
         if($log) {
             foreach($log as $l) {
                 Alert::info($l)->flash();
             }
         }
     }
-
-    // protected function levelUpMember($id, $isCheckAgain = false, $historyLevelUp = []) 
-    // {
-        
-    //     $this->info('Check Level Up Member ID : ' . $id);
-    //     /* Logic kenaikan level member */
-    //     $member = Member::with(['upline' => function($query) {
-    //         $query->with([
-    //             'upline' => function($query) { $query->with('level'); }, 
-    //             'downlines' => function($query) { 
-    //                 $query->with(['level']); 
-    //             },
-    //             'level'
-    //         ]);
-    //     }, 'level'])->find($id);
-    //     $uplineMember = $member->upline;
-    //     if ($isCheckAgain){ $uplineMember = $member; }
-    //     if (!$uplineMember) return ;
-    //     $uplineLevel = Level::where('id', $uplineMember->level_id)->first();
-    //     $levelNext =  Level::where('ordering_level', $uplineLevel->ordering_level + 1)->first();
-    //     if(!$levelNext) return ;
-    //     $levels = Level::orderBy('ordering_level', 'asc')->get();
-    //     $minimumDownlineNext = $levels[$uplineLevel->ordering_level]->minimum_downline;
-    //     $minimumSoldByDownlineNext = $levels[$uplineLevel->ordering_level]->minimum_sold_by_downline;
-    //     $downline = $this->getDownline($uplineMember->id);
-    //     if(!$downline){ return ; }
-        
-    //     $removeDownline = $this->removeDownlineWhereTransaction($downline, $minimumSoldByDownlineNext, $uplineLevel);
-    //     $downline = $removeDownline['downline'];
-    //     $downlineCountLevelNow = $removeDownline['downlineCountLevelNow'];
-
-    //     if ($downlineCountLevelNow >= $minimumDownlineNext) {
-    //         if ($this->isActiveMember($uplineMember)){
-    //             $uplineMember = Member::find($uplineMember->id);
-    //             $uplineMember->level_id = $levelNext->id; // Naik Level
-    //             $uplineMember->update();
-    //             $levelHistory = LevelUpHistories::with('level')->create([
-    //                 'member_id' => $uplineMember->id,
-    //                 'old_level_id' => $uplineLevel->id,
-    //                 'new_level_id' => $uplineMember->level_id,
-    //                 'old_level_code' => $uplineLevel->code,
-    //                 'new_level_code' => $uplineMember->level->code,
-    //             ]);
-    //             Alert::info('Member '.$uplineMember->name.' level up to '.$uplineMember->level->name)->flash();
-    //             $historyLevelUp[] = 'Member '.$uplineMember->name.' level up to '.$uplineMember->level->name; 
-    
-    //             /* check apakah bisa level up lagi */
-    //             $levelNow = Level::where('id', $levelHistory->new_level_id)->first();
-    //             $levelNext = Level::where('ordering_level', $levelNow->ordering_level + 1)->first();
-    //             if(!$levelNext) { return ; }
-
-    //             $minimumDownlineNext = $levelNext->minimum_downline;
-    //             $minimumSoldByDownlineNext = $levelNext->minimum_sold_by_downline;
-    //             $removedDownline = $this->removeDownlineWhereTransaction($downline, $minimumSoldByDownlineNext, $levelNow);
-    //             $downline = $removedDownline['downline'];
-    //             $downlineCountLevelNow = $removedDownline['downlineCountLevelNow'];
-    //             if ($downlineCountLevelNow >= $minimumDownlineNext) {
-    //                 $this->levelUpMember($uplineMember->id, true, $historyLevelUp);
-    //             }
-    //         } 
-    //         else {
-    //             // For Testing purpose
-    //             // Alert::error('Member '.$uplineMember->name.' is not active')->flash();
-    //             $historyLevelUp[] = 'Member '.$uplineMember->name.' tidak bisa level up karena tidak aktif';
-    //         }
-    //         $this->levelUpMember($uplineMember->id, false, $historyLevelUp);
-    //     }
-    //     if($historyLevelUp) {
-    //         foreach($historyLevelUp as $l) {
-    //             $this->info($l);
-    //         }
-    //     }
-    // }
-
-    // private function getDownline($uplineID) 
-    // {
-    //     $downline = Member::with(['transactions' => function($query) {
-    //         $query
-    //             ->with('transactionProducts')
-    //             ->WhereMonth('transaction_date', date('m'))
-    //             ->whereYear('transaction_date', date('Y'));
-    //     }])->where('upline_id', $uplineID)
-    //     ->get();
-    //     return $downline;
-    // }
-
-    // private function removeDownlineWhereTransaction($downline, $minimumSoldByDownlineNext, $uplineLevel){
-    //     foreach ($downline as $key => $value) {
-    //         $downlineSold = 0;
-    //         foreach ($value->transactions as $key => $transaction) {
-    //             if($transaction->type != 'Normal') continue;
-    //             foreach ($transaction->transactionProducts as $key => $transactionProduct) {
-    //                 $downlineSold += $transactionProduct->quantity;
-    //             }
-    //         }
-    //         if ($downlineSold < $minimumSoldByDownlineNext) { 
-    //             $downline->forget($key); // remove downline yang belum melakukan transaksi
-    //         }
-    //     }
-    //     $downlineCountLevelNow = 0;
-    //     foreach ($downline as $key => $value) {
-    //         if ($value->level->ordering_level >= $uplineLevel->ordering_level) {
-    //             $downlineCountLevelNow++; // hitung downline yang sudah melakukan transaksi dan levelnya sama atau lebih tinggi
-    //         }
-    //     }
-    //     return [ 
-    //         "downline" => $downline, 
-    //         "downlineCountLevelNow" => $downlineCountLevelNow,
-    //     ];
-    // }
 
     private function isActiveMember($member) 
     {
