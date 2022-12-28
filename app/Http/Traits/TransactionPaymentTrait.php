@@ -90,7 +90,7 @@ trait TransactionPaymentTrait {
                 $branchMember = Branch::with('member')->where('id', $member->branch_id)->first();
                 $isMemberOwner = $branchMember->member->id == $member->id;
                 $branch = Branch::where('id', $transaction->branch_id)->first();
-
+                if($member->id == 1) return;
                 if ($transaction->branch_id == 1) {
                     // Jika member membeli sparepart di pusat
                     if(!$isMemberOwner) {
@@ -109,7 +109,6 @@ trait TransactionPaymentTrait {
                     }
                     // Jika owner cabang,stokist membeli sparepart di pusat
                     else {
-                        if($member->id == 1) return;
                         $bonus = BonusHistory::create([
                             'member_id' => $member->id,
                             'member_numb' => $member->member_numb,
