@@ -41,12 +41,7 @@ class BranchProductCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        $query = BranchProduct::
-            join('products', 'branch_products.product_id', '=', 'products.id')
-            ->join('branches', 'branch_products.branch_id', '=', 'branches.id')
-            ->select('branch_products.*', 'products.*', 'branches.name as branch_name', 
-                DB::raw('(products.price + branch_products.additional_price) as netto_price'));
-        $this->crud->query = $query;
+        $this->crud->query = $this->customQuery();
         $this->crud->addColumn([
             'name' => 'branch_name',
             'type' => 'text',
@@ -243,6 +238,28 @@ class BranchProductCrudController extends CrudController
         });
 
         $this->crud->addClause('where', 'branch_products.branch_id', '!=', 1);
+    }
+
+    protected function customQuery() 
+    {
+        return BranchProduct::
+            leftJoin('products', 'branch_products.product_id', '=', 'products.id')
+            ->join('branches', 'branch_products.branch_id', '=', 'branches.id')
+            ->orderBy('branch_products.created_at', 'desc')
+            ->select(
+                'branch_products.id',
+                'branch_products.product_id',
+                'branch_products.branch_id',
+                'branch_products.additional_price', 
+                'products.name',
+                'products.model',
+                'products.type',
+                'products.capacity',
+                'products.price',
+                'products.type',
+                'products.is_demokit', 
+                'branches.name as branch_name', 
+                DB::raw('(products.price + branch_products.additional_price) as netto_price'));
     }
 
 }
