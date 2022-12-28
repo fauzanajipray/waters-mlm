@@ -184,6 +184,7 @@
 @endsection
 
 @section('after_scripts')
+  <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   @include('crud::inc.datatables_logic')
 
   {{-- CRUD LIST CONTENT - crud_list_scripts stack --}}

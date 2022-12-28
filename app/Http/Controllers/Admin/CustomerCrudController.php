@@ -168,8 +168,11 @@ class CustomerCrudController extends CrudController
         try {
             $customer = Customer::with('transactions')
                 ->where('id', $id)
-                ->where('is_member', '0') 
                 ->first();
+            if($customer->is_member == 1){
+                Alert::error('Customer is member');
+                return redirect()->back()->with('error', 'Customer is member, not allowed to delete');
+            }
             if($customer->transactions->count() > 0){
                 Alert::error('Customer has transactions');
                 return redirect()->back()->with('error', 'Customer has transactions, not allowed to delete');
@@ -181,10 +184,10 @@ class CustomerCrudController extends CrudController
         } catch (\Exception $e) {
             DB::rollback();
             Alert::error($e->getMessage());
-            return redirect()->back()->with('error', 'Something went wrong');
+            return redirect()->back()->with('error', $e->getMessage());
         }
     }
-   
+
     public function getCustomerIsMember(Request $request)
     {
         $customer = Customer::
@@ -202,5 +205,14 @@ class CustomerCrudController extends CrudController
                 'message' => 'Customer not found!',
             ]);
         }
+    }
+
+    public function index()
+    {
+        $this->crud->hasAccessOrFail('list');
+        $this->data['crud'] = $this->crud;
+        $this->data['title'] = $this->crud->getTitle() ?? mb_ucfirst($this->crud->entity_name_plural);
+
+        return view('vendor.backpack.crud.list_customer', $this->data);
     }
 }
