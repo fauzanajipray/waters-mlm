@@ -180,7 +180,7 @@ trait TransactionPaymentTrait {
                                 ->first();
                             if($bonusHistoryStokist) {
                                 $bonusHistoryStokist->bonus = $bonusHistoryStokist->bonus * 5 / $bonusHistoryStokist->bonus_percent;
-                                $bonusHistoryStokist->bonus_percent = 10;
+                                $bonusHistoryStokist->bonus_percent = 5;
                                 $bonusHistoryStokist->save();
                                 $log[] = 'Bonus Penjualan Sparepart Sparepart member ' . $bonusHistoryStokist->member_numb . " diperbarui menjadi Rp. " . number_format($bonusHistoryStokist->bonus, 0, ',', '.');
                             } else {
