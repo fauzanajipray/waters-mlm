@@ -262,9 +262,7 @@ class DatabaseSeeder extends Seeder
             }
         }
         $this->command->line("Completed --> Member");
-
     }
-
 
     private function customer()
     {

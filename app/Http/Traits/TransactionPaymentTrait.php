@@ -109,6 +109,7 @@ trait TransactionPaymentTrait {
                     }
                     // Jika owner cabang,stokist membeli sparepart di pusat
                     else {
+                        if($member->id == 1) return;
                         $bonus = BonusHistory::create([
                             'member_id' => $member->id,
                             'member_numb' => $member->member_numb,
