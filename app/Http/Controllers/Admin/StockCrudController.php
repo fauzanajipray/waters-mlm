@@ -127,12 +127,6 @@ class StockCrudController extends CrudController
             ]);
         }
 
-        $product = Product::select('id', 'name', 'model', 'price')->orderBy('name', 'ASC')->get();
-        $product = $product->map(function($item){
-            $item->name = $item->name . ' | ' . $item->model . ' | ' . 'Rp ' . formatNumber($item->price);
-            return $item;
-        });   
-        
         $this->crud->addField([
             'name' => 'origin_branch_id',
             'type' => 'select2_from_ajax',

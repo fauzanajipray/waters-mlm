@@ -351,11 +351,9 @@ trait ProductTrait {
                 $products = Product::get();
             }
             $products->map(function($product){
-                if ($product->type == 'sparepart'){
-                    $product->name = $product->name.' - '.$product->price;
-                } else {
-                    $product->name = $product->name.' - '.$product->model. ' - '.$product->price;
-                }
+                if($product->model) $product->name .= ' - ' . $product->model;
+                if($product->capacity) $product->name .= ' - ' . $product->capacity;
+                $product->name .= ' - ' . number_format($product->price) ;
                 return $product;
             });
             return $products;
@@ -524,10 +522,10 @@ trait ProductTrait {
         $form = collect(request()->input('form'));
         $member_id = $form->where('name', 'member_id')->first();
         $branch_id = $form->where('name', 'branch_id')->first();
-        if(!$member_id || !$branch_id){
+        $productType = $form->where('name', 'product_type')->first();
+        if(!$member_id || !$branch_id || !$productType){
             return response()->json([]);
         }
-
         if($search_term){
             $products = Stock::
                 leftJoin(
@@ -537,7 +535,7 @@ trait ProductTrait {
                         LEFT JOIN (
                             SELECT * FROM branch_products WHERE `branch_id` = '.$branch_id['value'].'
                         ) AS `branch_products2` 
-                        ON `products`.`id` = `branch_products2`.`product_id`
+                            ON `products`.`id` = `branch_products2`.`product_id`
                     ) AS `products2`' ),
                     function($join) {
                         $join->on('products2.id', '=', 'stocks.product_id');
@@ -545,6 +543,7 @@ trait ProductTrait {
                 )
                 ->where('stocks.branch_id', $branch_id['value'])
                 ->where('stocks.quantity', '>', 0)
+                ->where('products2.type', $productType['value'] )
                 ->where('name', 'like', '%'.$search_term.'%')
                 ->orWhere('model', 'like', '%'.$search_term.'%')
                 ->select(
@@ -565,8 +564,7 @@ trait ProductTrait {
                         FROM `products`
                         LEFT JOIN (
                             SELECT * FROM branch_products WHERE `branch_id` = '.$branch_id['value'].'
-                        ) AS `branch_products2` 
-                        ON `products`.`id` = `branch_products2`.`product_id`
+                        ) AS `branch_products2` ON `products`.`id` = `branch_products2`.`product_id`
                     ) AS `products2`' ),
                     function($join) {
                         $join->on('products2.id', '=', 'stocks.product_id');
@@ -574,12 +572,14 @@ trait ProductTrait {
                 )
                 ->where('stocks.branch_id', $branch_id['value'])
                 ->where('stocks.quantity', '>', 0)
+                ->where('products2.type', $productType['value'] )
                 ->select(
                     'stocks.*',
                     'products2.name',
                     'products2.model',
                     'products2.price',
                     'products2.type',
+                    'products2.capacity',
                     'products2.additional_price',
                     DB::raw('(products2.additional_price + products2.price) AS netto_price')
                 )
@@ -587,11 +587,9 @@ trait ProductTrait {
         }
 
         $products->map(function ($stock) {
-            if ($stock->type == 'sparepart'){
-                $stock->name = $stock->name.' - '.number_format($stock->price). ' - Stock : '.$stock->quantity;
-            } else {
-                $stock->name = $stock->name.' - '.$stock->model. ' - '.number_format($stock->price). ' - Stock : '.$stock->quantity;
-            }
+            if($stock->model) $stock->name .= ' - ' . $stock->model;
+            if($stock->capacity) $stock->name .= ' - ' . $stock->capacity;
+            $stock->name .= ' - ' . number_format($stock->price) .' - Stock : '.$stock->quantity;
             $stock->id = $stock->product_id;
             return $stock;
         });

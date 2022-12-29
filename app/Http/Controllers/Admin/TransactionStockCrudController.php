@@ -200,6 +200,20 @@ class TransactionStockCrudController extends CrudController
                 'dependencies' => ['member_id'],
                 'tab' => 'Product',
                 'include_all_form_fields' => true,
+                'wrapperAttributes' => [
+                    'class' => 'form-group col-md-6'
+                ]
+            ],
+            [
+                'name' => 'product_type',
+                'type' => 'select2_from_array',
+                'label' => 'Product Type',
+                'options' => ['product' => 'Product', 'sparepart' => 'Sparepart'],
+                'allows_null' => false,
+                'wrapperAttributes' => [
+                    'class' => 'form-group col-md-6'
+                ],
+                'tab' => 'Product',
             ],
             [
                 'name' => 'product_id',
@@ -213,7 +227,7 @@ class TransactionStockCrudController extends CrudController
                     'class' => 'form-group col-md-6'
                 ],
                 'method' => 'POST',
-                'dependencies' => ['branch_id'],
+                'dependencies' => ['branch_id', 'product_type'],
                 'include_all_form_fields' => true,
                 'tab' => 'Product',
             ],
