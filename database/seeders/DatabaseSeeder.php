@@ -375,13 +375,6 @@ class DatabaseSeeder extends Seeder
         ]);
 
         PaymentMethod::updateOrCreate([
-            "name" => "Debit BCA",
-        ],[
-            "name" => "Debit BCA",
-            "description" => "",
-        ]);
-
-        PaymentMethod::updateOrCreate([
             "name" => "Kartu Kredit",
         ],[
             "name" => "Kartu Kredit",
