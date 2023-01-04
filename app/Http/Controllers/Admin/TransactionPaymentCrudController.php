@@ -485,13 +485,9 @@ class TransactionPaymentCrudController extends CrudController
             unset($requests['payment_method']);
             // status paid
             $requests['code'] = $this->generateCode();
-            $payment = TransactionPayment::updateOrCreate(['id' => $requests['id']],$requests);
-            // if($transaction->id == 11){
-            //     dd($payment);
-            //     dd($requests);
-            //     // dd($lastPaymentDate);
-            //     dd($transaction);
-            // }
+            $requests['created_at'] = $requests['payment_date'];
+            $requests['updated_at'] = $requests['payment_date'];
+            $payment = TransactionPayment::updateOrCreate(['id' => $requests['id']], $requests);
             $transaction = $transaction = Transaction::with(['transactionPayments', 'transactionProducts'])->find($requests['transaction_id']);
             /* Check Stock */
             $transactionProducts = $transaction->transactionProducts;
@@ -510,10 +506,6 @@ class TransactionPaymentCrudController extends CrudController
                 $transaction->status_paid = true;
                 $transaction->save();
                 $lastPaymentDate = $transaction->transactionPayments->sortByDesc('payment_date')->first()->payment_date;
-                // if($transaction->id == 21){
-                //     // dd($lastPaymentDate);
-                //     dd($transaction);
-                // }
                 $this->calculateBonus($transaction, $transaction->member, $lastPaymentDate);
 
                 /* Minus stock */

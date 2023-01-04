@@ -5,6 +5,7 @@ use App\Models\BonusHistory;
 use App\Models\Branch;
 use App\Models\Level;
 use App\Models\Member;
+use App\Models\TransactionPayment;
 use App\Models\TransactionProduct;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -30,6 +31,7 @@ trait TransactionPaymentTrait {
                     'bonus_percent' => $levelNow->bp_percentage,
                     'bonus' => $transaction['total_price'] * $levelNow->bp_percentage / 100,
                     'created_at' => $lastPaymentDate,
+                    'updated_at' => $lastPaymentDate,
                 ]);
                 $log[] = $member->name . " mendapatkan Bonus Penjualan sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
             }
@@ -50,6 +52,8 @@ trait TransactionPaymentTrait {
                         'bonus_type' => "GM",
                         'bonus_percent' => $uplineLevel->gm_percentage,
                         'bonus' => $transaction['total_price'] * $uplineLevel->gm_percentage / 100,
+                        'created_at' => $lastPaymentDate,
+                        'updated_at' => $lastPaymentDate,
                     ]);
                     $log[] = $upline->name . " mendapatkan Bonus Sponsor sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
                 }
@@ -70,6 +74,8 @@ trait TransactionPaymentTrait {
                             'bonus_type' => "OR",
                             'bonus_percent' => $upline2Level->or_percentage,
                             'bonus' => $transaction['total_price'] * $upline2Level->or_percentage / 100,
+                            'created_at' => $lastPaymentDate,
+                            'updated_at' => $lastPaymentDate,
                         ]);
 
                         $log[] = $upline2->name . " mendapatkan Bonus Overriding sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
@@ -105,6 +111,7 @@ trait TransactionPaymentTrait {
                             'ss_type' => 'MEMBER',
                             'ss_product_id' => $p->product_id,
                             'created_at' => $lastPaymentDate,
+                            'updated_at' => $lastPaymentDate,
                         ]);
                     }
                     // Jika owner cabang,stokist membeli sparepart di pusat
@@ -120,6 +127,7 @@ trait TransactionPaymentTrait {
                             'ss_type' => 'MEMBER',
                             'ss_product_id' => $p->product_id,
                             'created_at' => $lastPaymentDate,
+                            'updated_at' => $lastPaymentDate,
                         ]);
                     }
                     $log[] = $member->name . " mendapatkan Bonus Penjualan Sparepart sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
@@ -138,6 +146,7 @@ trait TransactionPaymentTrait {
                                 'bonus' => ($p->price + $p->additional_price) * 10 / 100 * $p->quantity,
                                 'ss_type' => 'MEMBER',
                                 'created_at' => $lastPaymentDate,
+                                'updated_at' => $lastPaymentDate,
                             ]);
                             $log[] = $member->name . " mendapatkan Bonus Penjualan Sparepart sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
                             $bonusHistoryCabang = BonusHistory::
@@ -169,6 +178,7 @@ trait TransactionPaymentTrait {
                                 'bonus' => ($p->price + $p->additional_price) * 10 / 100 * $p->quantity,
                                 'ss_type' => 'MEMBER',
                                 'created_at' => $lastPaymentDate,
+                                'updated_at' => $lastPaymentDate,
                             ]);
                             $log[] = $member->name . " mendapatkan Bonus Penjualan Sparepart sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
                             $bonusHistoryStokist = BonusHistory::
@@ -201,6 +211,7 @@ trait TransactionPaymentTrait {
                                 'ss_type' => 'MEMBER',
                                 'ss_product_id' => $p->product_id,
                                 'created_at' => $lastPaymentDate,
+                                'updated_at' => $lastPaymentDate,
                             ]);
                             $log[] = $member->name . " mendapatkan Bonus Penjualan Sparepart sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
                             $bonusHistoryCabang = BonusHistory::
@@ -250,6 +261,7 @@ trait TransactionPaymentTrait {
                             'ss_type' => 'CABANG',
                             'ss_product_id' => $p->product_id,
                             'created_at' => $lastPaymentDate,
+                            'updated_at' => $lastPaymentDate,
                         ]);
                         $log[] = 'Bonus Komisi Sparepart Cabang member ' . $member->member_numb . " ditambahkan sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
                     }
@@ -271,6 +283,7 @@ trait TransactionPaymentTrait {
                                 'bonus_percent' => 15,
                                 'bonus' => ($p->price + $p->additional_price) * 15 / 100 * $p->quantity,
                                 'created_at' => $lastPaymentDate,
+                                'updated_at' => $lastPaymentDate,
                                 'ss_type' => 'STOKIST',
                                 'ss_product_id' => $p->product_id,
                             ]);

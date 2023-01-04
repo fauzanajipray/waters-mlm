@@ -66,7 +66,7 @@ class TransactionPayment extends Model
 
     public function setPhotoUrlAttribute($value)
     {
-        $destination_path = "public/uploads/images";     
+        $destination_path = "public/uploads/images";
         $attribute_name = "photo_url";
         if(request()->{$attribute_name . '_change'}){
             // if the image was erased

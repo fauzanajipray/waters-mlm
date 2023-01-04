@@ -438,7 +438,7 @@ class DatabaseSeeder extends Seeder
         foreach ($csvDatas as $csvData) {
             if($csvData['Nominal']){
                 $requests = [
-                    "id" => $csvData["ID"],
+                    "id" => (int) $csvData["ID"],
                     "transaction_id" => $csvData['Transaction ID'],
                     "payment_date" => Carbon::createFromFormat('d/m/Y', $csvData['Tanggal Payment'])->format("Y-m-d"),
                     "payment_method" => $csvData['Payment Method'],

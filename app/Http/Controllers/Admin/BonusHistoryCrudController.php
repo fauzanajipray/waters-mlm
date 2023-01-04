@@ -90,18 +90,7 @@ class BonusHistoryCrudController extends CrudController
                 return "Rp. " . number_format($bonusAfterTax, 2, ',', '.');
             },
         ]);
-        $this->crud->addColumn([
-            'name' => 'created_at',
-            'label' => 'Created At',
-            'type' => 'text',
-            'value' => function ($entry) {
-                return Carbon::parse($entry->created_at)->format('d M Y, H:i');
-            },
-            'orderable' => true,
-            'orderLogic' => function ($query, $column, $columnDirection) {
-                $query->orderBy('created_at', $columnDirection);
-            },
-        ]);
+        $this->crud->column('created_at');
         $this->crud->column('updated_at');
 
         $this->getFilter();
