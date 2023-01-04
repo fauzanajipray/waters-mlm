@@ -14,10 +14,11 @@ trait TransactionPaymentTrait {
 
     private function calculateBonus($transaction, $member, $lastPaymentDate ,$log = [])
     {
+
         $levelNow = Level::where('id', $member->level_id)->first();
         if ($this->isMemberTypePusat($member)){
             return;
-        } 
+        }
         if ($transaction->type == 'Normal') {
             /* Bonus Penjualan Pribadi */
             if ($this->isActiveMember($member)) {
@@ -32,7 +33,7 @@ trait TransactionPaymentTrait {
                     'created_at' => $lastPaymentDate,
                 ]);
                 $log[] = $member->name . " mendapatkan Bonus Penjualan sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
-            } 
+            }
             /* Bonus Sponsor */
             $upline = $member->upline;
             if ($upline) {
@@ -41,7 +42,7 @@ trait TransactionPaymentTrait {
                 })->sum('quantity');
                 $uplineLevel = Level::where('id', $upline->level_id)->first();
                 if ($uplineProductSold >= $upline->level->minimum_sold && $uplineLevel->gm_percentage > 0 && $this->isActiveMember($upline)) {  // Cek apakah pernah melakukan transaksi
-                    
+
                     $bonus = BonusHistory::create([
                         'member_id' => $upline->id,
                         'member_numb' => $upline->member_numb,
@@ -71,22 +72,22 @@ trait TransactionPaymentTrait {
                             'bonus_percent' => $upline2Level->or_percentage,
                             'bonus' => $transaction['total_price'] * $upline2Level->or_percentage / 100,
                         ]);
-    
+
                         $log[] = $upline2->name . " mendapatkan Bonus Overriding sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
-                    } 
+                    }
                 }
             }
-        } 
+        }
         /* Bonus Penjualan Sparepart */
         else if ($transaction->type == 'Sparepart') {
             $member = Member::where('id', $transaction->member_id)->first();
             $products = TransactionProduct::
                 leftJoin('products', 'products.id', '=', 'transaction_products.product_id')
-                ->leftJoin(DB::raw('(SELECT * FROM branch_products WHERE branch_id = ' . $transaction->branch_id . ') as branch_products'), 
+                ->leftJoin(DB::raw('(SELECT * FROM branch_products WHERE branch_id = ' . $transaction->branch_id . ') as branch_products'),
                     'branch_products.product_id', '=', 'products.id')
                 ->where('transaction_id', $transaction->id)->get();
             foreach ($products as $p) {
-                
+
                 $branchMember = Branch::with('member')->where('id', $member->branch_id)->first();
                 $isMemberOwner = $branchMember->member->id == $member->id;
                 $branch = Branch::where('id', $transaction->branch_id)->first();
@@ -121,7 +122,7 @@ trait TransactionPaymentTrait {
                             'ss_product_id' => $p->product_id,
                             'created_at' => $lastPaymentDate,
                         ]);
-                    } 
+                    }
                     $log[] = $member->name . " mendapatkan Bonus Penjualan Sparepart sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
                 } else {
                     if (!$isMemberOwner) {
@@ -146,16 +147,16 @@ trait TransactionPaymentTrait {
                                 ->where('bonus_percent', 20)
                                 ->where('ss_type', 'CABANG')
                                 ->orderBy('created_at', 'desc')
-                                ->first();    
+                                ->first();
                             if($bonusHistoryCabang) {
                                 $bonusHistoryCabang->bonus = $bonusHistoryCabang->bonus * 10 / $bonusHistoryCabang->bonus_percent;
                                 $bonusHistoryCabang->bonus_percent = 10;
                                 $bonusHistoryCabang->save();
                                 $log[] = 'Bonus Penjualan Sparepart Cabang member ' . $bonusHistoryCabang->member_numb . " diperbarui menjadi Rp. " . number_format($bonusHistoryCabang->bonus, 0, ',', '.');
                             } else {
-                                $log[] = "Bonus Penjualan Sparepart Cabang tidak ditemukan"; 
+                                $log[] = "Bonus Penjualan Sparepart Cabang tidak ditemukan";
                             }
-                        } 
+                        }
                         // Jika member membeli dari stokist
                         else if ($branch->type == 'STOKIST') {
                             $member = Member::with('branch')->where('id', $transaction->member_id)->first();
@@ -184,7 +185,7 @@ trait TransactionPaymentTrait {
                                 $bonusHistoryStokist->save();
                                 $log[] = 'Bonus Penjualan Sparepart Sparepart member ' . $bonusHistoryStokist->member_numb . " diperbarui menjadi Rp. " . number_format($bonusHistoryStokist->bonus, 0, ',', '.');
                             } else {
-                                $log[] = "Bonus Penjualan Sparepart Stokist tidak ditemukan"; 
+                                $log[] = "Bonus Penjualan Sparepart Stokist tidak ditemukan";
                             }
                         }
                     } else {
@@ -210,28 +211,28 @@ trait TransactionPaymentTrait {
                                 ->where('ss_type', 'CABANG')
                                 ->orderBy('created_at', 'desc')
                                 ->first();
-                            if($bonusHistoryCabang) { 
+                            if($bonusHistoryCabang) {
                                 $bonusHistoryCabang->bonus = $bonusHistoryCabang->bonus * 5 / $bonusHistoryCabang->bonus_percent;
                                 $bonusHistoryCabang->bonus_percent = 5;
                                 $bonusHistoryCabang->save();
                                 $log[] = 'Bonus Penjualan Sparepart Cabang member ' . $bonusHistoryCabang->member_numb . " diperbarui menjadi Rp. " . number_format($bonusHistoryCabang->bonus, 0, ',', '.');
                             } else {
-                                $log[] = "Bonus Penjualan Sparepart Cabang tidak ditemukan"; 
+                                $log[] = "Bonus Penjualan Sparepart Cabang tidak ditemukan";
                             }
                         }
 
                         // TODO : Jika owner cabang membeli sparepart di cabang?
                         // TODO : Jika owner stokist membeli sparepart di stokist?
-                        
+
                     }
                 }
             }
         }
-        /* Bonus Penjualan Stock */ 
+        /* Bonus Penjualan Stock */
         else if ($transaction->type = 'Stock') {
             $product = TransactionProduct::
                 leftJoin('products', 'products.id', '=', 'transaction_products.product_id')
-                ->leftJoin(DB::raw('(SELECT * FROM branch_products WHERE branch_id = ' . $transaction->branch_id . ') as branch_products'), 
+                ->leftJoin(DB::raw('(SELECT * FROM branch_products WHERE branch_id = ' . $transaction->branch_id . ') as branch_products'),
                     'branch_products.product_id', '=', 'products.id')
                 ->where('transaction_id', $transaction->id)->get();
             foreach ($product as $p) {
@@ -252,9 +253,9 @@ trait TransactionPaymentTrait {
                             'created_at' => $lastPaymentDate,
                         ]);
                         $log[] = 'Bonus Komisi Sparepart Cabang member ' . $member->member_numb . " ditambahkan sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
-                    } 
+                    }
                     // Jika menambah stok sparepart di stokist
-                    else if ($member->branch->type == 'STOKIST') { 
+                    else if ($member->branch->type == 'STOKIST') {
                         $bonusHistoryCabang = BonusHistory::
                             where('ss_product_id', $p->product_id)
                             ->where('bonus_type', 'SS')
@@ -270,11 +271,11 @@ trait TransactionPaymentTrait {
                                 'bonus_type' => "SS",
                                 'bonus_percent' => 15,
                                 'bonus' => ($p->price + $p->additional_price) * 15 / 100 * $p->quantity,
-                                'created_at' => $lastPaymentDate, 
+                                'created_at' => $lastPaymentDate,
                                 'ss_type' => 'STOKIST',
                                 'ss_product_id' => $p->product_id,
                             ]);
-                        $log[] = 'Bonus Komisi Sparepart Stokist member ' . $member->member_numb . " ditambahkan sebesar Rp. " . 
+                        $log[] = 'Bonus Komisi Sparepart Stokist member ' . $member->member_numb . " ditambahkan sebesar Rp. " .
                             number_format($bonus->bonus, 0, ',', '.');
                         if($bonusHistoryCabang) {
                             $bonusHistoryCabang->bonus = $bonusHistoryCabang->bonus * 5 / $bonusHistoryCabang->bonus_percent;
@@ -285,11 +286,12 @@ trait TransactionPaymentTrait {
                             $log[] = "Bonus Komisi Sparepart Cabang tidak ditemukan";
                         }
                     }
-                }                    
+                }
             }
         } else {
             return;
         }
+
         if($log) {
             foreach($log as $l) {
                 Alert::info($l)->flash();
@@ -297,7 +299,7 @@ trait TransactionPaymentTrait {
         }
     }
 
-    private function isActiveMember($member) 
+    private function isActiveMember($member)
     {
         if ($member->expired_at < Carbon::now()) {
             return false;
@@ -305,7 +307,7 @@ trait TransactionPaymentTrait {
         return true;
     }
 
-    private function isMemberTypePusat($member) 
+    private function isMemberTypePusat($member)
     {
         if ($member->type == 'PUSAT') {
             return true;

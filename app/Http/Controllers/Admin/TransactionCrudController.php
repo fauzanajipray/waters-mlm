@@ -34,7 +34,7 @@ class TransactionCrudController extends CrudController
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
-     * 
+     *
      * @return void
      */
     public function setup()
@@ -46,7 +46,7 @@ class TransactionCrudController extends CrudController
 
     /**
      * Define what happens when the List operation is loaded.
-     * 
+     *
      * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
      * @return void
      */
@@ -56,16 +56,16 @@ class TransactionCrudController extends CrudController
         $this->crud->firstCellNonFlex = true;
         $this->crud->addColumns([
             'code',
-            'transaction_date', 
+            'transaction_date',
             [
                 'name' => 'member_numb',
                 'label' => 'Unique Number',
-            ], 
+            ],
             'member_name',
             [
                 'name' => 'total_price',
                 'type' => 'number_format',
-            ], 
+            ],
             'id_card',
             'customer_id',
             [
@@ -80,7 +80,7 @@ class TransactionCrudController extends CrudController
         $this->crud->addButtonFromModelFunction('line', 'letter_road', 'letterRoad', 'beginning');
         $this->crud->addButtonFromModelFunction('line', 'invoice', 'invoice', 'beginning');
         $this->crud->addButtonFromModelFunction('line', 'add_payment', 'buttonAddPayment', 'beginning');
-        
+
         $this->crud->addClause('where', 'type', 'Normal');
 
         // FILTER
@@ -88,8 +88,8 @@ class TransactionCrudController extends CrudController
                 'type' => 'date_range',
                 'name' => 'transaction_date',
                 'label'=> 'Transaction Date',
-            ], 
-            false, 
+            ],
+            false,
             function($value) {
                 $dates = json_decode($value);
                 $this->crud->addClause('where', 'transaction_date', '>=', $dates->from);
@@ -114,7 +114,7 @@ class TransactionCrudController extends CrudController
                 'entity' => 'updatedBy',
                 'attribute' => 'name' ,
                 'model' => User::class,
-            ],            
+            ],
             'created_at',
             'updated_at',
         ]);
@@ -122,7 +122,7 @@ class TransactionCrudController extends CrudController
 
     /**
      * Define what happens when the Create operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-create
      * @return void
      */
@@ -150,7 +150,7 @@ class TransactionCrudController extends CrudController
             ],
             'default' => date('d-m-Y H:i:s'),
         ]);
-        
+
         $this->crud->addField([
             'name' => 'member_id',
             'type' => 'select2_from_ajax',
@@ -159,7 +159,7 @@ class TransactionCrudController extends CrudController
             'data_source' => url('members/only-actived'),
             'delay' => 500
         ]);
-        
+
         $this->crud->addField([
             'name' => 'customer_id',
             'type' => 'relationship',
@@ -177,7 +177,7 @@ class TransactionCrudController extends CrudController
             'data_source' => url('customer/get-customer-by-member-id'),
             'placeholder' => 'Select a customer',
         ]);
-        
+
         $this->crud->addField([
             'name' => 'shipping_address',
             'type' => 'textarea',
@@ -194,7 +194,7 @@ class TransactionCrudController extends CrudController
             'label' => 'Member is customer',
             'wrapperAttributes' => [
                 'class' => 'form-group col-md-12'
-            ], 
+            ],
             'value' => 1,
         ]);
 
@@ -279,14 +279,14 @@ class TransactionCrudController extends CrudController
         //     ],
         //     // optional
         //     'new_item_label'  => 'Add Product', // customize the text of the button
-        //     'init_rows' => 1, 
+        //     'init_rows' => 1,
         // ]);
 
     }
 
     /**
      * Define what happens when the Update operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-update
      * @return void
      */
@@ -310,7 +310,7 @@ class TransactionCrudController extends CrudController
     }
 
     public function edit($id)
-    {   
+    {
         $this->crud->hasAccessOrFail('update');
 
         $this->data['entry'] = $this->crud->getEntry($id);
@@ -331,7 +331,7 @@ class TransactionCrudController extends CrudController
     public function create(Request $request)
     {
         $this->crud->hasAccessOrFail('create');
-        
+
         $this->data['crud'] = $this->crud;
         $this->data['fields'] = $this->crud->getCreateFields();
         $this->data['saveAction'] = $this->crud->getSaveAction();
@@ -345,7 +345,7 @@ class TransactionCrudController extends CrudController
         }
         return view('crud::create', $this->data);
     }
-    
+
     public function update()
     {
         // show a success message
@@ -371,7 +371,7 @@ class TransactionCrudController extends CrudController
                 $products = $requests['products'];
             }
             foreach ($products as $key => $item) {
-                for ($key2=$key; $key2 < count($products); $key2++) { 
+                for ($key2=$key; $key2 < count($products); $key2++) {
                     if($item['product_id'] == $products[$key2]['product_id'] && $key != $key2){
                         $errors['products.'.$key2.'.product_id'] = 'Product '.$item['product_id'].' already taken';
                     }
@@ -401,7 +401,7 @@ class TransactionCrudController extends CrudController
             $totalPrice = 0;
             foreach ($products as $key => $item) {
                 $product = Product::
-                    leftJoin(DB::raw('( SELECT * FROM branch_products WHERE branch_id = '.$requests['branch_id'].' ) as branch_products2'), 
+                    leftJoin(DB::raw('( SELECT * FROM branch_products WHERE branch_id = '.$requests['branch_id'].' ) as branch_products2'),
                         function($join) { $join->on('branch_products2.product_id', '=', 'products.id'); }
                     )
                     ->where('products.id', $item['product_id'])
@@ -424,7 +424,7 @@ class TransactionCrudController extends CrudController
             // Save Log Product Sold
             foreach ($products as $key => $item) {
                 $product = Product::
-                    leftJoin(DB::raw('( SELECT * FROM branch_products WHERE branch_id = '.$requests['branch_id'].' ) as branch_products2'), 
+                    leftJoin(DB::raw('( SELECT * FROM branch_products WHERE branch_id = '.$requests['branch_id'].' ) as branch_products2'),
                         function($join) { $join->on('branch_products2.product_id', '=', 'products.id'); }
                     )
                     ->where('products.id', $item['product_id'])
@@ -519,7 +519,7 @@ class TransactionCrudController extends CrudController
                 $totalPrice += $product->price * $item['quantity'];
             }
         }
-        
+
         $requests['code'] = $this->generateCode();
         $requests['id_card'] = $member->id_card;
         $requests['member_name'] = $member->name;
@@ -531,12 +531,12 @@ class TransactionCrudController extends CrudController
         unset($requests['quantity']);
         unset($requests['discount_percentage']);
         unset($requests['discount_amount']);
-        
-        $transaction = Transaction::create($requests);
+
+        $transaction = Transaction::updateOrCreate([ "id" => $requests['id'],], $requests);
         // Save Log Product Sold
         foreach ($products as $key => $item) {
             $product = Product::
-                    leftJoin(DB::raw('( SELECT * FROM branch_products WHERE branch_id = '.$requests['branch_id'].' ) as branch_products2'), 
+                    leftJoin(DB::raw('( SELECT * FROM branch_products WHERE branch_id = '.$requests['branch_id'].' ) as branch_products2'),
                         function($join) { $join->on('branch_products2.product_id', '=', 'products.id'); }
                     )
                     ->where('products.id', $item['product_id'])

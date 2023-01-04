@@ -34,7 +34,7 @@ class MemberCrudController extends CrudController
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
-     * 
+     *
      * @return void
      */
     public function setup()
@@ -46,7 +46,7 @@ class MemberCrudController extends CrudController
 
     /**
      * Define what happens when the List operation is loaded.
-     * 
+     *
      * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
      * @return void
      */
@@ -55,7 +55,6 @@ class MemberCrudController extends CrudController
         $this->crud->viewAfterContent = ['image_preview_helper'];
         $this->crud->firstCellNonFlex = true;
         $this->crud->column('member_numb')->label('Unique Number');
-        $this->crud->column('id_card')->label('ID Card');
         $this->crud->column('name');
         $this->crud->addColumn([
             'name' => 'level_id',
@@ -86,11 +85,6 @@ class MemberCrudController extends CrudController
                 },
             ],
         ]);
-        $this->crud->column('gender');
-        $this->crud->column('phone');
-        $this->crud->column('email');
-        $this->crud->column('address');
-        $this->crud->column('npwp')->label('NPWP');
         $this->crud->column('lastpayment_status')->label('Last Payment Status')->wrapper([
             'element' => 'span',
             'class' => function ($crud, $column, $entry, $related_key) {
@@ -111,7 +105,12 @@ class MemberCrudController extends CrudController
             'label' => 'Expired At',
             'type' => 'datetime',
         ]);
-
+        $this->crud->column('id_card')->label('ID Card');
+        $this->crud->column('gender');
+        $this->crud->column('phone');
+        $this->crud->column('email');
+        $this->crud->column('address');
+        $this->crud->column('npwp')->label('NPWP');
         $this->crud->addButtonFromModelFunction('line', 'line_register', 'line_register', 'beginning');
         $this->crud->addButtonFromModelFunction('line', 'cardMember', 'cardMember', 'beginning');
         $this->crud->addButtonFromModelFunction('line', 'reportMember', 'reportMember', 'beginning');
@@ -120,7 +119,7 @@ class MemberCrudController extends CrudController
 
     /**
      * Define what happens when the Create operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-create
      * @return void
      */
@@ -266,7 +265,7 @@ class MemberCrudController extends CrudController
 
     /**
      * Define what happens when the Update operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-update
      * @return void
      */
@@ -283,7 +282,7 @@ class MemberCrudController extends CrudController
             'label' => 'Member Type',
             'type' => 'text',
             'attributes' => [
-                'disabled' => 'disable', 
+                'disabled' => 'disable',
             ],
         ]);
         if( $entry->branch) {
@@ -322,16 +321,16 @@ class MemberCrudController extends CrudController
             ],
         ]);
         $this->crud->removeField('level_id');
-        $this->crud->removeField('level_name');        
+        $this->crud->removeField('level_name');
     }
-    
+
     /**
      * Define what happens when the Show operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-show
      * @return void
      */
-    protected function setupShowOperation() 
+    protected function setupShowOperation()
     {
         $this->setupListOperation();
         $this->crud->addColumn([
@@ -355,7 +354,7 @@ class MemberCrudController extends CrudController
     public function store()
     {
         $requests = request()->all();
-        
+
         $this->crud->validateRequest($requests);
         $member_type = request('member_type');
         if ($member_type == 'PERSONAL'){
@@ -393,9 +392,9 @@ class MemberCrudController extends CrudController
             return redirect()->back()->withInput()->withErrors($e->getMessage());
         }
     }
-    
+
     public function update()
-    {   
+    {
         $this->crud->validateRequest();
         $requests = request()->all();
         DB::beginTransaction();

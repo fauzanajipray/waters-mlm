@@ -89,7 +89,7 @@ class DatabaseSeeder extends Seeder
             'role_id' => 2,
         ]);
         $user->assignRole('Admin');
-        
+
 
         $user = User::updateOrCreate([
             'email' => 'andi@gmail.com'
@@ -120,7 +120,7 @@ class DatabaseSeeder extends Seeder
             'role_id' => 1,
         ]);
         $user->assignRole('Super Admin');
-        
+
     }
 
     private function product()
@@ -247,7 +247,7 @@ class DatabaseSeeder extends Seeder
                         "lastpayment_status" => $csvData["Last Payment Status"] == "Paid" ? "1" : "0",
                         "npwp" => $csvData["NPWP Number"],
                     ]);
-            
+
 
             if (strtolower($csvData["Last Payment Status"]) == "paid") {
                 ActivationPayments::updateOrCreate([
@@ -270,16 +270,20 @@ class DatabaseSeeder extends Seeder
         $csvDatas = $this->csvToArray($filename);
 
         foreach ($csvDatas as $csvData) {
-            Customer::updateOrCreate([
-                "name" => $csvData["Name"],
-            ],[
-                "name" => $csvData["Name"],
-                "address" => $csvData["Address"],
-                "city" => $csvData["City"],
-                "phone" => $csvData["HP"],
-                "member_id" => $csvData["Member ID"],
-                "is_member" => $csvData["Is Member"],
-            ]);
+            if($csvData["Member ID"]){
+                Customer::updateOrCreate([
+                    "id" => $csvData["ID"],
+                    "name" => $csvData["Name"],
+                ],[
+                    "id" => $csvData["ID"],
+                    "name" => $csvData["Name"],
+                    "address" => $csvData["Address"],
+                    "city" => $csvData["City"],
+                    "phone" => $csvData["HP"],
+                    "member_id" => $csvData["Member ID"],
+                    "is_member" => $csvData["Is Member"] ?? 0,
+                ]);
+            }
         }
         $members = Member::all();
         foreach ($members as $member) {
@@ -296,7 +300,7 @@ class DatabaseSeeder extends Seeder
                 "city" => null,
                 "phone" => $member->phone,
                 "member_id" => $member->id,
-                "is_member" => "1" 
+                "is_member" => "1"
             ]);
         }
 
@@ -311,28 +315,32 @@ class DatabaseSeeder extends Seeder
         $transCrud = new TransactionCrudController();
 
         foreach ($csvDatas as $csvData) {
-            $existTrans = Transaction::where("code", $csvData['Code'] ?? 0)->exists();
-            $customer = Customer::where("id", $csvData['Customer ID'])->first();
-            $requests = [
-                "transaction_date" => date("Y-m-d H:i:s", strtotime($csvData['Transaction Date'])),
-                "customer_id" => $csvData['Customer ID'],
-                "shipping_address" => $csvData['Shipping Address'],
-                "is_member" => (isset($customer)) ? $customer->is_member : 0,
-                "member_id" => $csvData['Member ID'],
-                "product_id" => $csvData['Product ID'],
-                "discount_percentage" => $csvData['Discount Percentage'],
-                "discount_amount" => $csvData['Discount Amount'],
-                "quantity" => $csvData['Qty'],
-                "created_by" => 1,
-                "updated_by" => 1,
-                "type" => $csvData['Tipe Penjualan'] ,
-                "branch_id" => $csvData['Branch ID'],
-                "stock_from" => Branch::find($csvData['Branch ID'])->name,
-            ];
+            if($csvData["Member ID"] ) {
+                $existTrans = Transaction::where("code", $csvData['Code'] ?? 0)->exists();
+                $customer = Customer::where("id", $csvData['Customer ID'])->first();
+                $requests = [
+                    "id" => $csvData["ID"],
+                    "transaction_date" => date("Y-m-d H:i:s", strtotime($csvData['Transaction Date'])),
+                    "customer_id" => $csvData['Customer ID'],
+                    "shipping_address" => $csvData['Shipping Address'],
+                    "is_member" => (isset($customer)) ? $customer->is_member : 0,
+                    "member_id" => $csvData['Member ID'],
+                    "product_id" => $csvData['Product ID'],
+                    "discount_percentage" => $csvData['Discount Percentage'],
+                    "discount_amount" => $csvData['Discount Amount'],
+                    "quantity" => $csvData['Qty'],
+                    "created_by" => 1,
+                    "updated_by" => 1,
+                    "type" => $csvData['Tipe Penjualan'] ,
+                    "branch_id" => $csvData['Branch ID'],
+                    "stock_from" => Branch::find($csvData['Branch ID'])->name,
+                ];
 
-            if (!$existTrans) {
-                $transCrud->createByImport($requests);
+                if (!$existTrans) {
+                    $transCrud->createByImport($requests);
+                }
             }
+
         }
 
         $this->command->line("Completed --> Transaction");
@@ -344,7 +352,7 @@ class DatabaseSeeder extends Seeder
         ],[
             "name" => "HCI",
             "description" => "",
-        ]);       
+        ]);
 
         PaymentMethod::updateOrCreate([
             "name" => "QRIS",
@@ -412,26 +420,27 @@ class DatabaseSeeder extends Seeder
         }
         $this->command->line("Completed --> Stock");
     }
-    
+
     private function transactionPayment()
     {
         $filename = Storage::path('sample/payment.csv');
         $csvDatas = $this->csvToArray($filename);
         $transPaymentCrud = new TransactionPaymentCrudController();
         foreach ($csvDatas as $csvData) {
-            
-            $requests = [
-                "transaction_id" => $csvData['Transaction ID'],
-                "payment_date" => date("Y-m-d H:i:s", strtotime($csvData['Tanggal Payment'])),
-                "payment_method" => $csvData['Payment Method'],
-                "amount" => $csvData['Nominal'],
-                "type" => $csvData['Status'],
-             ];
-            try {
-                $transPaymentCrud->createByImport($requests);
-            } catch (Exception $e) {
-                $this->command->line("Error --> Transaction Payment");
-                $this->command->line($e->getMessage());
+            if($csvData['Nominal']){
+                $requests = [
+                    "transaction_id" => $csvData['Transaction ID'],
+                    "payment_date" => date("Y-m-d H:i:s", strtotime($csvData['Tanggal Payment'])),
+                    "payment_method" => $csvData['Payment Method'],
+                    "amount" => $csvData['Nominal'],
+                    "type" => $csvData['Status'],
+                 ];
+                try {
+                    $transPaymentCrud->createByImport($requests);
+                } catch (Exception $e) {
+                    $this->command->line("Error --> Transaction Payment, ID " . $csvData['Transaction ID']);
+                    $this->command->line($e->getMessage());
+                }
             }
         }
 

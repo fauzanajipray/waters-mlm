@@ -33,7 +33,7 @@ class TransactionPaymentCrudController extends CrudController
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
-     * 
+     *
      * @return void
      */
     public function setup()
@@ -45,13 +45,13 @@ class TransactionPaymentCrudController extends CrudController
 
     /**
      * Define what happens when the List operation is loaded.
-     * 
+     *
      * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
      * @return void
      */
     protected function setupListOperation()
     {
-        
+
         $this->crud->column('code');
         $this->crud->addColumn([
             'name' => 'transaction_id',
@@ -75,13 +75,13 @@ class TransactionPaymentCrudController extends CrudController
         /**
          * Columns can be defined using the fluent syntax or array syntax:
          * - $this->crud->column('price')->type('number');
-         * - $this->crud->addColumn(['name' => 'price', 'type' => 'number']); 
+         * - $this->crud->addColumn(['name' => 'price', 'type' => 'number']);
          */
     }
 
     /**
      * Define what happens when the Create operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-create
      * @return void
      */
@@ -89,7 +89,7 @@ class TransactionPaymentCrudController extends CrudController
     {
         $this->crud->setValidation(TransactionPaymentRequest::class);
         Transaction::findOrfail(request()->transaction_id);
-        
+
         $this->crud->addField([
             'name' => 'payment_method_id',
             'label' => 'Method',
@@ -151,13 +151,13 @@ class TransactionPaymentCrudController extends CrudController
             'type' => 'datetime_picker',
             'value' => date('Y-m-d H:i:s'),
         ]);
-                
+
         Widget::add()->type('script')->content(asset('assets/js/admin/form/payment_transaction.js'));
     }
 
     /**
      * Define what happens when the Update operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-update
      * @return void
      */
@@ -308,7 +308,7 @@ class TransactionPaymentCrudController extends CrudController
                     ->first();
                 if(!$product) {
                     throw new \Exception('Stock '. $transactionProduct->name.' '. $transactionProduct->model .' is not enough');
-                }  
+                }
                 if ($product->quantity < $transactionProduct->quantity) {
                     throw new \Exception('Stock '. $transactionProduct->name.' '. $transactionProduct->model .' is not enough');
                 }
@@ -355,7 +355,7 @@ class TransactionPaymentCrudController extends CrudController
                         $stockHistory->sales_on = $transaction->id;
                         $stockHistory->product_id = $transactionProduct->product_id;
                         $stockHistory->quantity = $transactionProduct->quantity;
-                        $stockHistory->save();    
+                        $stockHistory->save();
                     } else {
                         // out to branch
                         $stockHistory = new StockHistory();
@@ -366,7 +366,7 @@ class TransactionPaymentCrudController extends CrudController
                         $stockHistory->quantity = $transactionProduct->quantity;
                         $stockHistory->out_to = $transaction->member->branch->id;
                         $stockHistory->save();
-                        
+
                         // in to member branch
                         $stockNew = Stock::where('product_id', $transactionProduct->product_id)
                             ->where('branch_id', $transaction->member->branch->id)->first();
@@ -379,7 +379,7 @@ class TransactionPaymentCrudController extends CrudController
                             $stockNew->quantity = $stockNew->quantity + $transactionProduct->quantity;
                         }
                         $stockNew->save();
-                        
+
                         $stockHistoryIn = new StockHistory();
                         $stockHistoryIn->type = 'in';
                         $stockHistoryIn->branch_id = $transaction->member->branch->id;
@@ -387,9 +387,9 @@ class TransactionPaymentCrudController extends CrudController
                         $stockHistoryIn->product_id = $transactionProduct->product_id;
                         $stockHistoryIn->quantity = $transactionProduct->quantity;
                         $stockHistoryIn->in_from = $transaction->branch_id;
-                        $stockHistoryIn->save();   
+                        $stockHistoryIn->save();
                     }
-                }                
+                }
             }
             DB::commit();
             return redirect($this->crud->route);
@@ -410,9 +410,9 @@ class TransactionPaymentCrudController extends CrudController
     }
 
     public function createByImport($requests){
-        
+
         // $transaction = Transaction::findOrfail($requests['transaction_id']);
-        $transaction = Transaction::with(['transactionPayments', 'transactionProducts'])->find($requests['transaction_id']);
+        $transaction = Transaction::with(['transactionPayments', 'transactionProducts'])->findOrFail($requests['transaction_id']);
         $totalPrice =  0;
         if ($transaction->type == 'Bebas Putus') {
             $totalPrice = $transaction->transactionProducts->sum(function($item){
@@ -495,7 +495,7 @@ class TransactionPaymentCrudController extends CrudController
                     ->first();
                 if(!$product) {
                     throw new \Exception('Stock '. $transactionProduct->name.' '. $transactionProduct->model .' is not enough');
-                }  
+                }
                 if ($product->quantity < $transactionProduct->quantity) {
                     throw new \Exception('Stock '. $transactionProduct->name.' '. $transactionProduct->model .' is not enough');
                 }
@@ -506,7 +506,7 @@ class TransactionPaymentCrudController extends CrudController
                 $lastPaymentDate = $transaction->transactionPayments->sortByDesc('payment_date')->first()->payment_date;
                 // dd($lastPaymentDate);
                 $this->calculateBonus($transaction, $transaction->member, $lastPaymentDate);
-                
+
                 /* Minus stock */
                 foreach ($transactionProducts as $transactionProduct) {
                     $stock = Stock::where('product_id', $transactionProduct->product_id)
@@ -514,7 +514,7 @@ class TransactionPaymentCrudController extends CrudController
                         ->first();
                     $stock->quantity = $stock->quantity - $transactionProduct->quantity;
                     $stock->save();
-   
+
                     /* Add stock history */
                     if($transaction->type != "Display"){
                         $stockHistory = new StockHistory();
@@ -524,7 +524,7 @@ class TransactionPaymentCrudController extends CrudController
                         $stockHistory->product_id = $transactionProduct->product_id;
                         $stockHistory->quantity = $transactionProduct->quantity;
                         $stockHistory->created_at = $lastPaymentDate;
-                        $stockHistory->save();    
+                        $stockHistory->save();
                     } else {
                         // out to branch
                         $stockHistory = new StockHistory();
@@ -536,7 +536,7 @@ class TransactionPaymentCrudController extends CrudController
                         $stockHistory->out_to = $transaction->member->branch->id;
                         $stockHistory->created_at = $lastPaymentDate;
                         $stockHistory->save();
-                        
+
                         // in to member branch
                         $stockNew = Stock::where('product_id', $transactionProduct->product_id)
                             ->where('branch_id', $transaction->member->branch->id)->first();
@@ -550,7 +550,7 @@ class TransactionPaymentCrudController extends CrudController
                         }
                         $stockNew->created_at = $lastPaymentDate;
                         $stockNew->save();
-                        
+
                         $stockHistoryIn = new StockHistory();
                         $stockHistoryIn->type = 'in';
                         $stockHistoryIn->branch_id = $transaction->member->branch->id;
@@ -559,15 +559,15 @@ class TransactionPaymentCrudController extends CrudController
                         $stockHistoryIn->quantity = $transactionProduct->quantity;
                         $stockHistoryIn->in_from = $transaction->branch_id;
                         $stockHistoryIn->created_at = $lastPaymentDate;
-                        $stockHistoryIn->save();   
+                        $stockHistoryIn->save();
                     }
-                }                
+                }
             }
             DB::commit();
             return ;
         } catch (Exception $e) {
             DB::rollBack();
             return throw new Exception($e->getMessage());
-        }        
+        }
     }
 }
