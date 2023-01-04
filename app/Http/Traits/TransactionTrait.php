@@ -1,22 +1,14 @@
 <?php
 namespace App\Http\Traits;
 
-use App\Models\BonusHistory;
 use App\Models\Customer;
-use App\Models\Level;
-use App\Models\LevelUpHistories;
-use App\Models\Member;
 use App\Models\Transaction;
-use App\Models\TransactionProduct;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Prologue\Alerts\Facades\Alert;
 use Nasution\Terbilang;
 
 trait TransactionTrait {
-    protected function generateCode() 
+    protected function generateCode()
     {
         $lastTransaction = Transaction::withTrashed()->orderBy('id', 'desc')->first();
         $lastTransactionCode = $lastTransaction->code ?? 'TRX-000000-0000';
@@ -50,7 +42,7 @@ trait TransactionTrait {
             ->find($id);
         $transaction->total_paid = $transaction->transactionPayments->sum('amount');
         $transaction->payment_type = null;
-        if ($transaction->transactionPayments->count() > 0)   { 
+        if ($transaction->transactionPayments->count() > 0)   {
             $transaction->payment_type = $transaction->transactionPayments->first()->type ;
         };
         if (!$transaction) {

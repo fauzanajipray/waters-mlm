@@ -54,6 +54,8 @@
                         </tr>
                     </tbody>
                 </table>
+
+                <p class="font-italic">Notes : BP (Bonus Penjualan), GM (Goldmine), OR (Overriding), SS (Komisi Sparepart), KN (Komisi NIS), KC (Komisi Cabang), KS (Komisi Stokist)</p>
             </div>
         </div>
       </div>
@@ -161,7 +163,7 @@
                     @if($loop->first && $crud->getOperationSetting('bulkActions'))
                       {!! View::make('crud::columns.inc.bulk_actions_checkbox')->render() !!}
                     @endif
-                    {!! $column['label'] !!} 
+                    {!! $column['label'] !!}
                   </th>
                 @endforeach
 
@@ -180,7 +182,7 @@
           @endif
           @if (isset($crud->viewAfterContent) && is_array($crud->viewAfterContent))
                 @foreach ($crud->viewAfterContent as $name)
-                    @include($name) 
+                    @include($name)
                 @endforeach
             @endif
     </div>
