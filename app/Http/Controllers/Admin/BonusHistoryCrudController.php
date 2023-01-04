@@ -147,26 +147,26 @@ class BonusHistoryCrudController extends CrudController
     private function getFilter(){
         $startDate = Carbon::now()->firstOfMonth()->format('Y-m-d');
         $endDate = Carbon::now()->format('Y-m-d');
-        // $this->crud->addFilter([
-        //         'type' => 'date_range',
-        //         'name' => 'created_at',
-        //         'label'=> 'Date',
-        //         'init_selection' => [
-        //             'from' => $startDate,
-        //             'to' => $endDate
-        //         ]
-        //     ],
-        //     false,
-        //     function($value) {
-        //         $dates = json_decode($value);
-        //         $this->crud->addClause('where', 'created_at', '>=', $dates->from);
-        //         $this->crud->addClause('where', 'created_at', '<=', $dates->to . ' 23:59:59');
-        //     },
-        //     function() use ($startDate, $endDate) {
-        //         $this->crud->addClause('where', 'created_at', '>=', $startDate . ' 00:00:00');
-        //         $this->crud->addClause('where', 'created_at', '<=', $endDate . ' 23:59:59');
-        //     },
-        // );
+        $this->crud->addFilter([
+                'type' => 'date_range',
+                'name' => 'created_at',
+                'label'=> 'Date',
+                'init_selection' => [
+                    'from' => $startDate,
+                    'to' => $endDate
+                ]
+            ],
+            false,
+            function($value) {
+                $dates = json_decode($value);
+                $this->crud->addClause('where', 'created_at', '>=', $dates->from);
+                $this->crud->addClause('where', 'created_at', '<=', $dates->to . ' 23:59:59');
+            },
+            function() use ($startDate, $endDate) {
+                $this->crud->addClause('where', 'created_at', '>=', $startDate . ' 00:00:00');
+                $this->crud->addClause('where', 'created_at', '<=', $endDate . ' 23:59:59');
+            },
+        );
 
         $this->crud->addFilter([
                 'name' => 'member_id',
@@ -180,23 +180,22 @@ class BonusHistoryCrudController extends CrudController
                 $this->crud->addClause('where', 'member_id', $value);
             }
         );
-        // // Filter Bonus Type, Default GM and OR
-        // $this->crud->addFilter([
-        //         'name' => 'bonus_type',
-        //         'type' => 'select2_multiple',
-        //         'label'=> 'Bonus Type',
-        //         'init_selection'=> ['GM', 'OR', 'SS'],
-        //     ],
-        //     [ 'GM' => 'GM', 'OR' => 'OR', 'BP' => 'BP', 'SS' => 'SS'],
-        //     function($value) {
-        //         $this->crud->addClause('whereIn', 'bonus_type', json_decode($value));
-        //     },
-        //     // function() {
-        //     //     $this->crud->addClause('whereIn', 'bonus_type', ['GM', 'OR', 'SS']);
-        //     // },
-        // );
+        // Filter Bonus Type, Default GM and OR
+        $this->crud->addFilter([
+                'name' => 'bonus_type',
+                'type' => 'select2_multiple',
+                'label'=> 'Bonus Type',
+                'init_selection'=> ['GM', 'OR', 'SS'],
+            ],
+            [ 'GM' => 'GM', 'OR' => 'OR', 'BP' => 'BP', 'SS' => 'SS'],
+            function($value) {
+                $this->crud->addClause('whereIn', 'bonus_type', json_decode($value));
+            },
+            function() {
+                $this->crud->addClause('whereIn', 'bonus_type', ['GM', 'OR', 'SS']);
+            },
+        );
 
-        // dd($this->crud->query->toSql());
     }
 
     public function index()
