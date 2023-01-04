@@ -18,6 +18,7 @@ use App\Models\PaymentMethod;
 use App\Models\Product;
 use App\Models\Transaction;
 use App\Models\User;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -223,43 +224,51 @@ class DatabaseSeeder extends Seeder
         $config = Configuration::where('key', 'activation_payment_amount')->first();
         ActivationPayments::truncate();
         foreach ($csvDatas as $csvData) {
-            $memberMst = Member::where("id", $csvData["Upline ID"])->first();
+            // try {
+                $memberMst = Member::where("id", $csvData["Upline ID"])->first();
+                // $expiredDate = ($csvData['Expired At']) ? Carbon::createFromFormat('d/m/Y', $csvData['Expired At'])->format("Y-m-d") : null;
+                $member = Member::updateOrCreate([
+                            "member_numb" => $csvData["Unique Number"],
+                        ],[
+                            "member_numb" => $csvData["Unique Number"],
+                            "id_card_type" => $csvData["ID Card Type"],
+                            "id_card" => $csvData["ID Card"],
+                            "name" => $csvData["Name"],
+                            "level_id" => $csvData["Level ID"],
+                            "gender" => $csvData["Gender"],
+                            "postal_code" => $csvData["Postal Code"],
+                            "dob" => ($csvData['DOB']) ? Carbon::createFromFormat('d/m/Y', $csvData['DOB'])->format("Y-m-d") : null,
+                            "phone" => $csvData["Phone"],
+                            "email" => $csvData["Email"],
+                            "address" => $csvData["Address"],
+                            "join_date" => ($csvData['Join Date']) ? Carbon::createFromFormat('d/m/Y', $csvData['Join Date'])->format("Y-m-d") : Carbon::now(),
+                            "expired_at" => date("Y-m-d", strtotime($csvData["Expired At"])) ?? null,
+                            "upline_id" => (isset($memberMst)) ? $memberMst->id : null,
+                            "member_type" => strtoupper($csvData["Member Type"]),
+                            "branch_id" => $csvData["Office ID"],
+                            "lastpayment_status" => $csvData["Last Payment Status"] == "Paid" ? "1" : "0",
+                            "npwp" => $csvData["NPWP Number"],
+                        ]);
 
-            $member = Member::updateOrCreate([
-                        "member_numb" => $csvData["Unique Number"],
-                    ],[
-                        "member_numb" => $csvData["Unique Number"],
-                        "id_card_type" => $csvData["ID Card Type"],
-                        "id_card" => $csvData["ID Card"],
-                        "name" => $csvData["Name"],
-                        "level_id" => $csvData["Level ID"],
-                        "gender" => $csvData["Gender"],
-                        "postal_code" => $csvData["Postal Code"],
-                        "dob" => date("Y-m-d", strtotime($csvData["DOB"])),
-                        "phone" => $csvData["Phone"],
-                        "email" => $csvData["Email"],
-                        "address" => $csvData["Address"],
-                        "join_date" => date("Y-m-d", strtotime($csvData["Join Date"])),
-                        "expired_at" => date("Y-m-d", strtotime($csvData["Expired At"])),
-                        "upline_id" => (isset($memberMst)) ? $memberMst->id : null,
-                        "member_type" => strtoupper($csvData["Member Type"]),
-                        "branch_id" => $csvData["Office ID"],
-                        "lastpayment_status" => $csvData["Last Payment Status"] == "Paid" ? "1" : "0",
-                        "npwp" => $csvData["NPWP Number"],
-                    ]);
+                if (strtolower($csvData["Last Payment Status"]) == "paid") {
+                    $dateNow = Carbon::now()->format("ymd");
+                    $codeDate = ($csvData['Join Date']) ? Carbon::createFromFormat('d/m/Y', $csvData['Join Date'])->format("ymd") : $dateNow;
+                    $code = "PYM-". $codeDate .'-'.str_pad($member->id, 4, '0', STR_PAD_LEFT);
+                    ActivationPayments::updateOrCreate([
+                            "code" => $code,
+                            "member_id" => $member->id
+                        ],[
+                            "code" => $code,
+                            "payment_date" => ($csvData['Join Date']) ? Carbon::createFromFormat('d/m/Y', $csvData['Join Date'])->format("Y-m-d") : Carbon::now(),
+                            "member_id" => $member->id,
+                            "total" => $config->value
+                        ]);
 
-
-            if (strtolower($csvData["Last Payment Status"]) == "paid") {
-                ActivationPayments::updateOrCreate([
-                        "payment_date" => date("Y-m-d", strtotime($csvData["Join Date"])),
-                        "member_id" => $member->id
-                    ],[
-                        "code" => "PYM-".date("ymd", strtotime($csvData["Join Date"])).'-'.str_pad($member->id, 4, '0', STR_PAD_LEFT),
-                        "payment_date" => date("Y-m-d", strtotime($csvData["Join Date"])),
-                        "member_id" => $member->id,
-                        "total" => $config->value
-                    ]);
-            }
+                }
+            // } catch (Exception $e) {
+            //     $this->command->line("Error --> Member ID : ".$csvData["ID"]);
+            //     $this->command->line($e->getMessage());
+            // }
         }
         $this->command->line("Completed --> Member");
     }
@@ -320,7 +329,7 @@ class DatabaseSeeder extends Seeder
                 $customer = Customer::where("id", $csvData['Customer ID'])->first();
                 $requests = [
                     "id" => $csvData["ID"],
-                    "transaction_date" => date("Y-m-d H:i:s", strtotime($csvData['Transaction Date'])),
+                    "transaction_date" => Carbon::createFromFormat('d/m/Y', $csvData['Transaction Date'])->format("Y-m-d"),
                     "customer_id" => $csvData['Customer ID'],
                     "shipping_address" => $csvData['Shipping Address'],
                     "is_member" => (isset($customer)) ? $customer->is_member : 0,
@@ -414,7 +423,7 @@ class DatabaseSeeder extends Seeder
                 "branch_id" => $csvData['Branch ID'],
                 "product_id" => $csvData['Product ID'],
                 "quantity" => $csvData['Quantity'],
-                "created_at" =>  date("Y-m-d H:i:s", strtotime($csvData['Date'])),
+                "created_at" => Carbon::createFromFormat('d/m/Y', $csvData['Date'])->format("Y-m-d"),
             ];
             $stockCrud->createByImport($requests);
         }
@@ -429,12 +438,13 @@ class DatabaseSeeder extends Seeder
         foreach ($csvDatas as $csvData) {
             if($csvData['Nominal']){
                 $requests = [
+                    "id" => $csvData["ID"],
                     "transaction_id" => $csvData['Transaction ID'],
-                    "payment_date" => date("Y-m-d H:i:s", strtotime($csvData['Tanggal Payment'])),
+                    "payment_date" => Carbon::createFromFormat('d/m/Y', $csvData['Tanggal Payment'])->format("Y-m-d"),
                     "payment_method" => $csvData['Payment Method'],
                     "amount" => $csvData['Nominal'],
                     "type" => $csvData['Status'],
-                 ];
+                ];
                 try {
                     $transPaymentCrud->createByImport($requests);
                 } catch (Exception $e) {

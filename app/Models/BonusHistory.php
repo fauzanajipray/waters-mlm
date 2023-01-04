@@ -38,11 +38,11 @@ class BonusHistory extends Model
     public function transaction(){
         return $this->belongsTo(Transaction::class, 'transaction_id');
     }
-    
+
     public function member(){
         return $this->belongsTo(Member::class, 'member_id');
     }
-    
+
     /*
     |--------------------------------------------------------------------------
     | SCOPES
@@ -56,7 +56,7 @@ class BonusHistory extends Model
         } else  {
             $query->whereIn('bonus_type', ['GM', 'OR', 'SS']);
         }
-        return $query; 
+        return $query;
     }
 
     public function scopeWhereCreatedAt($query, $created_at)

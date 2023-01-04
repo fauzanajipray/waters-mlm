@@ -14,7 +14,6 @@ trait TransactionPaymentTrait {
 
     private function calculateBonus($transaction, $member, $lastPaymentDate ,$log = [])
     {
-
         $levelNow = Level::where('id', $member->level_id)->first();
         if ($this->isMemberTypePusat($member)){
             return;
