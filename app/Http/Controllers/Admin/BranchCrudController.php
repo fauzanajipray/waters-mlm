@@ -30,7 +30,7 @@ class BranchCrudController extends CrudController
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
-     * 
+     *
      * @return void
      */
     public function setup()
@@ -42,7 +42,7 @@ class BranchCrudController extends CrudController
 
     /**
      * Define what happens when the List operation is loaded.
-     * 
+     *
      * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
      * @return void
      */
@@ -50,7 +50,7 @@ class BranchCrudController extends CrudController
     {
         $this->crud->column('name');
         $this->crud->column('address');
-        $this->crud->column('type');      
+        $this->crud->column('type');
         $this->crud->addColumn([
             'name' => 'member',
             'label' => 'Owner',
@@ -63,14 +63,14 @@ class BranchCrudController extends CrudController
                     return backpack_url('member/' . $related_key . '/show');
                 },
             ],
-        ]);        
+        ]);
         // $this->crud->addButtonFromModelFunction('line', 'add_stock', 'stockButton', 'beginning'); // TODO: add stock button
         $this->crud->addButtonFromModelFunction('line', 'add_owner', 'addOwnerButton', 'beginning');
     }
 
     /**
      * Define what happens when the Create operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-create
      * @return void
      */
@@ -85,13 +85,13 @@ class BranchCrudController extends CrudController
             'options' => ($branch == 0) ? ['PUSAT' => 'PUSAT', 'CABANG' => 'CABANG', 'STOKIST' => 'STOKIST'] : ['CABANG' => 'CABANG', 'STOKIST' => 'STOKIST'],
             'allows_null' => false,
             'default' => 'CABANG',
-        ]); 
+        ]);
         $this->crud->field('address');
     }
 
     /**
      * Define what happens when the Update operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-update
      * @return void
      */
@@ -106,15 +106,19 @@ class BranchCrudController extends CrudController
     }
 
     public function memberNotExist(Request $request){
-        
+
         $search_term = $request->input('q');
         $member_type = request()->form[3];
-        
+
         if($member_type['name'] != 'member_type') {
             $member_type = request()->form[4];
             if($member_type['name'] != 'member_type') {
                 return response()->json([]);
             }
+        }
+
+        if($member_type['value'] == 'NIS') {
+            return $this->memberExist($request);
         }
 
         if($search_term) {
@@ -132,7 +136,7 @@ class BranchCrudController extends CrudController
     }
 
     public function memberExist(Request $request){
-        
+
         $search_term = $request->input('q');
 
         if($search_term) {
@@ -202,7 +206,7 @@ class BranchCrudController extends CrudController
                 'data_source' => url('members/not-branch-owner'),
             ]
         ]);
-        
+
         $this->crud->setEntityNameStrings('owners', 'Owners');
 
         return view($this->crud->getEditView(), $this->data);
@@ -238,7 +242,7 @@ class BranchCrudController extends CrudController
     public function getOriginBranch(Request $request){
         $search_term = $request->input('q');
         $branch_id = request()->form[2];
-        if($branch_id['name'] != 'branch_id') { 
+        if($branch_id['name'] != 'branch_id') {
             return response()->json([]);
         }
 
@@ -263,7 +267,7 @@ class BranchCrudController extends CrudController
         }
         $branch->map(function($item) {
             if(isset($item->member)) $item->name = $item->name . ' | ' . $item->member->name;
-            
+
             return $item;
         });
         return $branch;
@@ -344,7 +348,7 @@ class BranchCrudController extends CrudController
                 return response()->json([]);
             }
         }
-        
+
         $branches->map(function($item) {
             if(isset($item->member)) $item->name = $item->name . ' | ' . $item->member->name;
             return $item;

@@ -70,7 +70,7 @@ class Member extends Model
     public function bonus(){
         return $this->hasMany('App\Models\BonusHistory', 'member_id', 'id');
     }
-    
+
     public function transactions(){
         return $this->hasMany('App\Models\Transaction', 'member_id', 'id');
     }
@@ -82,7 +82,7 @@ class Member extends Model
     public function branch(){
         return $this->belongsTo('App\Models\Branch', 'branch_id', 'id');
     }
-    
+
     /*
     |--------------------------------------------------------------------------
     | SCOPES
@@ -94,6 +94,10 @@ class Member extends Model
 
     public function scopeIsNotActive() {
         return $this->where('expired_at', '<', date('Y-m-d'))->orWhere('expired_at', null);
+    }
+
+    public function scopeIsNIS() {
+        return $this->where('member_type', 'NIS');
     }
 
     /*
@@ -133,6 +137,4 @@ class Member extends Model
     public function setNameAttribute($value){
         return $this->attributes['name'] = Str::title($value);
     }
-
-    
 }

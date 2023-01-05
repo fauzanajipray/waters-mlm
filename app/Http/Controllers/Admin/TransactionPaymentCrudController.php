@@ -339,7 +339,6 @@ class TransactionPaymentCrudController extends CrudController
                 $transaction->save();
                 $lastPaymentDate = $transaction->transactionPayments->sortByDesc('payment_date')->first()->payment_date;
                 $this->calculateBonus($transaction, $transaction->member, $lastPaymentDate);
-                // dd($transaction->member);
                 /* Minus stock */
                 foreach ($transactionProducts as $transactionProduct) {
                     $stock = Stock::where('product_id', $transactionProduct->product_id)
@@ -410,7 +409,6 @@ class TransactionPaymentCrudController extends CrudController
     }
 
     public function createByImport($requests){
-
         // $transaction = Transaction::findOrfail($requests['transaction_id']);
         $transaction = Transaction::with(['transactionPayments', 'transactionProducts'])->findOrFail($requests['transaction_id']);
         $totalPrice =  0;

@@ -62,5 +62,22 @@ class ConfigurationSeeder extends Seeder
             'value' => '5',
             'description' => 'Bonus tax percentage for npwp',
         ]);
+
+        Configuration::updateOrCreate([
+            'key' => 'bonus_cabang_percentage_for_product',
+        ],[
+            'key' => 'bonus_cabang_percentage_for_product',
+            'value' => '4.195',
+            'description' => 'Bonus cabang percentage for selling product',
+        ]);
+
+        Configuration::updateOrCreate([
+            'key' => 'bonus_stokist_percentage_for_product',
+        ],[
+            'key' => 'bonus_stokist_percentage_for_product',
+            'value' => '50',
+            'description' => 'Bonus stokist percentage from bonus cabang for selling product',
+        ]);
+
     }
 }

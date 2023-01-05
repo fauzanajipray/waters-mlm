@@ -8,7 +8,7 @@ crud.field('member_id').onChange(function(field) {
     if(crud.field('is_member').value == 1) {
       crud.field('customer_id').hide();
     }
-    
+
     var address = document.getElementsByName('shipping_address')[0];
     if(crud.field('is_member').value == 1) {
       var url = baseURL + '/customer/get-customer-is-member';
@@ -24,14 +24,32 @@ crud.field('member_id').onChange(function(field) {
         }
       })
     }
+    // AJAX call to get member type
+    $.ajax({
+        url: baseURL + '/member/member-type?member_id=' + field.value,
+        type: 'GET',
+        success: function(data) {
+            if(data == 'NIS'){
+                crud.field('is_nis').check();
+                crud.field('is_nis').disable();
+                crud.field('nis').hide();
+            } else {
+                crud.field('is_nis').enable();
+                crud.field('is_nis').uncheck();
+            }
+        }
+    });
   } else {
-    crud.field('customer_id').hide();
+        crud.field('customer_id').hide();
       crud.field('is_member').hide();
       crud.field('shipping_address').hide();
+      crud.field('is_nis').enable();
+      crud.field('is_nis').uncheck();
   }
 }).change();
+
 crud.field('is_member').onChange(function(field) {
-  
+
   var address = document.getElementsByName('shipping_address')[0];
   if (field.value == 1) {
       crud.field('customer_id').hide();
@@ -87,7 +105,6 @@ crud.field('customer_id').onChange(function(field){
 var form = document.querySelector('form');
 form.addEventListener('submit', function(e) {
   var transactionDate = document.getElementsByName('transaction_date')[0];
-  console.log(transactionDate.value);
   var date = new Date(transactionDate.value);
   var month = date.getMonth() + 1;
   var year = date.getFullYear();
@@ -149,3 +166,11 @@ crud.field('quantity').onChange(function(field) {
     }
   }
 }).change();
+
+crud.field('is_nis').onChange(function(field) {
+    if (field.value == 1) {
+        crud.field('nis').show();
+    } else {
+        crud.field('nis').hide();
+    }
+})

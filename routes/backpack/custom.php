@@ -26,22 +26,24 @@ Route::group([
     Route::get('members/not-activated', [App\Http\Controllers\Api\MemberController::class, 'notActivated']);
     Route::get('members/only-actived', [App\Http\Controllers\Api\MemberController::class, 'onlyActive']);
     Route::get('members/not-branch-owner', [App\Http\Controllers\Api\MemberController::class, 'notBranchOwner']);
+    Route::get('members/only-nis', 'MemberCrudController@onlyNis');
     Route::get('members/branch-owner', 'MemberCrudController@getBranchOwner');
     Route::post('members/for-filter', 'MemberCrudController@getMembersForFilter');
     Route::get('member/register-form', 'MemberCrudController@downloadFormRegister');
+    Route::get('member/member-type', 'MemberCrudController@getMemberType');
     Route::crud('role', 'RoleCrudController');
     Route::crud('permission', 'PermissionCrudController');
     Route::crud('product', 'ProductCrudController');
     Route::prefix('product')->group(function () {
         Route::post('get-product', 'ProductCrudController@getProduct');
-        Route::post('get-demokit-products', 'ProductCrudController@getDemokitProducts'); 
+        Route::post('get-demokit-products', 'ProductCrudController@getDemokitProducts');
         Route::post('get-display-products', 'ProductCrudController@getDisplayProducts');
-        Route::post('get-bebas-putus', 'ProductCrudController@getBebasProducts'); 
+        Route::post('get-bebas-putus', 'ProductCrudController@getBebasProducts');
         Route::post('for-filter', 'ProductCrudController@getProductsForFilter');
-        Route::post('for-stock', 'ProductCrudController@getProductForStock'); 
-        Route::post('for-transaction', 'ProductCrudController@getProductTransaction'); 
-        Route::post('for-transaction/sparepart', 'ProductCrudController@getProductSparepartTransaction'); 
-        Route::post('for-transaction/stock', 'ProductCrudController@getProductStockTransaction'); 
+        Route::post('for-stock', 'ProductCrudController@getProductForStock');
+        Route::post('for-transaction', 'ProductCrudController@getProductTransaction');
+        Route::post('for-transaction/sparepart', 'ProductCrudController@getProductSparepartTransaction');
+        Route::post('for-transaction/stock', 'ProductCrudController@getProductStockTransaction');
         Route::get('{id}/branch/{branch_id}', 'ProductCrudController@getProductStock');
     });
     Route::crud('transaction', 'TransactionCrudController');
@@ -77,7 +79,7 @@ Route::group([
     Route::crud('payment-method', 'PaymentMethodCrudController');
     Route::crud('transaction-payment', 'TransactionPaymentCrudController');
     Route::crud('stock', 'StockCrudController');
-    Route::crud('stock-card', 'StockCardCrudController');    
+    Route::crud('stock-card', 'StockCardCrudController');
     Route::prefix('stock-card/{idStock}')->group(function () {
         Route::crud('detail', 'StockCardDetailCrudController');
         Route::crud('adjustment', 'StockCardAdjustmentCrudController');

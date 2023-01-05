@@ -12,14 +12,14 @@ use Illuminate\Http\Request;
 use Prologue\Alerts\Facades\Alert;
 
 trait MemberTrait {
-    public function downloadCardMember($id) 
+    public function downloadCardMember($id)
     {
         $member = Member::with('level')->where('id', $id)->firstOrFail();
         $title = "Card Member ($member->member_numb - $member->name)";
         $level = $member->level->name;
         ($this->isActiveMember($member)) ? $expiredDate = Carbon::parse($member->expired_at)->format('d F Y') : $expiredDate = 'Expired';
         $pdf = PDF::loadView('member.card_member_pdf', [
-            'title' => $title, 
+            'title' => $title,
             'member' => $member,
             'level' => $level,
             'expiredDate' => $expiredDate,
@@ -59,7 +59,7 @@ trait MemberTrait {
             $total = $BP + $GM + $OR;
             // $memberActive = ($this->isActiveMember($member)) ? 'Active' : 'Expired';
 
-            
+
             $data = [
                 'id' => $member['id'],
                 'name' => $member['name'],
@@ -83,7 +83,7 @@ trait MemberTrait {
         $dataMember[0]['parentId'] = "";
         $title = "Report Member (".$dataMember[0]['member_numb']." - ".$dataMember[0]['name'].")";
         $user = User::where('id', 1)->firstOrFail();
-        return view('member.report_member', [ 
+        return view('member.report_member', [
             'title' => $title,
             'user' => $user,
             'dataMember' => json_encode($dataMember),
@@ -155,7 +155,7 @@ trait MemberTrait {
         return $memberNumb;
     }
 
-    private function isActiveMember($member) 
+    private function isActiveMember($member)
     {
         if ($member->expired_at < Carbon::now()) {
             return false;
@@ -178,7 +178,7 @@ trait MemberTrait {
     function downloadFormLineRegister($id){
         $data = Member::with('upline')->where('id', $id)->first();
         $registrationPayment = Configuration::where('key', 'activation_payment_amount')->first()->value;
-        
+
         $pdf = Pdf::loadView('exports.pdf.print-letter-form-register', [
             'data' => $data,
             'payment' => $registrationPayment,
@@ -228,6 +228,41 @@ trait MemberTrait {
         }
         $members = collect($members);
         return $members;
+    }
+
+    public function onlyNis(Request $request){
+        $search_term = $request->input('q');
+        if($search_term) {
+            $members = Member::active()->isNIS()->where(function ($query) use ($search_term) {
+                $query->where('name', 'LIKE', '%'.$search_term.'%')
+                    ->orWhere('member_numb', 'LIKE', '%'.$search_term.'%')
+                    ->orWhere('id_card', 'LIKE', '%'.$search_term.'%');
+                })
+                ->paginate(10);
+                $members->map(function($member) {
+                    $text = $member->member_numb . ' - ' . $member->name;
+                    $member->text = $text;
+                    return $member;
+                });
+        } else {
+            $members = Member::active()->isNIS()->paginate(10);
+            $members->map(function($member) {
+                $text = $member->member_numb . ' - ' . $member->name;
+                $member->text = $text;
+                return $member;
+            });
+        }
+        return $members;
+    }
+
+    public function getMemberType(Request $request){
+        $memberID = $request->input('member_id');
+        if($memberID){
+            $member = Member::find($memberID);
+            $memberType = $member->member_type;
+            return $memberType;
+        }
+        return null;
     }
 }
 

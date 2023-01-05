@@ -52,8 +52,6 @@ class TransactionCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        $this->crud->viewAfterContent = ['image_preview_helper'];
-        $this->crud->firstCellNonFlex = true;
         $this->crud->addColumns([
             'code',
             'transaction_date',
@@ -193,9 +191,30 @@ class TransactionCrudController extends CrudController
             'type' => 'checkbox',
             'label' => 'Member is customer',
             'wrapperAttributes' => [
-                'class' => 'form-group col-md-12'
+                'class' => 'form-group col-md-6'
             ],
             'value' => 1,
+        ]);
+
+        $this->crud->addField([
+            'name' => 'is_nis',
+            'type' => 'checkbox',
+            'label' => 'NIS',
+            'wrapperAttributes' => [
+                'class' => 'form-group col-md-6'
+            ],
+            'dependencies' => ['member_id'],
+        ]);
+
+        $this->crud->addField([
+            'name' => 'nis',
+            'type' => 'select2_from_ajax',
+            'entity' => 'member',
+            'attribute' => 'text',
+            'label' => 'NIS Member',
+            'data_source' => url('members/only-nis'),
+            'dependencies' => ['is_nis', 'member_id'],
+            'delay' => 500
         ]);
 
         $this->crud->field('shipping_notes');
@@ -388,11 +407,7 @@ class TransactionCrudController extends CrudController
                 $errors['customer_id'] = 'Customer is required';
             }
             if (isset($errors)) return redirect()->back()->withErrors($errors)->withInput();
-            $member = Member::with(['upline' => function($query) {
-                $query->with(['upline' => function($query) {
-                    $query->with('level');
-                }]);
-            }])->find($requests['member_id']);
+            $member = Member::find($requests['member_id']);
         } catch (\Exception $e) {
             return redirect()->back()->withErrors($e->getMessage())->withInput();
         }
@@ -409,6 +424,8 @@ class TransactionCrudController extends CrudController
                     ->first();
                 $totalPrice += $product->netto_price * $item['quantity'];
             }
+            // check member type nis
+            if ($member->member_type == 'NIS')  $requests['nis'] = $member->id;
             $requests['code'] = $this->generateCode();
             $requests['id_card'] = $member->id_card;
             $requests['member_name'] = $member->name;
@@ -480,11 +497,8 @@ class TransactionCrudController extends CrudController
             $products = $requests['products'];
         }
 
-        $member = Member::with(['upline' => function($query) {
-            $query->with(['upline' => function($query) {
-                $query->with('level');
-            }]);
-        }])->find($requests['member_id']);
+        $member = Member::find($requests['member_id']);
+
 
         if ($requests['is_member'] == 1 && $requests['member_id']) {
             $customer = Customer::where('member_id', $requests['member_id'])->first();
@@ -520,6 +534,8 @@ class TransactionCrudController extends CrudController
             }
         }
 
+        // check member type nis
+        if ($member->member_type == 'NIS')  $requests['nis'] = $member->id;
         $requests['code'] = $this->generateCode();
         $requests['id_card'] = $member->id_card;
         $requests['member_name'] = $member->name;

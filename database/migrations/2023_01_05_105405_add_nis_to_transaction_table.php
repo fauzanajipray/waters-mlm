@@ -14,12 +14,11 @@ return new class extends Migration
     public function up()
     {
         Schema::table('transactions', function (Blueprint $table) {
-            $table->unsignedBigInteger('customer_id')
-            ->after('level_id')->nullable();
+            $table->unsignedBigInteger('nis')
+                ->after('customer_id')->nullable();
 
-            $table->foreign('customer_id')
-            ->references('id')->on('customers')->onDelete('restrict')->onUpdate('cascade');
-
+            $table->foreign('nis')
+                ->references('id')->on('members')->onDelete('restrict')->onUpdate('cascade');
         });
     }
 
@@ -31,7 +30,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('transactions', function (Blueprint $table) {
-            $table::dropColumn('customer_id');
+            $table::dropColumn('nis');
         });
     }
 };

@@ -78,9 +78,9 @@ class MemberCrudController extends CrudController
                         case 'CABANG':
                             return 'badge badge-warning';
                         case 'PUSAT':
+                            return 'badge badge-dark';
+                        case 'NIS':
                             return 'badge badge-danger';
-                        default:
-                            return 'badge badge-secondary';
                     }
                 },
             ],
@@ -146,18 +146,15 @@ class MemberCrudController extends CrudController
         $branchPusat = Member::where('member_type', 'PUSAT')->count();
         $this->crud->field('member_type')->label('Member Type')->type('select_from_array')->options(
             ($branchPusat == 0) ? [
-                // 'PERSONAL' => 'PERSONAL',
-                // 'STOKIST' => 'STOKIST',
-                // 'CABANG' => 'CABANG',
-                // 'NSI' => 'NSI',
                 'PUSAT' => 'PUSAT',
             ] : [
                 'PERSONAL' => 'PERSONAL',
                 'STOKIST' => 'STOKIST',
                 'CABANG' => 'CABANG',
-                // 'NSI' => 'NSI',
+                'NIS' => 'NIS',
             ]
         )->allows_null(false);
+
         $this->crud->addField([
             'name' => 'branch_id',
             'label' => 'Branch',
@@ -169,6 +166,7 @@ class MemberCrudController extends CrudController
             'delay' => 500,
             'data_source' => url('branches/member-not-exist'),
         ]);
+
         $this->crud->addField([
             'name' => 'level_name',
             'label' => 'Level',

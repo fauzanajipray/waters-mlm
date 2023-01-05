@@ -26,7 +26,7 @@ class ProductCrudController extends CrudController
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
-     * 
+     *
      * @return void
      */
     public function setup()
@@ -38,7 +38,7 @@ class ProductCrudController extends CrudController
 
     /**
      * Define what happens when the List operation is loaded.
-     * 
+     *
      * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
      * @return void
      */
@@ -46,7 +46,7 @@ class ProductCrudController extends CrudController
     {
         $this->crud->column('name')->label('Name');
         $this->crud->column('model');
-        $this->crud->column('capacity');
+        $this->crud->column('capacity')->label('Remarks');
         $this->crud->column('price')->label('Netto Price')->prefix('Rp. ')->type('number_format');
         $this->crud->addColumn([
             'name' => 'type',
@@ -88,7 +88,7 @@ class ProductCrudController extends CrudController
 
     /**
      * Define what happens when the Create operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-create
      * @return void
      */
@@ -137,7 +137,7 @@ class ProductCrudController extends CrudController
             'type' => 'text',
             'dependencies' => ['type'],
         ]);
-        $this->crud->field('capacity')->label('Capacity');
+        $this->crud->field('capacity')->label('Remarks');
         $this->crud->field('price')->label('Netto Price')->type('number_format')->prefix('Rp. ');
         $this->crud->field('is_demokit')->label('Is Demokit');
         Widget::add()->type('script')->content(asset('assets/js/admin/form/product.js'));
@@ -145,7 +145,7 @@ class ProductCrudController extends CrudController
 
     /**
      * Define what happens when the Update operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-update
      * @return void
      */
@@ -175,7 +175,7 @@ class ProductCrudController extends CrudController
 
     /**
      * Define what happens when the Show operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-show-entries
      * @return void
      */

@@ -20,6 +20,11 @@ trait TransactionPaymentTrait {
             return;
         }
         if ($transaction->type == 'Normal') {
+            /* Komisi NSI */
+            if ($transaction->nis) {
+                // TODO : Hitung komisi NIS
+            }
+
             /* Bonus Penjualan Pribadi */
             if ($this->isActiveMember($member)) {
                 $bonus = BonusHistory::create([

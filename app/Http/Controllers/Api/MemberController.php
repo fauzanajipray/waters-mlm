@@ -11,7 +11,7 @@ class MemberController extends Controller
     public function index(Request $request)
     {
         $search_term = $request->input('q');
-        
+
         if($search_term) {
             $members = Member::where('name', 'LIKE', '%'.$search_term.'%')
                 ->orWhere('member_numb', 'LIKE', '%'.$search_term.'%')
@@ -33,7 +33,7 @@ class MemberController extends Controller
 
     public function notActivated(Request $request){
         $search_term = $request->input('q');
-        
+
         if($search_term) {
             $members = Member::where('name', 'LIKE', '%'.$search_term.'%')
                 ->orWhere('member_numb', 'LIKE', '%'.$search_term.'%')
