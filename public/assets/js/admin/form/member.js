@@ -1,5 +1,5 @@
 crud.field('member_type').onChange(function(field) {
-  if (field.value == 'PERSONAL' || field.value == 'NIS') {
+  if (field.value == 'PERSONAL' || field.value == 'NSI') {
     crud.field('branch_id').hide();
     crud.field('branch_office_id').show();
   } else {

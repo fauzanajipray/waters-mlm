@@ -29,13 +29,13 @@ crud.field('member_id').onChange(function(field) {
         url: baseURL + '/member/member-type?member_id=' + field.value,
         type: 'GET',
         success: function(data) {
-            if(data == 'NIS'){
-                crud.field('is_nis').check();
-                crud.field('is_nis').disable();
-                crud.field('nis').hide();
+            if(data == 'NSI'){
+                crud.field('is_nsi').check();
+                crud.field('is_nsi').disable();
+                crud.field('nsi').hide();
             } else {
-                crud.field('is_nis').enable();
-                crud.field('is_nis').uncheck();
+                crud.field('is_nsi').enable();
+                crud.field('is_nsi').uncheck();
             }
         }
     });
@@ -43,8 +43,8 @@ crud.field('member_id').onChange(function(field) {
         crud.field('customer_id').hide();
       crud.field('is_member').hide();
       crud.field('shipping_address').hide();
-      crud.field('is_nis').enable();
-      crud.field('is_nis').uncheck();
+      crud.field('is_nsi').enable();
+      crud.field('is_nsi').uncheck();
   }
 }).change();
 
@@ -167,10 +167,10 @@ crud.field('quantity').onChange(function(field) {
   }
 }).change();
 
-crud.field('is_nis').onChange(function(field) {
+crud.field('is_nsi').onChange(function(field) {
     if (field.value == 1) {
-        crud.field('nis').show();
+        crud.field('nsi').show();
     } else {
-        crud.field('nis').hide();
+        crud.field('nsi').hide();
     }
 })

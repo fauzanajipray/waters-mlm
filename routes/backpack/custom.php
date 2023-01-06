@@ -26,7 +26,7 @@ Route::group([
     Route::get('members/not-activated', [App\Http\Controllers\Api\MemberController::class, 'notActivated']);
     Route::get('members/only-actived', [App\Http\Controllers\Api\MemberController::class, 'onlyActive']);
     Route::get('members/not-branch-owner', [App\Http\Controllers\Api\MemberController::class, 'notBranchOwner']);
-    Route::get('members/only-nis', 'MemberCrudController@onlyNis');
+    Route::get('members/only-nsi', 'MemberCrudController@onlyNsi');
     Route::get('members/branch-owner', 'MemberCrudController@getBranchOwner');
     Route::post('members/for-filter', 'MemberCrudController@getMembersForFilter');
     Route::get('member/register-form', 'MemberCrudController@downloadFormRegister');
@@ -85,4 +85,5 @@ Route::group([
         Route::crud('adjustment', 'StockCardAdjustmentCrudController');
     });
     Route::crud('branch-product', 'BranchProductCrudController');
+    Route::crud('level-nsi', 'LevelNsiCrudController');
 }); // this should be the absolute last line of this file

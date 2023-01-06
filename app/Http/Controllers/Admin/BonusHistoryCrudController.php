@@ -174,14 +174,14 @@ class BonusHistoryCrudController extends CrudController
                 'name' => 'bonus_type',
                 'type' => 'select2_multiple',
                 'label'=> 'Bonus Type',
-                'init_selection'=> ['GM', 'OR', 'SS'],
+                'init_selection'=> ['GM', 'OR', 'SS', 'KN', 'KC', 'KS'],
             ],
-            [ 'GM' => 'GM', 'OR' => 'OR', 'BP' => 'BP', 'SS' => 'SS'],
+            [ 'GM' => 'GM', 'OR' => 'OR', 'BP' => 'BP', 'SS' => 'SS', 'KN' => 'KN', 'KC' => 'KC', 'KS' => 'KS'],
             function($value) {
                 $this->crud->addClause('whereIn', 'bonus_type', json_decode($value));
             },
             function() {
-                $this->crud->addClause('whereIn', 'bonus_type', ['GM', 'OR', 'SS']);
+                $this->crud->addClause('whereIn', 'bonus_type', ['GM', 'OR', 'SS', 'KN', 'KC', 'KS']);
             },
         );
 

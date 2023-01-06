@@ -52,8 +52,6 @@ class MemberCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        $this->crud->viewAfterContent = ['image_preview_helper'];
-        $this->crud->firstCellNonFlex = true;
         $this->crud->column('member_numb')->label('Unique Number');
         $this->crud->column('name');
         $this->crud->addColumn([
@@ -79,7 +77,7 @@ class MemberCrudController extends CrudController
                             return 'badge badge-warning';
                         case 'PUSAT':
                             return 'badge badge-dark';
-                        case 'NIS':
+                        case 'NSI':
                             return 'badge badge-danger';
                     }
                 },
@@ -151,7 +149,7 @@ class MemberCrudController extends CrudController
                 'PERSONAL' => 'PERSONAL',
                 'STOKIST' => 'STOKIST',
                 'CABANG' => 'CABANG',
-                'NIS' => 'NIS',
+                'NSI' => 'NSI',
             ]
         )->allows_null(false);
 
@@ -371,6 +369,7 @@ class MemberCrudController extends CrudController
         DB::beginTransaction();
         try {
             $requests['member_numb'] = $this->generateMemberNumber();
+            if($member_type == 'NSI') $requests['level_nsi_id'] = 1;
             $member = Member::create($requests);
             Customer::create([
                 'name' => $requests['name'],

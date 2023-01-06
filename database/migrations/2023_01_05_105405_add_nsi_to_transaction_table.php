@@ -14,10 +14,10 @@ return new class extends Migration
     public function up()
     {
         Schema::table('transactions', function (Blueprint $table) {
-            $table->unsignedBigInteger('nis')
+            $table->unsignedBigInteger('nsi')
                 ->after('customer_id')->nullable();
 
-            $table->foreign('nis')
+            $table->foreign('nsi')
                 ->references('id')->on('members')->onDelete('restrict')->onUpdate('cascade');
         });
     }
@@ -30,7 +30,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('transactions', function (Blueprint $table) {
-            $table::dropColumn('nis');
+            $table::dropColumn('nsi');
         });
     }
 };

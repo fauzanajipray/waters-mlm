@@ -41,21 +41,17 @@ class TransactionRequest extends FormRequest
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|numeric|min:1|in:1',
             'shipping_address' => 'required|max:255',
-            'is_nis' => 'nullable|boolean',
-            'nis' => ['nullable','numeric', function ($attribute, $value, $fail) {
-                if ($this->is_nis == 1 && $value == null) {
-                    $fail('NIS is required');
+            'is_nsi' => 'nullable|boolean',
+            'nsi' => ['nullable','numeric', function ($attribute, $value, $fail) {
+                if ($this->is_nsi == "1" && $value == null) {
+                    $fail('Member NSI is required');
                 }
-                if ($this->is_nis == 1) {
-                    $fail('NIS is not required');
-                }
-                if($this->is_nis == "1") {
-                    $member = \App\Models\Member::find($this->member_id);
-                    if ($member->member_type != 'NIS') {
-                        $fail('Member is not NIS');
+                if ($this->is_nsi == "1" && $value != null){
+                    $member = \App\Models\Member::find($value);
+                    if ($member->member_type != 'NSI') {
+                        $fail('Member is not NSI');
                     }
                 }
-                dd($this->is_nis);
             }],
             // 'products' => 'required|array',
             // 'products.*.product_id' => 'required|exists:products,id',

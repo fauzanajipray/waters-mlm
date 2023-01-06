@@ -13,6 +13,7 @@ use App\Models\BranchProduct;
 use App\Models\Configuration;
 use App\Models\Customer;
 use App\Models\Level;
+use App\Models\LevelNSI;
 use App\Models\Member;
 use App\Models\PaymentMethod;
 use App\Models\Product;
@@ -21,7 +22,6 @@ use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class DatabaseSeeder extends Seeder
@@ -38,6 +38,7 @@ class DatabaseSeeder extends Seeder
         $this->user();
         $this->product();
         $this->level();
+        $this->levelNSI();
         $this->office();
         $this->member();
         $this->branchProduct();
@@ -196,6 +197,24 @@ class DatabaseSeeder extends Seeder
         $this->command->line("Completed --> Level");
     }
 
+    private function levelNSI()
+    {
+        $filename = Storage::path('sample/level_nsi.csv');
+        $csvDatas = $this->csvToArray($filename);
+
+        foreach ($csvDatas as $csvData) {
+            LevelNSI::updateOrCreate([
+                'id' => $csvData["ID"],
+            ], [
+                'id' => $csvData["ID"],
+                'min_sold' => $csvData["Min Sold"],
+                'bonus_percentage' => $csvData["Percentage"],
+            ]);
+        }
+
+        $this->command->line("Completed --> Level NSI");
+    }
+
 
     private function office()
     {
@@ -224,7 +243,7 @@ class DatabaseSeeder extends Seeder
         $config = Configuration::where('key', 'activation_payment_amount')->first();
         ActivationPayments::truncate();
         foreach ($csvDatas as $csvData) {
-            // try {
+            try {
                 $memberMst = Member::where("id", $csvData["Upline ID"])->first();
                 $expiredDate = ($csvData['Expired At']) ? Carbon::createFromFormat('d/m/Y', $csvData['Expired At'])->format("Y-m-d") : null;
                 $member = Member::updateOrCreate([
@@ -248,6 +267,7 @@ class DatabaseSeeder extends Seeder
                             "branch_id" => $csvData["Office ID"],
                             "lastpayment_status" => $csvData["Last Payment Status"] == "Paid" ? "1" : "0",
                             "npwp" => $csvData["NPWP Number"],
+                            "level_nsi_id" => ($csvData["Level NSI"] != "") ? $csvData["Level NSI"] : null,
                         ]);
 
                 if (strtolower($csvData["Last Payment Status"]) == "paid") {
@@ -265,10 +285,10 @@ class DatabaseSeeder extends Seeder
                         ]);
 
                 }
-            // } catch (Exception $e) {
-            //     $this->command->line("Error --> Member ID : ".$csvData["ID"]);
-            //     $this->command->line($e->getMessage());
-            // }
+            } catch (Exception $e) {
+                $this->command->line("Error --> Member ID : ".$csvData["ID"]);
+                $this->command->line($e->getMessage());
+            }
         }
         $this->command->line("Completed --> Member");
     }

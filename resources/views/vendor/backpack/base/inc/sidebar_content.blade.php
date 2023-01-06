@@ -49,7 +49,6 @@
   </ul>
 </li>
 
-<li class="nav-item"><a class="nav-link" href="{{ backpack_url('level') }}"><i class="nav-icon la la-chart-line"></i> Levels</a></li>
 <li class="nav-item"><a class="nav-link" href="{{ backpack_url('payment-method') }}"><i class="nav-icon la la-money-bill"></i> Payment Methods</a></li>
 
 <!-- Histories -->
@@ -63,13 +62,21 @@
 
 <li class="nav-item"><a class="nav-link" href="{{ backpack_url('branch') }}"><i class="nav-icon la la-city"></i> Branches</a></li>
 <li class="nav-item"><a class="nav-link" href="{{ backpack_url('customer') }}"><i class="nav-icon la la-users"></i> Customers</a></li>
-<li class="nav-item"><a class="nav-link" href="{{ backpack_url('configuration') }}"><i class="nav-icon la la-tools"></i> Configurations</a></li>
+<!-- Configuration -->
+<li class="nav-item nav-dropdown">
+  <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon la la-cog"></i> Configuration</a>
+  <ul class="nav-dropdown-items">
+    <li class="nav-item"><a class="nav-link" href="{{ backpack_url('level') }}"><i class="nav-icon la la-chart-line"></i> Levels</a></li>
+    <li class="nav-item"><a class="nav-link" href="{{ backpack_url('level-nsi') }}"><i class="nav-icon la la-question"></i> Level NSI</a></li>
+    <li class="nav-item"><a class="nav-link" href="{{ backpack_url('configuration') }}"><i class="nav-icon la la-tools"></i> Others</a></li>
+  </ul>
+</li>
 <!-- Users, Roles, Permissions -->
 <li class="nav-item nav-dropdown">
   <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon la la-users"></i> Authentication</a>
   <ul class="nav-dropdown-items">
-      <li class="nav-item"><a class="nav-link" href="{{ backpack_url('user') }}"><i class="nav-icon la la-user"></i> <span>Users</span></a></li>
-      <li class="nav-item"><a class="nav-link" href="{{ backpack_url('role') }}"><i class="nav-icon la la-id-badge"></i> <span>Roles</span></a></li>
-      <li class="nav-item"><a class="nav-link" href="{{ backpack_url('permission') }}"><i class="nav-icon la la-key"></i> <span>Permissions</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="{{ backpack_url('user') }}"><i class="nav-icon la la-user"></i> <span>Users</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="{{ backpack_url('role') }}"><i class="nav-icon la la-id-badge"></i> <span>Roles</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="{{ backpack_url('permission') }}"><i class="nav-icon la la-key"></i> <span>Permissions</span></a></li>
   </ul>
 </li>

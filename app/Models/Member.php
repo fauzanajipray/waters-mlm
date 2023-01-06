@@ -96,8 +96,8 @@ class Member extends Model
         return $this->where('expired_at', '<', date('Y-m-d'))->orWhere('expired_at', null);
     }
 
-    public function scopeIsNIS() {
-        return $this->where('member_type', 'NIS');
+    public function scopeIsNSI() {
+        return $this->where('member_type', 'NSI');
     }
 
     /*

@@ -230,10 +230,10 @@ trait MemberTrait {
         return $members;
     }
 
-    public function onlyNis(Request $request){
+    public function onlyNsi(Request $request){
         $search_term = $request->input('q');
         if($search_term) {
-            $members = Member::active()->isNIS()->where(function ($query) use ($search_term) {
+            $members = Member::active()->isNSI()->where(function ($query) use ($search_term) {
                 $query->where('name', 'LIKE', '%'.$search_term.'%')
                     ->orWhere('member_numb', 'LIKE', '%'.$search_term.'%')
                     ->orWhere('id_card', 'LIKE', '%'.$search_term.'%');
@@ -245,7 +245,7 @@ trait MemberTrait {
                     return $member;
                 });
         } else {
-            $members = Member::active()->isNIS()->paginate(10);
+            $members = Member::active()->isNSI()->paginate(10);
             $members->map(function($member) {
                 $text = $member->member_numb . ' - ' . $member->name;
                 $member->text = $text;

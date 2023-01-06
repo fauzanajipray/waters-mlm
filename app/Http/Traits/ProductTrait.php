@@ -22,7 +22,7 @@ trait ProductTrait {
             ->first();
         return response()->json($product);
     }
-    
+
     public function getDemokitProducts()
     {
         $search_term = request()->input('q');
@@ -40,7 +40,7 @@ trait ProductTrait {
                         FROM `products`
                         LEFT JOIN (
                             SELECT * FROM branch_products WHERE `branch_id` = '.$branch_id['value'].'
-                        ) AS `branch_products2` 
+                        ) AS `branch_products2`
                         ON `products`.`id` = `branch_products2`.`product_id`
                     ) AS `products2`' ),
                     function($join) {
@@ -70,7 +70,7 @@ trait ProductTrait {
                         FROM `products`
                         LEFT JOIN (
                             SELECT * FROM branch_products WHERE `branch_id` = '.$branch_id['value'].'
-                        ) AS `branch_products2` 
+                        ) AS `branch_products2`
                         ON `products`.`id` = `branch_products2`.`product_id`
                     ) AS `products2`' ),
                     function($join) {
@@ -89,7 +89,7 @@ trait ProductTrait {
                     'products2.additional_price',
                     DB::raw('(products2.additional_price + products2.price) AS netto_price')
                 )
-                ->get();   
+                ->get();
         }
         $products->map(function ($stock) {
             $stock->name = $stock->name.' - '.$stock->model. ' - '.number_format($stock->netto_price). ' - Stock : '.$stock->quantity ;
@@ -112,7 +112,7 @@ trait ProductTrait {
 
     public function getDisplayProducts()
     {
-        $search_term = request()->input('q');   
+        $search_term = request()->input('q');
         $form = collect(request()->input('form'));
         $member_id = $form->where('name', 'member_id')->first();
         $branch_id = $form->where('name', 'branch_id')->first();
@@ -128,7 +128,7 @@ trait ProductTrait {
                         FROM `products`
                         LEFT JOIN (
                             SELECT * FROM branch_products WHERE `branch_id` = '.$branch_id['value'].'
-                        ) AS `branch_products2` 
+                        ) AS `branch_products2`
                         ON `products`.`id` = `branch_products2`.`product_id`
                     ) AS `products2`' ),
                     function($join) {
@@ -157,7 +157,7 @@ trait ProductTrait {
                         FROM `products`
                         LEFT JOIN (
                             SELECT * FROM branch_products WHERE `branch_id` = '.$branch_id['value'].'
-                        ) AS `branch_products2` 
+                        ) AS `branch_products2`
                         ON `products`.`id` = `branch_products2`.`product_id`
                     ) AS `products2`' ),
                     function($join) {
@@ -222,7 +222,7 @@ trait ProductTrait {
         $branch_id = collect(request()->form)->where('name', 'branch_id')->first();
         if(!$branch_id){
             return response()->json([]);
-        }        
+        }
         if($search_term){
             $products = Stock::
                 leftJoin(
@@ -231,7 +231,7 @@ trait ProductTrait {
                         FROM `products`
                         LEFT JOIN (
                             SELECT * FROM branch_products WHERE `branch_id` = '.$branch_id['value'].'
-                        ) AS `branch_products2` 
+                        ) AS `branch_products2`
                         ON `products`.`id` = `branch_products2`.`product_id`
                     ) AS `products2`' ),
                     function($join) {
@@ -261,7 +261,7 @@ trait ProductTrait {
                         FROM `products`
                         LEFT JOIN (
                             SELECT * FROM branch_products WHERE `branch_id` = '.$branch_id['value'].'
-                        ) AS `branch_products2` 
+                        ) AS `branch_products2`
                         ON `products`.`id` = `branch_products2`.`product_id`
                     ) AS `products2`' ),
                     function($join) {
@@ -292,7 +292,7 @@ trait ProductTrait {
         return $products;
     }
 
-    public function getProductsForFilter() 
+    public function getProductsForFilter()
     {
         $search_term = request()->input('q');
         if($search_term){
@@ -310,16 +310,16 @@ trait ProductTrait {
         return $products->pluck('name', 'id');
     }
 
-    public function getProductForStock() 
-    {  
+    public function getProductForStock()
+    {
         $search_term = request()->input('q');
         $branch_id = request()->form[2];
         $origin_branch_id = request()->form[3];
-        if($branch_id['name'] != 'branch_id' ) { 
+        if($branch_id['name'] != 'branch_id' ) {
             return response()->json([]);
         }
         if ($branch_id['value'] != 1) {
-            if($origin_branch_id['name'] == 'origin_branch_id' ) { 
+            if($origin_branch_id['name'] == 'origin_branch_id' ) {
                 if($search_term){
                     $stocks = Stock::leftJoin('products', 'products.id', '=', 'stocks.product_id')
                         ->where('branch_id', $origin_branch_id['value'])
@@ -368,13 +368,13 @@ trait ProductTrait {
         return $stocks->quantity ?? 0;
     }
 
-    public function getProductTransaction() 
+    public function getProductTransaction()
     {
         $search_term = request()->input('q');
         $branch_id = collect(request()->form)->where('name', 'branch_id')->first();
         if(!$branch_id){
             return response()->json([]);
-        }        
+        }
         if($search_term){
             $stocks = Stock::
                 leftJoin(
@@ -383,7 +383,7 @@ trait ProductTrait {
                         FROM `products`
                         LEFT JOIN (
                             SELECT * FROM branch_products WHERE `branch_id` = '.$branch_id['value'].'
-                        ) AS `branch_products2` 
+                        ) AS `branch_products2`
                         ON `products`.`id` = `branch_products2`.`product_id`
                     ) AS `products2`' ),
                     function($join) {
@@ -413,12 +413,12 @@ trait ProductTrait {
                         FROM `products`
                         LEFT JOIN (
                             SELECT * FROM branch_products WHERE `branch_id` = '.$branch_id['value'].'
-                        ) AS `branch_products2` 
+                        ) AS `branch_products2`
                         ON `products`.`id` = `branch_products2`.`product_id`
                     ) AS `products2`' ),
                     function($join) {
                         $join->on('products2.id', '=', 'stocks.product_id');
-                    } 
+                    }
                 )
                 ->where('stocks.branch_id', $branch_id['value'])
                 ->where('stocks.quantity', '>', 0)
@@ -436,19 +436,20 @@ trait ProductTrait {
         }
         $stocks = $stocks->map(function ($stock) {
             $stock->name = $stock->name.' - '.$stock->model. ' - '.number_format($stock->netto_price). ' - Stock : '.$stock->quantity ;
+            $stock->id = $stock->product_id;
             return $stock;
         });
 
         return $stocks;
     }
 
-    public function getProductSparepartTransaction() 
+    public function getProductSparepartTransaction()
     {
         $search_term = request()->input('q');
         $branch_id = collect(request()->form)->where('name', 'branch_id')->first();
         if(!$branch_id){
             return response()->json([]);
-        }        
+        }
         if($search_term){
             $products = Stock::
                 leftJoin(
@@ -457,7 +458,7 @@ trait ProductTrait {
                         FROM `products`
                         LEFT JOIN (
                             SELECT * FROM branch_products WHERE `branch_id` = '.$branch_id['value'].'
-                        ) AS `branch_products2` 
+                        ) AS `branch_products2`
                         ON `products`.`id` = `branch_products2`.`product_id`
                     ) AS `products2`' ),
                     function($join) {
@@ -478,7 +479,7 @@ trait ProductTrait {
                     'products2.additional_price',
                     DB::raw('(products2.additional_price + products2.price) AS netto_price')
                 )
-                ->get();   
+                ->get();
         }else{
             $products = Stock::
                 leftJoin(
@@ -487,7 +488,7 @@ trait ProductTrait {
                         FROM `products`
                         LEFT JOIN (
                             SELECT * FROM branch_products WHERE `branch_id` = '.$branch_id['value'].'
-                        ) AS `branch_products2` 
+                        ) AS `branch_products2`
                         ON `products`.`id` = `branch_products2`.`product_id`
                     ) AS `products2`' ),
                     function($join) {
@@ -506,7 +507,7 @@ trait ProductTrait {
                     'products2.additional_price',
                     DB::raw('(products2.additional_price + products2.price) AS netto_price')
                 )
-                ->get();  
+                ->get();
         }
         $products = $products->map(function ($stock) {
             $stock->name = $stock->name.' - '.number_format($stock->netto_price). ' - Stock : '.$stock->quantity ;
@@ -518,7 +519,7 @@ trait ProductTrait {
 
     public function getProductStockTransaction()
     {
-        $search_term = request()->input('q');   
+        $search_term = request()->input('q');
         $form = collect(request()->input('form'));
         $member_id = $form->where('name', 'member_id')->first();
         $branch_id = $form->where('name', 'branch_id')->first();
@@ -534,7 +535,7 @@ trait ProductTrait {
                         FROM `products`
                         LEFT JOIN (
                             SELECT * FROM branch_products WHERE `branch_id` = '.$branch_id['value'].'
-                        ) AS `branch_products2` 
+                        ) AS `branch_products2`
                             ON `products`.`id` = `branch_products2`.`product_id`
                     ) AS `products2`' ),
                     function($join) {

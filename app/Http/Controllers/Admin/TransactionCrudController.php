@@ -197,9 +197,9 @@ class TransactionCrudController extends CrudController
         ]);
 
         $this->crud->addField([
-            'name' => 'is_nis',
+            'name' => 'is_nsi',
             'type' => 'checkbox',
-            'label' => 'NIS',
+            'label' => 'NSI',
             'wrapperAttributes' => [
                 'class' => 'form-group col-md-6'
             ],
@@ -207,13 +207,13 @@ class TransactionCrudController extends CrudController
         ]);
 
         $this->crud->addField([
-            'name' => 'nis',
+            'name' => 'nsi',
             'type' => 'select2_from_ajax',
             'entity' => 'member',
             'attribute' => 'text',
-            'label' => 'NIS Member',
-            'data_source' => url('members/only-nis'),
-            'dependencies' => ['is_nis', 'member_id'],
+            'label' => 'NSI Member',
+            'data_source' => url('members/only-nsi'),
+            'dependencies' => ['is_nsi', 'member_id'],
             'delay' => 500
         ]);
 
@@ -424,8 +424,8 @@ class TransactionCrudController extends CrudController
                     ->first();
                 $totalPrice += $product->netto_price * $item['quantity'];
             }
-            // check member type nis
-            if ($member->member_type == 'NIS')  $requests['nis'] = $member->id;
+            // check member type nsi
+            if ($member->member_type == 'NSI')  $requests['nsi'] = $member->id;
             $requests['code'] = $this->generateCode();
             $requests['id_card'] = $member->id_card;
             $requests['member_name'] = $member->name;
@@ -534,8 +534,8 @@ class TransactionCrudController extends CrudController
             }
         }
 
-        // check member type nis
-        if ($member->member_type == 'NIS')  $requests['nis'] = $member->id;
+        // check member type nsi
+        if ($member->member_type == 'NSI')  $requests['nsi'] = $member->id;
         $requests['code'] = $this->generateCode();
         $requests['id_card'] = $member->id_card;
         $requests['member_name'] = $member->name;

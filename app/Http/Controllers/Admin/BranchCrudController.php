@@ -117,7 +117,7 @@ class BranchCrudController extends CrudController
             }
         }
 
-        if($member_type['value'] == 'NIS') {
+        if($member_type['value'] == 'NSI') {
             return $this->memberExist($request);
         }
 
