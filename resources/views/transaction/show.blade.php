@@ -69,6 +69,14 @@
                                 @endif
                             </td>
                         </tr>
+                        @if ($entry->nsi)
+                        <tr>
+                            <th>NSI</th>
+                            <td>
+                                {{ App\Models\Member::select(['name'])->find($entry->nsi)->name }}
+                            </td>
+                        </tr>
+                        @endif
                     </tbody>
                 </table>
             </div>
@@ -164,7 +172,7 @@
                         <tr>
                             <td colspan="@if($entry->type == 'Demokit' || $entry->type == 'Display' || $entry->type == 'Bebas Putus') 6 @else 5 @endif" style="text-align: right; font-weight: bold;">Total</td>
                             <td>Rp. {{ number_format($entry->total_price, 2, ',', '.') }}</td>
-                            
+
                         </tr>
                     </tbody>
                 </table>

@@ -369,7 +369,6 @@ class MemberCrudController extends CrudController
         DB::beginTransaction();
         try {
             $requests['member_numb'] = $this->generateMemberNumber();
-            if($member_type == 'NSI') $requests['level_nsi_id'] = 1;
             $member = Member::create($requests);
             Customer::create([
                 'name' => $requests['name'],

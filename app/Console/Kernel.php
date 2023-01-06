@@ -25,6 +25,11 @@ class Kernel extends ConsoleKernel
             ->monthlyOn($dayEndInMonth, '23:00')
             // ->everyMinute()
             ->appendOutputTo(storage_path('logs/level-up-member.log'));
+
+        $schedule->command('bonus-nsi')
+            ->monthlyOn($dayEndInMonth, '23:00')
+            // ->everyMinute()
+            ->appendOutputTo(storage_path('logs/bonus-nsi.log'));
     }
 
     /**

@@ -23,47 +23,6 @@ trait TransactionPaymentTrait {
             return;
         }
         if ($transaction->type == 'Normal') {
-            /* Komisi NSI */
-            if ($transaction->nsi) {
-                $memberNsi = Member::where('id', $transaction->nsi)->first();
-                $transactionPastTotal = Transaction::
-                    leftJoin(DB::raw('(
-                        SELECT transaction_id,MAX(created_at) as last_payment_date from transaction_payments
-                        GROUP BY transaction_id
-                    ) as transaction_payments'), 'transactions.id', '=', 'transaction_payments.transaction_id')
-                    ->where('status_paid', 1)
-                    ->where('nsi', $memberNsi->id)
-                    ->whereMonth('transaction_payments.last_payment_date', Carbon::parse($lastPaymentDate)->format('m'))
-                    ->whereYear('transaction_payments.last_payment_date', Carbon::parse($lastPaymentDate)->format('Y'))
-                    ->select(DB::raw('COUNT(*) as total'))
-                    ->first();
-
-                $levelNsiNext = LevelNsi::where('id', $memberNsi->level_nsi_id + 1)->first();
-
-                if ($levelNsiNext) {
-                    if ($transactionPastTotal->total >= $levelNsiNext->min_sold) {
-                        /* Update level NSI */
-                        $memberNsi->level_nsi_id = $memberNsi->level_nsi_id + 1;
-                        $memberNsi->save();
-                    }
-                }
-                $levelNsiNow = LevelNsi::where('id', $memberNsi->level_nsi_id)->first();
-                $levelNsiNow->bonus_percentage = (Double) str_replace(',', '.', $levelNsiNow->bonus_percentage);
-                $bonusPembulatan = ceil(($transaction['total_price'] * $levelNsiNow->bonus_percentage / 100) / 1000) * 1000;
-                $bonus = BonusHistory::create([
-                    'member_id' => $memberNsi->id,
-                    'member_numb' => $memberNsi->member_numb,
-                    'transaction_id' => $transaction['id'],
-                    'level_id' => $memberNsi->level_id,
-                    'bonus_type' => "KN",
-                    'bonus_percent' => $levelNsiNow->bonus_percentage,
-                    'bonus' => $bonusPembulatan,
-                    'created_at' => $lastPaymentDate,
-                    'updated_at' => $lastPaymentDate,
-                ]);
-                $log[] = $memberNsi->name . " mendapatkan Bonus Komisi NSI level ". $levelNsiNow->id ." sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
-            }
-
             /* Bonus Penjualan Pribadi */
             if ($this->isActiveMember($member)) {
                 $bonus = BonusHistory::create([

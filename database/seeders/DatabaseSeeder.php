@@ -267,7 +267,6 @@ class DatabaseSeeder extends Seeder
                             "branch_id" => $csvData["Office ID"],
                             "lastpayment_status" => $csvData["Last Payment Status"] == "Paid" ? "1" : "0",
                             "npwp" => $csvData["NPWP Number"],
-                            "level_nsi_id" => ($csvData["Level NSI"] != "") ? $csvData["Level NSI"] : null,
                         ]);
 
                 if (strtolower($csvData["Last Payment Status"]) == "paid") {
