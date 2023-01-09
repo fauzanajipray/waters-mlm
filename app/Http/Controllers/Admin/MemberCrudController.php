@@ -113,6 +113,38 @@ class MemberCrudController extends CrudController
         $this->crud->addButtonFromModelFunction('line', 'cardMember', 'cardMember', 'beginning');
         $this->crud->addButtonFromModelFunction('line', 'reportMember', 'reportMember', 'beginning');
         $this->crud->addButtonFromModelFunction('top', 'register', 'register', 'end');
+
+        $this->crud->addFilter([
+            'name' => 'member_type',
+            'type' => 'dropdown',
+            'label'=> 'Type',
+            'placeholder' => 'Select Type'
+        ], [
+            'PERSONAL' => 'Personal',
+            'STOKIST' => 'Stokist',
+            'CABANG' => 'Cabang',
+            'PUSAT' => 'Pusat',
+            'NSI' => 'NSI',
+        ], function($value) {
+            $this->crud->addClause('where', 'member_type', $value);
+        });
+
+        $this->crud->addFilter([
+            'name' => 'expired',
+            'type' => 'dropdown',
+            'label'=> 'Expired',
+            'placeholder' => 'Select Status'
+        ], [
+            1 => 'Expired',
+            0 => 'Not Expired',
+        ], function($value) {
+            if ($value == 1) {
+                $this->crud->addClause('where', 'expired_at', '<=', date('Y-m-d'));
+                $this->crud->addClause('where', 'expired_at', null);
+            } else {
+                $this->crud->addClause('where', 'expired_at', '>=', date('Y-m-d'));
+            }
+        });
     }
 
     /**
