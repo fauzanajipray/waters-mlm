@@ -10,7 +10,7 @@ use Carbon\Carbon;
 trait LevelUpTrait {
   protected function levelUpMember($id, $transactionDate, $isCheckAgain = false, $historyLevelUp = [])
   {
-    $this->info('Check Level Up Member ID : ' . $id);
+    $this->info(' - Check Level Up Member ID : ' . $id);
     /* Logic kenaikan level member */
     $member = Member::with(['upline' => function($query) {
         $query->with([
@@ -72,7 +72,7 @@ trait LevelUpTrait {
     }
     if($historyLevelUp) {
         foreach($historyLevelUp as $l) {
-            $this->info($l);
+            $this->info('   '.$l);
         }
     }
   }

@@ -64,20 +64,20 @@ class Startup extends Command
                 $this->newLine();
                 foreach($monthYears as $monthYear){
                     $date = Carbon::parse($monthYear)->endOfMonth();
-                    $this->info('--- Komisi NSI calculate bonus started, Date : '. $date . ' ---');
+                    $this->info(' - Komisi NSI calculate bonus started, Date : '. $date . ' -');
                     foreach($nsiMembers as $member){
                         $log = $this->calculateBonusNsi($member, $date);
-                        if($log == []){
+                        if($log){
                             foreach($log as $l){ $this->info($l); }
                         } else {
-                            $this->info('No bonus for member ' . $member->name);
+                            $this->info('   No bonus for member ' . $member->name);
                         }
                     }
+                    $this->info(' - Komisi NSI calculate bonus end -');
                     $this->newLine();
-                    $this->info('--- Komisi NSI calculate bonus end ---');
                 }
             } else {
-                $this->info('No NSI member');
+                $this->info('   No NSI member');
             }
             $this->info('* Startup Command : Calculate Bonus NSI end');
             $this->newLine();

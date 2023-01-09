@@ -8,12 +8,15 @@ use Illuminate\Http\Request;
 use Nasution\Terbilang;
 
 trait TransactionTrait {
-    protected function generateCode()
+    protected function generateCode($dateTransaction = null)
     {
+        if (!$dateTransaction) {
+            $dateTransaction = date('ymd');
+        }
         $lastTransaction = Transaction::withTrashed()->orderBy('id', 'desc')->first();
         $lastTransactionCode = $lastTransaction->code ?? 'TRX-000000-0000';
         $transactionCode = explode('-', $lastTransactionCode)[2] + 1;
-        $transactionCode = 'INV-' . date('ymd') . '-' . str_pad($transactionCode, 4, '0', STR_PAD_LEFT);
+        $transactionCode = 'INV-' . $dateTransaction . '-' . str_pad($transactionCode, 4, '0', STR_PAD_LEFT);
         return $transactionCode;
     }
 

@@ -23,7 +23,7 @@ trait BonusNsiTrait {
             ->get();
         $transactionTotal = $transactionPast->count();
         $level = LevelNsi::where('min_sold', '<=' , $transactionTotal)->orderBy('min_sold', 'Desc')->first();
-        if(!$level) return;
+        if(!$level) return $log;
 
         foreach ($transactionPast as $key => $transaction) {
             $level->bonus_percentage = (Double) str_replace(',', '.', $level->bonus_percentage);
