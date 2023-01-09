@@ -42,7 +42,7 @@ class BonusNSI extends Command
             $this->newLine();
             $NsiMembers = Member::where('member_type', 'NSI')->get();
             foreach($NsiMembers as $member){
-                $log = $this->calculateBonus($member, Carbon::now());
+                $log = $this->calculateBonusNsi($member, Carbon::now());
                 if($log){
                     foreach($log as $l){
                         $this->info($l);

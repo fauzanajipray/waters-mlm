@@ -8,7 +8,7 @@ use App\Models\Transaction;
 use Illuminate\Support\Facades\DB;
 
 trait BonusNsiTrait {
-    public function calculateBonus($member, $date)
+    public function calculateBonusNsi($member, $date)
     {
         $log = [];
         $transactionPast = Transaction::

@@ -8,15 +8,15 @@ use App\Models\Member;
 use Carbon\Carbon;
 
 trait LevelUpTrait {
-  protected function levelUpMember($id, $transactionDate, $isCheckAgain = false, $historyLevelUp = []) 
+  protected function levelUpMember($id, $transactionDate, $isCheckAgain = false, $historyLevelUp = [])
   {
     $this->info('Check Level Up Member ID : ' . $id);
     /* Logic kenaikan level member */
     $member = Member::with(['upline' => function($query) {
         $query->with([
-            'upline' => function($query) { $query->with('level'); }, 
-            'downlines' => function($query) { 
-                $query->with(['level']); 
+            'upline' => function($query) { $query->with('level'); },
+            'downlines' => function($query) {
+                $query->with(['level']);
             },
             'level'
         ]);
@@ -32,7 +32,7 @@ trait LevelUpTrait {
     $minimumSoldByDownlineNext = $levels[$uplineLevel->ordering_level]->minimum_sold_by_downline;
     $downline = $this->getDownline($uplineMember->id, $transactionDate);
     if(!$downline){ return ; }
-    
+
     $removeDownline = $this->removeDownlineWhereTransaction($downline, $minimumSoldByDownlineNext, $uplineLevel);
     $downline = $removeDownline['downline'];
     $downlineCountLevelNow = $removeDownline['downlineCountLevelNow'];
@@ -49,7 +49,7 @@ trait LevelUpTrait {
                 'old_level_code' => $uplineLevel->code,
                 'new_level_code' => $uplineMember->level->code,
             ]);
-            $historyLevelUp[] = 'Member '.$uplineMember->name.' level up to '.$uplineMember->level->name; 
+            $historyLevelUp[] = 'Member '.$uplineMember->name.' level up to '.$uplineMember->level->name;
 
             /* check apakah bisa level up lagi */
             $levelNow = Level::where('id', $levelHistory->new_level_id)->first();
@@ -62,13 +62,13 @@ trait LevelUpTrait {
             $downline = $removedDownline['downline'];
             $downlineCountLevelNow = $removedDownline['downlineCountLevelNow'];
             if ($downlineCountLevelNow >= $minimumDownlineNext) {
-                $this->levelUpMember($uplineMember->id, true, $historyLevelUp, $transactionDate);
+                $this->levelUpMember($uplineMember->id, $transactionDate, true, $historyLevelUp);
             }
-        } 
+        }
         else {
             $historyLevelUp[] = 'Member '.$uplineMember->name.' tidak bisa level up karena tidak aktif';
         }
-        $this->levelUpMember($uplineMember->id, false, $historyLevelUp, $transactionDate);
+        $this->levelUpMember($uplineMember->id, $transactionDate, false, $historyLevelUp);
     }
     if($historyLevelUp) {
         foreach($historyLevelUp as $l) {
@@ -99,7 +99,7 @@ trait LevelUpTrait {
           $downlineSold += $transactionProduct->quantity;
         }
       }
-      if ($downlineSold < $minimumSoldByDownlineNext) { 
+      if ($downlineSold < $minimumSoldByDownlineNext) {
           $downline->forget($key); // remove downline yang belum melakukan transaksi
       }
     }
@@ -109,13 +109,13 @@ trait LevelUpTrait {
         $downlineCountLevelNow++; // hitung downline yang sudah melakukan transaksi dan levelnya sama atau lebih tinggi
       }
     }
-    return [ 
-      "downline" => $downline, 
+    return [
+      "downline" => $downline,
       "downlineCountLevelNow" => $downlineCountLevelNow,
     ];
   }
 
-  private function isActiveMember($member) 
+  private function isActiveMember($member)
   {
     if ($member->expired_at < Carbon::now()) {
         return false;
