@@ -72,7 +72,14 @@ class BonusHistoryCrudController extends CrudController
         ]);
         $this->crud->column('level_id');
         $this->crud->column('bonus_type');
-        $this->crud->column('bonus_percent');
+        $this->crud->addColumn([
+            'name' => 'bonus_percent',
+            'label' => 'Bonus Percent',
+            'type' => 'text',
+            'value' => function ($entry) {
+                return number_format($entry->bonus_percent, 2, ',', '.');
+            },
+        ]);
         $this->crud->column('bonus')->value(function ($entry) {
             return "Rp. " . number_format($entry->bonus, 2, ',', '.');
         });

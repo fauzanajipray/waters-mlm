@@ -75,8 +75,8 @@ class ConfigurationSeeder extends Seeder
             'key' => 'bonus_stokist_percentage_for_product',
         ],[
             'key' => 'bonus_stokist_percentage_for_product',
-            'value' => '50',
-            'description' => 'Bonus stokist percentage from bonus cabang for selling product',
+            'value' => '2.0975',
+            'description' => 'Bonus stokist percentage for selling product',
         ]);
 
     }

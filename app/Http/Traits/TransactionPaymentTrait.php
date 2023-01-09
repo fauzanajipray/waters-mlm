@@ -3,16 +3,13 @@ namespace App\Http\Traits;
 
 use App\Models\BonusHistory;
 use App\Models\Branch;
+use App\Models\Configuration;
 use App\Models\Level;
-use App\Models\LevelNsi;
 use App\Models\Member;
-use App\Models\Transaction;
-use App\Models\TransactionPayment;
 use App\Models\TransactionProduct;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use PhpParser\Node\Expr\Cast\Double;
-use Prologue\Alerts\Facades\Alert;;
+use Prologue\Alerts\Facades\Alert;
 
 trait TransactionPaymentTrait {
 
@@ -85,6 +82,63 @@ trait TransactionPaymentTrait {
                     }
                 }
             }
+
+            /* Bonus Penjualan Cabang */
+            $member = Member::where('id', $transaction->member_id)->first();
+            $products = TransactionProduct::
+                leftJoin('products', 'products.id', '=', 'transaction_products.product_id')
+                ->leftJoin(DB::raw('(SELECT * FROM branch_products WHERE branch_id = ' . $transaction->branch_id . ') as branch_products'),
+                    'branch_products.product_id', '=', 'products.id')
+                ->where('transaction_id', $transaction->id)->get();
+
+            $branch = Branch::where('id', $transaction->branch_id)->first();
+            $branchesWithOwner = Branch::with('member')->get()->where('member', $member)->first();
+
+            if(!$branchesWithOwner) return;
+
+            $config = Configuration::where('key', 'bonus_stokist_percentage_for_product')->first();
+            $bonusPercent = (Double) $config->value; // 2.0975%
+            $config = Configuration::where('key', 'bonus_cabang_percentage_for_product')->first();
+            $bonusPercentCabang = (Double) $config->value; // 4.195%
+
+            foreach ($products as $p) {
+                if($member->id == 1) return;
+                for($i=0; $i<$p->quantity; $i++){
+                    if($branchesWithOwner->type == 'CABANG'){
+                        $bonus = BonusHistory::create([
+                            'member_id' => $member->id,
+                            'member_numb' => $member->member_numb,
+                            'transaction_id' => $transaction['id'],
+                            'level_id' => $member->level_id,
+                            'bonus_type' => "KC",
+                            'bonus_percent' => $bonusPercentCabang,
+                            'bonus' => ceil(($p->price + $p->additional_price) * $bonusPercentCabang / 100 /1000) * 1000,
+                            'created_at' => $lastPaymentDate,
+                            'updated_at' => $lastPaymentDate,
+                            'product_id' => $p->product_id,
+                            'kc_type' => 'LANGSUNG',
+                        ]);
+                        $log[] = $member->name . " mendapatkan Bonus Cabang sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
+                    }
+                    else if ($branchesWithOwner->type == 'STOKIST') {
+                        if($branch->type == 'CABANG'){
+                            $bonus = BonusHistory::create([
+                                'member_id' => $member->id,
+                                'member_numb' => $member->member_numb,
+                                'transaction_id' => $transaction['id'],
+                                'level_id' => $member->level_id,
+                                'bonus_type' => "KS",
+                                'bonus_percent' => $bonusPercent,
+                                'bonus' => ceil(($p->price + $p->additional_price) * $bonusPercent / 100 /1000) * 1000,
+                                'created_at' => $lastPaymentDate,
+                                'updated_at' => $lastPaymentDate,
+                                'product_id' => $p->product_id,
+                            ]);
+                            $log[] = $member->name . " mendapatkan Bonus Stokist sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
+                        }
+                    }
+                }
+            }
         }
         /* Bonus Penjualan Sparepart */
         else if ($transaction->type == 'Sparepart') {
@@ -112,7 +166,7 @@ trait TransactionPaymentTrait {
                             'bonus_percent' => 10, // TODO : Tanyain percentnya
                             'bonus' => ($p->price + $p->additional_price) * $p->quantity * 10 / 100,
                             'ss_type' => 'MEMBER',
-                            'ss_product_id' => $p->product_id,
+                            'product_id' => $p->product_id,
                             'created_at' => $lastPaymentDate,
                             'updated_at' => $lastPaymentDate,
                         ]);
@@ -128,7 +182,7 @@ trait TransactionPaymentTrait {
                             'bonus_percent' => 20, // TODO : Tanyain percentnya
                             'bonus' => ($p->price + $p->additional_price) * $p->quantity * 20 / 100,
                             'ss_type' => 'MEMBER',
-                            'ss_product_id' => $p->product_id,
+                            'product_id' => $p->product_id,
                             'created_at' => $lastPaymentDate,
                             'updated_at' => $lastPaymentDate,
                         ]);
@@ -153,7 +207,7 @@ trait TransactionPaymentTrait {
                             ]);
                             $log[] = $member->name . " mendapatkan Bonus Penjualan Sparepart sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
                             $bonusHistoryCabang = BonusHistory::
-                                where('ss_product_id', $p->product_id)
+                                where('product_id', $p->product_id)
                                 ->where('bonus_type', 'SS')
                                 ->where('bonus_percent', 20)
                                 ->where('ss_type', 'CABANG')
@@ -185,7 +239,7 @@ trait TransactionPaymentTrait {
                             ]);
                             $log[] = $member->name . " mendapatkan Bonus Penjualan Sparepart sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
                             $bonusHistoryStokist = BonusHistory::
-                                where('ss_product_id', $p->product_id)
+                                where('product_id', $p->product_id)
                                 ->where('bonus_type', 'SS')
                                 ->where('bonus_percent', 15)
                                 ->where('ss_type', 'STOKIST')
@@ -212,13 +266,13 @@ trait TransactionPaymentTrait {
                                 'bonus_percent' => 15,
                                 'bonus' => ($p->price + $p->additional_price) * 15 / 100 * $p->quantity,
                                 'ss_type' => 'MEMBER',
-                                'ss_product_id' => $p->product_id,
+                                'product_id' => $p->product_id,
                                 'created_at' => $lastPaymentDate,
                                 'updated_at' => $lastPaymentDate,
                             ]);
                             $log[] = $member->name . " mendapatkan Bonus Penjualan Sparepart sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
                             $bonusHistoryCabang = BonusHistory::
-                                where('ss_product_id', $p->product_id)
+                                where('product_id', $p->product_id)
                                 ->where('bonus_type', 'SS')
                                 ->where('bonus_percent', 20)
                                 ->where('ss_type', 'CABANG')
@@ -249,56 +303,118 @@ trait TransactionPaymentTrait {
                     'branch_products.product_id', '=', 'products.id')
                 ->where('transaction_id', $transaction->id)->get();
             foreach ($product as $p) {
-                if($p->type == 'sparepart') {
-                    $member = Member::with('branch')->where('id', $transaction->member_id)->first();
-                    // Jika menambah stok sparepart di cabang
-                    if($member->branch->type == 'CABANG'){
-                        $bonus = BonusHistory::create([
-                            'member_id' => $member->id,
-                            'member_numb' => $member->member_numb,
-                            'transaction_id' => $transaction['id'],
-                            'level_id' => $member->level_id,
-                            'bonus_type' => "SS",
-                            'bonus_percent' => 20,
-                            'bonus' => ($p->price + $p->additional_price) * 20 / 100 * $p->quantity,
-                            'ss_type' => 'CABANG',
-                            'ss_product_id' => $p->product_id,
-                            'created_at' => $lastPaymentDate,
-                            'updated_at' => $lastPaymentDate,
-                        ]);
-                        $log[] = 'Bonus Komisi Sparepart Cabang member ' . $member->member_numb . " ditambahkan sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
-                    }
-                    // Jika menambah stok sparepart di stokist
-                    else if ($member->branch->type == 'STOKIST') {
-                        $bonusHistoryCabang = BonusHistory::
-                            where('ss_product_id', $p->product_id)
-                            ->where('bonus_type', 'SS')
-                            ->where('bonus_percent', 20)
-                            ->where('ss_type', 'CABANG')
-                            ->orderBy('created_at', 'desc')
-                            ->first();
-                        $bonus = BonusHistory::create([ // Harusnya didalam if tapi karena ada fitur adjustment stock dikeluarkan dari if
+                for($i=0; $i<$p->quantity; $i++){
+                    if($p->type == 'sparepart') {
+                        $member = Member::with('branch')->where('id', $transaction->member_id)->first();
+                        // Jika menambah stok sparepart di cabang
+                        if($member->branch->type == 'CABANG'){
+                            $bonus = BonusHistory::create([
                                 'member_id' => $member->id,
                                 'member_numb' => $member->member_numb,
                                 'transaction_id' => $transaction['id'],
                                 'level_id' => $member->level_id,
                                 'bonus_type' => "SS",
-                                'bonus_percent' => 15,
-                                'bonus' => ($p->price + $p->additional_price) * 15 / 100 * $p->quantity,
+                                'bonus_percent' => 20,
+                                'bonus' => ($p->price + $p->additional_price) * 20 / 100,
+                                'ss_type' => 'CABANG',
+                                'product_id' => $p->product_id,
                                 'created_at' => $lastPaymentDate,
                                 'updated_at' => $lastPaymentDate,
-                                'ss_type' => 'STOKIST',
-                                'ss_product_id' => $p->product_id,
                             ]);
-                        $log[] = 'Bonus Komisi Sparepart Stokist member ' . $member->member_numb . " ditambahkan sebesar Rp. " .
-                            number_format($bonus->bonus, 0, ',', '.');
-                        if($bonusHistoryCabang) {
-                            $bonusHistoryCabang->bonus = $bonusHistoryCabang->bonus * 5 / $bonusHistoryCabang->bonus_percent;
-                            $bonusHistoryCabang->bonus_percent = 5;
-                            $bonusHistoryCabang->save();
-                            $log[] = 'Bonus Komisi Sparepart Cabang member ' . $bonusHistoryCabang->member_numb . " diperbarui menjadi Rp. " . number_format($bonusHistoryCabang->bonus, 0, ',', '.');
-                        } else {
-                            $log[] = "Bonus Komisi Sparepart Cabang tidak ditemukan";
+                            $log[] = 'Bonus Komisi Sparepart Cabang member ' . $member->member_numb . " ditambahkan sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
+                        }
+                        // Jika menambah stok sparepart di stokist
+                        else if ($member->branch->type == 'STOKIST') {
+                            $ownerBranch = Branch::with('member')->where('id', $transaction->branch_id)->first()->member;
+                            $bonusHistoryCabang = BonusHistory::
+                                where('product_id', $p->product_id)
+                                ->where('bonus_type', 'SS')
+                                ->where('bonus_percent', 20)
+                                ->where('ss_type', 'CABANG')
+                                ->where('member_id', $ownerBranch->id)
+                                ->orderBy('created_at', 'desc')
+                                ->first();
+                            $bonus = BonusHistory::create([ // Harusnya didalam if tapi karena ada fitur adjustment stock dikeluarkan dari if
+                                    'member_id' => $member->id,
+                                    'member_numb' => $member->member_numb,
+                                    'transaction_id' => $transaction['id'],
+                                    'level_id' => $member->level_id,
+                                    'bonus_type' => "SS",
+                                    'bonus_percent' => 15,
+                                    'bonus' => ($p->price + $p->additional_price) * 15 / 100,
+                                    'created_at' => $lastPaymentDate,
+                                    'updated_at' => $lastPaymentDate,
+                                    'ss_type' => 'STOKIST',
+                                    'product_id' => $p->product_id,
+                                ]);
+                            $log[] = 'Bonus Komisi Sparepart Stokist member ' . $member->member_numb . " ditambahkan sebesar Rp. " .
+                                number_format($bonus->bonus, 0, ',', '.');
+                            if($bonusHistoryCabang) {
+                                $bonusHistoryCabang->bonus = $bonusHistoryCabang->bonus * 5 / $bonusHistoryCabang->bonus_percent;
+                                $bonusHistoryCabang->bonus_percent = 5;
+                                $bonusHistoryCabang->save();
+                                $log[] = 'Bonus Komisi Sparepart Cabang member ' . $bonusHistoryCabang->member_numb . " diperbarui menjadi Rp. " . number_format($bonusHistoryCabang->bonus, 0, ',', '.');
+                            } else {
+                                $log[] = "Bonus Komisi Sparepart Cabang tidak ditemukan";
+                            }
+                        }
+                    } else {
+                        $member = Member::with('branch')->where('id', $transaction->member_id)->first();
+                        // Komisi jika menambah produk di cabang
+                        if($member->branch->type == 'CABANG'){
+                            $configBonusCabang = Configuration::where('key', 'bonus_cabang_percentage_for_product')->first();
+                            $bonusPercent = (Double) $configBonusCabang->value; // 4.195%
+                            $bonus = BonusHistory::create([
+                                'member_id' => $member->id,
+                                'member_numb' => $member->member_numb,
+                                'transaction_id' => $transaction['id'],
+                                'level_id' => $member->level_id,
+                                'bonus_type' => "KC",
+                                'bonus_percent' => $bonusPercent,
+                                'bonus' => ceil(($p->price + $p->additional_price) * $bonusPercent / 100 /1000)* 1000,
+                                'created_at' => $lastPaymentDate,
+                                'updated_at' => $lastPaymentDate,
+                                'product_id' => $p->product_id,
+                                'kc_type' => 'STOCK',
+                            ]);
+                            $log[] = 'Bonus Komisi Cabang member ' . $member->member_numb . " ditambahkan sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
+                        }
+                        // Komisi jika menambahkan produk di stokist
+                        else if ($member->branch->type == 'STOKIST') {
+                            $config = Configuration::where('key', 'bonus_stokist_percentage_for_product')->first();
+                            $bonusPercent = (Double) $config->value; // 2.0975%
+                            $config = Configuration::where('key', 'bonus_cabang_percentage_for_product')->first();
+                            $bonusPercentCabang = (Double) $config->value; // 4.195%
+                            $ownerBranch = Branch::with('member')->where('id', $transaction->branch_id)->first()->member;
+                            $bonusHistoryCabang = BonusHistory::
+                                where('product_id', $p->product_id)
+                                ->where('bonus_type', 'KC')
+                                ->where('member_id', $ownerBranch->id)
+                                ->where('bonus_percent', number_format($bonusPercentCabang, 4, '.', ''))
+                                ->where('kc_type', 'STOCK')
+                                ->orderBy('created_at', 'asc')
+                                ->first();
+                            $bonus = BonusHistory::create([
+                                'member_id' => $member->id,
+                                'member_numb' => $member->member_numb,
+                                'transaction_id' => $transaction['id'],
+                                'level_id' => $member->level_id,
+                                'bonus_type' => "KS",
+                                'bonus_percent' => $bonusPercent,
+                                'bonus' => ceil(($p->price + $p->additional_price) * $bonusPercent / 100 /1000) * 1000,
+                                'created_at' => $lastPaymentDate,
+                                'updated_at' => $lastPaymentDate,
+                            ]);
+
+                            $log[] = 'Bonus Komisi Stokist member ' . $member->member_numb . " ditambahkan sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
+                            if($bonusHistoryCabang) {
+                                $bonusHistoryCabang->bonus_percent = $bonusHistoryCabang->bonus_percent - $bonusPercent;
+                                $bonusHistoryCabang->bonus = $bonusHistoryCabang->bonus - $bonus->bonus;
+                                $bonusHistoryCabang->save();
+                                $log[] = 'Bonus Komisi Cabang member ' . $bonusHistoryCabang->member_numb . " diperbarui menjadi Rp. " . number_format($bonusHistoryCabang->bonus, 0, ',', '.');
+                            } else {
+                                $log[] = "Bonus Komisi Cabang tidak ditemukan";
+                            }
                         }
                     }
                 }

@@ -17,7 +17,8 @@ return new class extends Migration
         DB::statement('ALTER TABLE bonus_histories MODIFY COLUMN bonus_type ENUM("BP", "GM", "OR", "SS", "KN", "KC", "KS") ');
         Schema::table('bonus_histories', function (Blueprint $table) {
             $table->enum('ss_type', ['CABANG', 'STOKIST', 'MEMBER'])->nullable()->after('bonus_type');
-            $table->unsignedBigInteger('ss_product_id')->nullable()->after('ss_type');
+            $table->enum("kc_type", ["LANGSUNG", "STOCK"])->nullable()->after("ss_type");
+            $table->unsignedBigInteger('product_id')->nullable()->after('ss_type');
         });
     }
 

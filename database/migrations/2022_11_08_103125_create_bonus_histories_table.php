@@ -15,12 +15,12 @@ return new class extends Migration
     {
         Schema::create('bonus_histories', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('member_id')->constrained();                                          
+            $table->foreignId('member_id')->constrained();
             $table->string('member_numb');
             $table->foreignId('transaction_id')->constrained();
             $table->foreignId('level_id')->constrained();
             $table->enum('bonus_type', ['BP', 'GM', 'OR']);
-            $table->decimal('bonus_percent', 20, 2)->default(0);
+            $table->decimal('bonus_percent', 20, 4)->default(0);
             $table->decimal('bonus', 20, 2)->default(0);
             $table->timestamps();
         });
