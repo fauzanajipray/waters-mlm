@@ -345,7 +345,7 @@ class DatabaseSeeder extends Seeder
 
         foreach ($csvDatas as $csvData) {
             if($csvData["Member ID"] ) {
-                $existTrans = Transaction::where("code", $csvData['Code'] ?? 0)->exists();
+                // $existTrans = Transaction::where("code", $csvData['Code'] ?? 0)->exists();
                 $customer = Customer::where("id", $csvData['Customer ID'])->first();
                 $requests = [
                     "id" => $csvData["ID"],
@@ -365,9 +365,9 @@ class DatabaseSeeder extends Seeder
                     "stock_from" => Branch::find($csvData['Branch ID'])->name,
                 ];
 
-                if (!$existTrans) {
+                // if (!$existTrans) {
                     $transCrud->createByImport($requests);
-                }
+                // }
             }
 
         }
