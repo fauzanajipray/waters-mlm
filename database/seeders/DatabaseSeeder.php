@@ -13,7 +13,7 @@ use App\Models\BranchProduct;
 use App\Models\Configuration;
 use App\Models\Customer;
 use App\Models\Level;
-use App\Models\LevelNSI;
+use App\Models\LevelNsi;
 use App\Models\Member;
 use App\Models\PaymentMethod;
 use App\Models\Product;
@@ -204,7 +204,7 @@ class DatabaseSeeder extends Seeder
         $csvDatas = $this->csvToArray($filename);
 
         foreach ($csvDatas as $csvData) {
-            LevelNSI::updateOrCreate([
+            LevelNsi::updateOrCreate([
                 'id' => $csvData["ID"],
             ], [
                 'id' => $csvData["ID"],
