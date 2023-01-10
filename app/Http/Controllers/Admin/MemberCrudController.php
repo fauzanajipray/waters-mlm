@@ -140,7 +140,6 @@ class MemberCrudController extends CrudController
         ], function($value) {
             if ($value == 1) {
                 $this->crud->addClause('where', 'expired_at', '<=', date('Y-m-d'));
-                $this->crud->addClause('where', 'expired_at', null);
             } else {
                 $this->crud->addClause('where', 'expired_at', '>=', date('Y-m-d'));
             }

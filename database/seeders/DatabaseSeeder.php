@@ -22,6 +22,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Storage;
 
 class DatabaseSeeder extends Seeder
@@ -245,7 +246,7 @@ class DatabaseSeeder extends Seeder
         foreach ($csvDatas as $csvData) {
             try {
                 $memberMst = Member::where("id", $csvData["Upline ID"])->first();
-                $expiredDate = ($csvData['Expired At']) ? Carbon::createFromFormat('d/m/Y', $csvData['Expired At'])->format("Y-m-d") : null;
+                $expiredDate = ($csvData['Expired At']) ? Carbon::createFromFormat('d/m/Y', $csvData['Expired At'])->format("Y-m-d") : date("Y-m-d", strtotime($csvData['Expired At']));
                 $member = Member::updateOrCreate([
                             "member_numb" => $csvData["Unique Number"],
                         ],[
