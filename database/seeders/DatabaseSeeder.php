@@ -40,7 +40,7 @@ class DatabaseSeeder extends Seeder
         $this->product();
         $this->level();
         $this->levelNSI();
-        $this->office();
+        $this->branch();
         $this->member();
         $this->branchProduct();
         $this->customer();
@@ -217,7 +217,7 @@ class DatabaseSeeder extends Seeder
     }
 
 
-    private function office()
+    private function branch()
     {
         $filename = Storage::path('sample/office.csv');
         $csvDatas = $this->csvToArray($filename);
@@ -247,28 +247,38 @@ class DatabaseSeeder extends Seeder
             try {
                 $memberMst = Member::where("id", $csvData["Upline ID"])->first();
                 $expiredDate = ($csvData['Expired At']) ? Carbon::createFromFormat('d/m/Y', $csvData['Expired At'])->format("Y-m-d") : date("Y-m-d", strtotime($csvData['Expired At']));
+
+                $memberType = strtoupper($csvData["Member Type"]);
+
                 $member = Member::updateOrCreate([
-                            "member_numb" => $csvData["Unique Number"],
-                        ],[
-                            "member_numb" => $csvData["Unique Number"],
-                            "id_card_type" => $csvData["ID Card Type"],
-                            "id_card" => $csvData["ID Card"],
-                            "name" => $csvData["Name"],
-                            "level_id" => $csvData["Level ID"],
-                            "gender" => $csvData["Gender"],
-                            "postal_code" => $csvData["Postal Code"],
-                            "dob" => ($csvData['DOB']) ? Carbon::createFromFormat('d/m/Y', $csvData['DOB'])->format("Y-m-d") : null,
-                            "phone" => $csvData["Phone"],
-                            "email" => $csvData["Email"],
-                            "address" => $csvData["Address"],
-                            "join_date" => ($csvData['Join Date']) ? Carbon::createFromFormat('d/m/Y', $csvData['Join Date'])->format("Y-m-d") : Carbon::now(),
-                            "expired_at" => $expiredDate,
-                            "upline_id" => (isset($memberMst)) ? $memberMst->id : null,
-                            "member_type" => strtoupper($csvData["Member Type"]),
-                            "branch_id" => $csvData["Office ID"],
-                            "lastpayment_status" => $csvData["Last Payment Status"] == "Paid" ? "1" : "0",
-                            "npwp" => $csvData["NPWP Number"],
-                        ]);
+                    "member_numb" => $csvData["Unique Number"],
+                ],[
+                    "member_numb" => $csvData["Unique Number"],
+                    "id_card_type" => $csvData["ID Card Type"],
+                    "id_card" => $csvData["ID Card"],
+                    "name" => $csvData["Name"],
+                    "level_id" => $csvData["Level ID"],
+                    "gender" => $csvData["Gender"],
+                    "postal_code" => $csvData["Postal Code"],
+                    "dob" => ($csvData['DOB']) ? Carbon::createFromFormat('d/m/Y', $csvData['DOB'])->format("Y-m-d") : null,
+                    "phone" => $csvData["Phone"],
+                    "email" => $csvData["Email"],
+                    "address" => $csvData["Address"],
+                    "join_date" => ($csvData['Join Date']) ? Carbon::createFromFormat('d/m/Y', $csvData['Join Date'])->format("Y-m-d") : Carbon::now(),
+                    "expired_at" => $expiredDate,
+                    "upline_id" => (isset($memberMst)) ? $memberMst->id : null,
+                    "member_type" => $memberType,
+                    "branch_id" => $csvData["Office ID"],
+                    "lastpayment_status" => $csvData["Last Payment Status"] == "Paid" ? "1" : "0",
+                    "npwp" => $csvData["NPWP Number"],
+                ]);
+
+                $branch = Branch::with('member')->find($csvData["Office ID"]);
+                if($memberType == 'STOKIST' || $memberType == 'CABANG') {
+                    if($branch->member->id != $member->id) {
+                        $member->update([ "member_type" => "Personal" ]);
+                    }
+                }
 
                 if (strtolower($csvData["Last Payment Status"]) == "paid") {
                     $dateNow = Carbon::now()->format("ymd");
