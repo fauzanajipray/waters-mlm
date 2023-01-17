@@ -74,56 +74,34 @@ class DatabaseSeeder extends Seeder
     private function user()
     {
         $user = User::updateOrCreate([
-            'email' => 'kevin@rectmedia.com',
+            'email' => 'benny@rectmedia.com'
+        ], [
+            'email' => 'benny@rectmedia.com',
+            'password' => bcrypt('qwerty'),
+            'name' => 'Benny',
+            'role_id' => 1,
+        ]);
+        $user->assignRole('Super Admin');
+
+        $user = User::updateOrCreate([
+            'email' => 'fauzan@rectmedia.id'
+        ], [
+            'email' => 'fauzan@rectmedia.id',
+            'password' => bcrypt('qwerty'),
+            'name' => 'Fauzan',
+            'role_id' => 2,
+        ]);
+        $user->assignRole('Super Admin');
+
+        $user = User::updateOrCreate([
+            'email' => 'kevin@rectmedia.com'
         ], [
             'email' => 'kevin@rectmedia.com',
             'password' => bcrypt('qwerty'),
             'name' => 'Kevin',
-            'role_id' => 1,
-        ]);
-        $user->assignRole('Super Admin');
-
-        $user = User::updateOrCreate([
-            'email' => 'benny@gmail.com'
-        ], [
-            'email' => 'benny@gmail.com',
-            'password' => bcrypt('qwerty'),
-            'name' => 'Benny',
-            'role_id' => 2,
+            'role_id' => 3,
         ]);
         $user->assignRole('Admin');
-
-
-        $user = User::updateOrCreate([
-            'email' => 'andi@gmail.com'
-        ], [
-            'email' => 'andi@gmail.com',
-            'password' => bcrypt('qwerty'),
-            'name' => 'Andi',
-            'role_id' => 2,
-        ]);
-        $user->assignRole('Admin');
-
-        $user = User::updateOrCreate([
-            'email' => 'budi@gmail.com'
-        ], [
-            'email' => 'budi@gmail.com',
-            'password' => bcrypt('qwerty'),
-            'name' => 'Budi',
-            'role_id' => 2,
-        ]);
-        $user->assignRole('Admin');
-
-        $user = User::updateOrCreate([
-            'email' => 'fauzan@gmail.com'
-        ], [
-            'email' => 'fauzan@gmail.com',
-            'password' => bcrypt('qwerty'),
-            'name' => 'Fauzan',
-            'role_id' => 1,
-        ]);
-        $user->assignRole('Super Admin');
-
     }
 
     private function product()
