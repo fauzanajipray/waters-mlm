@@ -67,7 +67,7 @@ class ConfigurationSeeder extends Seeder
             'key' => 'bonus_cabang_percentage_for_product',
         ],[
             'key' => 'bonus_cabang_percentage_for_product',
-            'value' => '4.195',
+            'value' => '4.1945',
             'description' => 'Bonus cabang percentage for selling product',
         ]);
 
@@ -75,7 +75,7 @@ class ConfigurationSeeder extends Seeder
             'key' => 'bonus_stokist_percentage_for_product',
         ],[
             'key' => 'bonus_stokist_percentage_for_product',
-            'value' => '2.0975',
+            'value' => '2.097',
             'description' => 'Bonus stokist percentage for selling product',
         ]);
 
