@@ -61,6 +61,21 @@ class MemberCrudController extends CrudController
             'attribute' => 'name' ,
             'model' => Level::class,
         ]);
+        $this->crud->column('lastpayment_status')->label('Payment Status')->wrapper([
+            'element' => 'span',
+            'class' => function ($crud, $column, $entry, $related_key) {
+                switch ($entry->lastpayment_status) {
+                    case 1:
+                        return 'badge badge-success';
+                    case 0:
+                        return 'badge badge-danger';
+                    default:
+                        return 'badge badge-secondary';
+                }
+            },
+        ])->value(function ($value) {
+            return ($value->lastpayment_status) ? 'Paid' : 'Unpaid';
+        });
         $this->crud->addColumn([
             'name' => 'member_type',
             'label' => 'Type',
@@ -83,21 +98,6 @@ class MemberCrudController extends CrudController
                 },
             ],
         ]);
-        $this->crud->column('lastpayment_status')->label('Last Payment Status')->wrapper([
-            'element' => 'span',
-            'class' => function ($crud, $column, $entry, $related_key) {
-                switch ($entry->lastpayment_status) {
-                    case 1:
-                        return 'badge badge-success';
-                    case 0:
-                        return 'badge badge-danger';
-                    default:
-                        return 'badge badge-secondary';
-                }
-            },
-        ])->value(function ($value) {
-            return ($value->lastpayment_status) ? 'Paid' : 'Unpaid';
-        });
         $this->crud->addColumn([
             'name' => 'expired_at',
             'label' => 'Expired At',

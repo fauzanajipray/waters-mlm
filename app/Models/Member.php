@@ -37,20 +37,19 @@ class Member extends Model
     */
 
     public function cardMember(){
-        return '<a href="' . backpack_url('member') . '/' . $this->id . '/download-card-member" target="_blank" class="btn btn-sm btn-link"><i class="la la-download"></i> Card Member</a>';
-
+        return '<a href="' . backpack_url('member') . '/' . $this->id . '/download-card-member" target="_blank" class="btn btn-sm btn-link"><i class="la la-download"></i> Card</a>';
     }
 
     public function reportMember(){
-        return '<a href="' . backpack_url('member') . '/' . $this->id . '/report-member" class="btn btn-sm btn-link"><i class="la la-chart-bar"></i> Report Member</a>';
+        return '<a href="' . backpack_url('member') . '/' . $this->id . '/report-member" class="btn btn-sm btn-link"><i class="la la-chart-bar"></i> Downline</a>';
     }
 
     function register(){
-        return '<a href="'.backpack_url('member').'/register-form" class="btn btn-primary" data-style="zoom-in"><span class="ladda-label"><i class="la la-print"></i> Print Form Register</span></a>';
+        return '<a href="'.backpack_url('member').'/register-form" class="btn btn-primary" data-style="zoom-in"><span class="ladda-label"><i class="la la-print"></i> Print Form Pendaftaran</span></a>';
     }
 
     function line_register(){
-        return '<a href="' . backpack_url('member') . '/' . $this->id . '/download-register" target="_blank" class="btn btn-sm btn-link"><i class="la la-print"></i> Register</a>';
+        return '<a href="' . backpack_url('member') . '/' . $this->id . '/download-register" target="_blank" class="btn btn-sm btn-link"><i class="la la-print"></i> Form Pendaftaran</a>';
     }
 
     /*
