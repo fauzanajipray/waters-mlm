@@ -51,7 +51,9 @@ class CustomerCrudController extends CrudController
         $this->crud->column('city');
         $this->crud->column('phone');
         $this->crud->column('member_id');
-        $this->crud->column('is_member');
+        $this->crud->column('is_member')->value(function ($value) {
+            return ($value->is_member) ? 'Yes' : 'No';
+        });
         $this->crud->column('created_at');
         $this->crud->column('updated_at');
 
