@@ -28,7 +28,7 @@ class CustomerCrudController extends CrudController
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
-     * 
+     *
      * @return void
      */
     public function setup()
@@ -40,7 +40,7 @@ class CustomerCrudController extends CrudController
 
     /**
      * Define what happens when the List operation is loaded.
-     * 
+     *
      * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
      * @return void
      */
@@ -58,13 +58,13 @@ class CustomerCrudController extends CrudController
         $this->crud->column('updated_at');
 
         $this->crud->addButtonFromModelFunction('line', 'deleteButton', 'deleteButton', 'end');
-        
+
         Widget::add()->type('script')->content(asset('assets/js/admin/form/customer.js'));
     }
 
     /**
      * Define what happens when the Create operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-create
      * @return void
      */
@@ -88,7 +88,7 @@ class CustomerCrudController extends CrudController
 
     /**
      * Define what happens when the Update operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-update
      * @return void
      */
@@ -108,11 +108,11 @@ class CustomerCrudController extends CrudController
             ]
         ])->beforeField('name');
     }
-    
+
     protected function setupInlineCreateOperation(){
 
         $this->crud->setValidation(InlineCreateRequest::class);
-        $this->crud->removeField('member_id');   
+        $this->crud->removeField('member_id');
         $memberID = request('main_form_fields')[0]['value'] ?? 1;
         $member = Customer::where('member_id', $memberID)->first();
         $this->crud->addField([
@@ -145,7 +145,7 @@ class CustomerCrudController extends CrudController
                 $customer->name = $customer->name . ' - ' . $customer->phone;
                 return $customer;
             });
-        } else if (!$search_term && $memberIdForm['name'] == 'member_id' && $memberIdForm['value']){ 
+        } else if (!$search_term && $memberIdForm['name'] == 'member_id' && $memberIdForm['value']){
             $customers = Customer::
                 where('member_id', $memberIdForm['value'])
                 ->where('is_member', "0")
@@ -178,7 +178,7 @@ class CustomerCrudController extends CrudController
             if($customer->transactions->count() > 0){
                 Alert::error('Customer has transactions');
                 return redirect()->back()->with('error', 'Customer has transactions, not allowed to delete');
-            } 
+            }
             $customer->delete();
             DB::commit();
             Alert::success('Customer deleted');
@@ -215,6 +215,6 @@ class CustomerCrudController extends CrudController
         $this->data['crud'] = $this->crud;
         $this->data['title'] = $this->crud->getTitle() ?? mb_ucfirst($this->crud->entity_name_plural);
 
-        return view('vendor.backpack.crud.list_customer', $this->data);
+        return view('vendor.backpack.crud.list_with_error_head', $this->data);
     }
 }

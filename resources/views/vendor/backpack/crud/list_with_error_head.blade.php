@@ -23,14 +23,6 @@
 @section('content')
   {{-- Default box --}}
   <div class="row">
-    {{-- Error Session --}}
-    @if (session()->has('error'))
-      <div class="col-md-12">
-        <div class="alert alert-danger">
-          {{ session()->get('error') }}
-        </div>
-      </div>
-    @endif
 
     {{-- THE ACTUAL CONTENT --}}
     <div class="{{ $crud->getListContentClass() }}">
@@ -171,7 +163,7 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('packages/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}">
   <link rel="stylesheet" type="text/css" href="{{ asset('packages/datatables.net-fixedheader-bs4/css/fixedHeader.bootstrap4.min.css') }}">
   <link rel="stylesheet" type="text/css" href="{{ asset('packages/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css') }}">
-
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.css" integrity="sha512-NXUhxhkDgZYOMjaIgd89zF2w51Mub53Ru3zCNp5LTlEzMbNNAjTjDbpURYGS5Mop2cU4b7re1nOIucsVlrx9fA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   {{-- CRUD LIST CONTENT - crud_list_styles stack --}}
   @stack('crud_list_styles')
   @if (isset($crud->firstCellNonFlex) && $crud->firstCellNonFlex)
@@ -190,4 +182,40 @@
   {{-- CRUD LIST CONTENT - crud_list_scripts stack --}}
   @stack('crud_list_scripts')
 
+  <script>
+    $(document).on("click", ".btn-delete-custom", function () {
+        console.log("Delete Customer Clicked");
+        var link = $(this).attr("href");
+        //Sweet Alert for update action publish
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!",
+            cancelButtonText: "No, cancel!",
+        }).then((result) => {
+            if (result.value) {
+            window.location.href = link;
+            }
+        });
+
+        return false;
+    });
+    @if (session()->has('success'))
+        new Noty({
+            type: "success",
+            text: "{!! session('success') !!}",
+            theme: 'nest',
+        }).show();
+    @endif
+    @if (session()->has('error'))
+        new Noty({
+            type: "error",
+            text: "{!! session('error') !!}"
+        }).show();
+    @endif
+  </script>
 @endsection

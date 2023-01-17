@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Backpack\CRUD\app\Models\Traits\CrudTrait;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Branch extends Model
 {
-    use CrudTrait;
+    use CrudTrait, SoftDeletes;
 
     /*
     |--------------------------------------------------------------------------
@@ -39,6 +40,10 @@ class Branch extends Model
 
     public function stockButton(){
         return '<a href="'. backpack_url('stock/create') . '?branch_id=' . $this->id . '" class="btn btn-sm btn-link"><i class="la la-plus"></i> Stock</a>';
+    }
+
+    public function deleteButton(){
+        return '<a href="'. backpack_url('branch') . '/' . $this->id . '/delete" class="btn btn-sm btn-link btn-delete-custom"><i class="la la-trash"></i> Delete</a>';
     }
 
     /*

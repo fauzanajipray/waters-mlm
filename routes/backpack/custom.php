@@ -68,6 +68,7 @@ Route::group([
     Route::post('customer/get-customer-is-member', 'CustomerCrudController@getCustomerIsMember');
     Route::crud('configuration', 'ConfigurationCrudController');
     Route::crud('branch', 'BranchCrudController');
+    Route::get('branch/{id}/delete', 'BranchCrudController@deleteBranch');
     Route::prefix('branches')->group(function (){
         Route::post('/', 'BranchCrudController@getBranches');
         Route::post('member-not-exist', 'BranchCrudController@memberNotExist');

@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Requests\BranchProductRequest;
 use App\Http\Requests\BranchRequest;
 use App\Models\Branch;
+use App\Models\BranchProduct;
 use App\Models\Member;
+use App\Models\Product;
 use App\Models\Stock;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
@@ -12,6 +15,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Prologue\Alerts\Facades\Alert;
 
 use function PHPUnit\Framework\isEmpty;
 
@@ -25,7 +29,7 @@ class BranchCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
-    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
+    // use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
 
     /**
@@ -66,6 +70,7 @@ class BranchCrudController extends CrudController
         ]);
         // $this->crud->addButtonFromModelFunction('line', 'add_stock', 'stockButton', 'beginning'); // TODO: add stock button
         $this->crud->addButtonFromModelFunction('line', 'add_owner', 'addOwnerButton', 'beginning');
+        $this->crud->addButtonFromModelFunction('line', 'deleteButton', 'deleteButton', 'end');
     }
 
     /**
@@ -103,6 +108,32 @@ class BranchCrudController extends CrudController
                 'readonly' => 'readonly',
             ],
         ]);
+    }
+
+    protected function store(Request $request) {
+        $requests = $request->all();
+        $this->crud->validateRequest($requests);
+
+        DB::beginTransaction();
+        try {
+            $branch = Branch::create($requests);
+            foreach (Product::all() as $p) {
+                BranchProduct::updateOrCreate([
+                    'branch_id' => $branch->id,
+                    'product_id' => $p->id,
+                ], [
+                    'branch_id' => $branch->id,
+                    'product_id' => $p->id,
+                    'additional_price' => 0,
+                ]);
+            }
+            DB::commit();
+            return redirect()->route('branch.index');
+        } catch (Exception $e) {
+            DB::rollBack();
+            dd($e->getMessage());
+            return redirect()->back()->with('error', $e->getMessage());
+        }
     }
 
     public function memberNotExist(Request $request){
@@ -354,5 +385,38 @@ class BranchCrudController extends CrudController
             return $item;
         });
         return $branches;
+    }
+
+    public function index()
+    {
+        $this->crud->hasAccessOrFail('list');
+        $this->data['crud'] = $this->crud;
+        $this->data['title'] = $this->crud->getTitle() ?? mb_ucfirst($this->crud->entity_name_plural);
+
+        return view('vendor.backpack.crud.list_with_error_head', $this->data);
+    }
+
+    public function deleteBranch($id){
+        DB::beginTransaction();
+        try {
+            $branch = Branch::with('member')->find($id);
+            $stock = Stock::where('branch_id', $id)->get();
+
+            if(isset($branch->member)) {
+                throw new \Exception('You can\'t delete this branch because it has owner or member');
+            } else if ($stock->count() > 0) {
+                throw new \Exception('You can\'t delete this branch because it has stock');
+            }
+            $product = BranchProduct::where('branch_id', $id)->get();
+            $product->each(function($item) {
+                $item->delete();
+            });
+            $branch->delete();
+            DB::commit();
+            return redirect()->back()->with('success', 'Branch deleted successfully');
+        } catch (\Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with('error', $e->getMessage());
+        }
     }
 }
