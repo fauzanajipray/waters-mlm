@@ -101,7 +101,7 @@ class MemberCrudController extends CrudController
         $this->crud->addColumn([
             'name' => 'expired_at',
             'label' => 'Expired At',
-            'type' => 'datetime',
+            'type' => 'date',
         ]);
         $this->crud->column('id_card')->label('ID Card');
         $this->crud->column('gender');
