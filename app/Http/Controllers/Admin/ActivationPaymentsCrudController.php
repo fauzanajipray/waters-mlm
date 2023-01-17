@@ -27,7 +27,7 @@ class ActivationPaymentsCrudController extends CrudController
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
-     * 
+     *
      * @return void
      */
     public function setup()
@@ -39,7 +39,7 @@ class ActivationPaymentsCrudController extends CrudController
 
     /**
      * Define what happens when the List operation is loaded.
-     * 
+     *
      * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
      * @return void
      */
@@ -54,7 +54,7 @@ class ActivationPaymentsCrudController extends CrudController
 
     /**
      * Define what happens when the Create operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-create
      * @return void
      */
@@ -66,7 +66,7 @@ class ActivationPaymentsCrudController extends CrudController
             'code' => 'required|unique:activation_payments,code',
             'member_id' => 'required|exists:members,id',
         ]);
-        
+
         $this->crud->addField([
             'name' => 'payment_date',
             'type' => 'datetime_picker',
@@ -77,14 +77,54 @@ class ActivationPaymentsCrudController extends CrudController
                 'language' => 'id'
             ],
         ]);
-        $this->crud->addField([
-            'name' => 'member_id',
-            'type' => 'select2_from_ajax',
-            'entity' => 'member',
-            'attribute' => 'text',
-            'data_source' => url('members/not-activated'),
-            'placeholder' => 'Select a member',
-        ]);
+        if(isset(request()->member_id)){
+            $member = Member::find(request()->member_id);
+            // dd($member);
+            if(!$member){
+                $this->crud->addField([
+                    'name' => 'member_id',
+                    'type' => 'select2_from_ajax',
+                    'entity' => 'member',
+                    'attribute' => 'text',
+                    'data_source' => url('members/not-activated'),
+                    'placeholder' => 'Select a member',
+                ]);
+            } else if($member->checkIsActive()) {
+                $this->crud->addField([
+                    'name' => 'member_id',
+                    'type' => 'select2_from_ajax',
+                    'entity' => 'member',
+                    'attribute' => 'text',
+                    'data_source' => url('members/not-activated'),
+                    'placeholder' => 'Select a member',
+                ]);
+            } else {
+                $this->crud->addField([
+                    'name' => 'member_name',
+                    'type' => 'text',
+                    'label' => 'Member',
+                    'attributes' => [
+                        'readonly' => 'readonly',
+                        'disabled' => 'disabled',
+                    ],
+                    'default' => $member->member_numb . ' - ' . $member->name,
+                ]);
+                $this->crud->addField([
+                    'name' => 'member_id',
+                    'type' => 'hidden',
+                    'default' => $member->id,
+                ]);
+            }
+        } else {
+            $this->crud->addField([
+                'name' => 'member_id',
+                'type' => 'select2_from_ajax',
+                'entity' => 'member',
+                'attribute' => 'text',
+                'data_source' => url('members/not-activated'),
+                'placeholder' => 'Select a member',
+            ]);
+        }
         $paymentAmount = Configuration::where('key', 'activation_payment_amount')->first()->value;
         $this->crud->addField([
             'name' => 'total',
@@ -100,7 +140,7 @@ class ActivationPaymentsCrudController extends CrudController
 
     /**
      * Define what happens when the Update operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-update
      * @return void
      */
@@ -116,7 +156,7 @@ class ActivationPaymentsCrudController extends CrudController
 
     public function create(){
         $this->crud->hasAccessOrFail('create');
-        
+
         $this->data['crud'] = $this->crud;
         $this->data['fields'] = $this->crud->getCreateFields();
         $this->data['saveAction'] = $this->crud->getSaveAction();
@@ -132,7 +172,7 @@ class ActivationPaymentsCrudController extends CrudController
         $request->merge(['code' => $code]);
 
         DB::beginTransaction();
-        try { 
+        try {
             // Add To Activation Payments
             $activationPayment = ActivationPayments::create($request->all());
             // Update Member Expired at + 2 Years
@@ -163,7 +203,7 @@ class ActivationPaymentsCrudController extends CrudController
         }
     }
 
-    protected function generateCode() 
+    protected function generateCode()
     {
         $lastTransaction = ActivationPayments::orderBy('id', 'desc')->first();
         $lastTransactionCode = $lastTransaction->code ?? 'PYM-0000-0000';

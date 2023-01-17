@@ -16,8 +16,8 @@ return new class extends Migration
         Schema::create('members', function (Blueprint $table) {
             $table->id();
             $table->string('member_numb')->unique();
-            $table->enum('id_card_type', ['KTP', 'SIM']);
-            $table->string('id_card');
+            $table->enum('id_card_type', ['KTP', 'SIM'])->nullable();
+            $table->string('id_card')->nullable();
             $table->string('name');
             $table->unsignedBigInteger('level_id')->nullable();
             $table->foreign('level_id')->references('id')->on('levels')->onDelete('restrict')->onUpdate('cascade');

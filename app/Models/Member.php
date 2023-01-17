@@ -52,6 +52,14 @@ class Member extends Model
         return '<a href="' . backpack_url('member') . '/' . $this->id . '/download-register" target="_blank" class="btn btn-sm btn-link"><i class="la la-print"></i> Form Pendaftaran</a>';
     }
 
+    function checkIsActive(){
+        if($this->expired_at >= Carbon::now() || $this->expired_at != null){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     /*
     |--------------------------------------------------------------------------
     | RELATIONS

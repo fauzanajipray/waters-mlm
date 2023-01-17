@@ -413,6 +413,7 @@ class MemberCrudController extends CrudController
             DB::commit();
             Alert::success(trans('backpack::crud.insert_success'))->flash();
             return redirect($this->crud->route);
+            // return redirect()->route('activation-payments.create', ['member_id' => $member->id]);  // redirect to activation payment
         } catch (\Exception $e) {
             DB::rollBack();
             Alert::error('Error ', $e->getMessage())->flash();
