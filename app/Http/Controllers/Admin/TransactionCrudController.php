@@ -39,6 +39,19 @@ class TransactionCrudController extends CrudController
      */
     public function setup()
     {
+        if(!backpack_user()->hasPermissionTo('Read Normal Transaction')){
+            $this->crud->denyAccess(['list']);
+        }
+        if(!backpack_user()->hasPermissionTo('Create Normal Transaction')){
+            $this->crud->denyAccess(['create']);
+        }
+        if(!backpack_user()->hasPermissionTo('Delete Normal Transaction')){
+            $this->crud->denyAccess(['delete']);
+        }
+        if(!backpack_user()->hasPermissionTo('Detail Normal Transaction')){
+            $this->crud->denyAccess(['show']);
+        }
+
         $this->crud->setModel(Transaction::class);
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/transaction');
         $this->crud->setEntityNameStrings('normal transaction', 'normal transactions');
@@ -397,7 +410,7 @@ class TransactionCrudController extends CrudController
                 }
             }
             if ($requests['is_member'] == 1 && $requests['member_id']) {
-                $customer = Customer::where('member_id', $requests['member_id'])->first();
+                $customer = Customer::where('member_id', $requests['member_id'])->where('is_member', "1")->first();
                 if ($customer) {
                     $requests['customer_id'] = strval($customer->id);
                 } else {
@@ -462,7 +475,12 @@ class TransactionCrudController extends CrudController
             $requests['transaction_id'] = $transaction->id;
             Alert::success(trans('backpack::crud.insert_success'))->flash();
             DB::commit();
-            return redirect(backpack_url('transaction-payment') . '/create?transaction_id=' . $transaction->id);
+
+            if(backpack_user()->hasPermissionTo('Create Payment Transaction')){
+                return redirect(backpack_url('transaction-payment') . '/create?transaction_id=' . $transaction->id);
+            } else {
+                return redirect(backpack_url('transaction') . '/' . $transaction->id . '/show');
+            }
         } catch (\Exception $e) {
             DB::rollback();
             Alert::error("Something when wrong")->flash();

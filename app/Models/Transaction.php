@@ -40,13 +40,16 @@ class Transaction extends Model
     }
 
     function buttonAddPayment(){
-        $status_paid = $this->status_paid;
-        $payment = TransactionPayment::where('transaction_id', $this->id)->count();
-        if($status_paid == 0 || $payment < 1){
-            return '<a href="'. backpack_url('transaction-payment') . '/create?transaction_id=' . $this->id . '" class="btn btn-sm btn-link"><i class="la la-plus"></i> Add Payment</a>';
-        }
+        // if(backpack_user()->hasPermissionTo('Create Payment Transaction')){
+            $status_paid = $this->status_paid;
+            $payment = TransactionPayment::where('transaction_id', $this->id)->count();
+            if($status_paid == 0 || $payment < 1){
+                return '<a href="'. backpack_url('transaction-payment') . '/create?transaction_id=' . $this->id . '" class="btn btn-sm btn-link"><i class="la la-plus"></i> Add Payment</a>';
+            }
+        // }
+        // return '';
     }
- 
+
     /*
     |--------------------------------------------------------------------------
     | RELATIONS
@@ -80,11 +83,11 @@ class Transaction extends Model
     public function transactionProducts() {
         return $this->hasMany(TransactionProduct::class, 'transaction_id');
     }
-    
+
     public function customer(){
         return $this->belongsTo(Customer::class, 'customer_id');
     }
-    
+
     public function transactionPayments(){
         return $this->hasMany(TransactionPayment::class, 'transaction_id');
     }
@@ -103,7 +106,7 @@ class Transaction extends Model
     {
         return $query->whereMonth('created_at', date('m'))->whereYear('created_at', date('Y'));
     }
-    
+
     /*
     |--------------------------------------------------------------------------
     | ACCESSORS

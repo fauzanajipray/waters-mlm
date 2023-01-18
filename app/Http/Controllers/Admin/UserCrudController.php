@@ -27,19 +27,31 @@ class UserCrudController extends CrudController
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
-     * 
+     *
      * @return void
      */
     public function setup()
     {
-       $this->crud->setModel(\App\Models\User::class);
-       $this->crud->setRoute(config('backpack.base.route_prefix') . '/user');
-       $this->crud->setEntityNameStrings('user', 'users');
+        if(!backpack_user()->hasPermissionTo('Read User')){
+            $this->crud->denyAccess(['list', 'show']);
+        }
+        if(!backpack_user()->hasPermissionTo('Create User')){
+            $this->crud->denyAccess(['create']);
+        }
+        if(!backpack_user()->hasPermissionTo('Update User')){
+            $this->crud->denyAccess(['update']);
+        }
+        if(!backpack_user()->hasPermissionTo('Delete User')){
+            $this->crud->denyAccess(['delete']);
+        }
+        $this->crud->setModel(\App\Models\User::class);
+        $this->crud->setRoute(config('backpack.base.route_prefix') . '/user');
+        $this->crud->setEntityNameStrings('user', 'users');
     }
 
     /**
      * Define what happens when the List operation is loaded.
-     * 
+     *
      * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
      * @return void
      */
@@ -55,7 +67,7 @@ class UserCrudController extends CrudController
             'entity' => 'role', // the method that defines the relationship in your Model
             'attribute' => 'name'
         ]);
-        
+
         $this->crud->addFilter(
             [
                 'name'  => 'role',
@@ -74,14 +86,14 @@ class UserCrudController extends CrudController
 
     /**
      * Define what happens when the Create operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-create
      * @return void
      */
     protected function setupCreateOperation()
     {
         $this->crud->setValidation(UserRequest::class);
-    
+
         $this->crud->field('name');
         $this->crud->field('email');
         $this->crud->field('password');
@@ -89,7 +101,7 @@ class UserCrudController extends CrudController
              'name' => 'password_confirmation',
              'type' => 'password',
              'label' => 'Confirm Password',
-        ]); 
+        ]);
         $this->crud->addField([
             'name'        => 'role_id', // the name of the db column
             'label'       => 'Role', // the input label
@@ -99,12 +111,12 @@ class UserCrudController extends CrudController
             'model'       => "App\Models\Role", // foreign key model
             'pivot'       => true, // on create&update, do you need to add/delete pivot table entries?
         ]);
-        
+
     }
 
     /**
      * Define what happens when the Update operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-update
      * @return void
      */
@@ -128,14 +140,14 @@ class UserCrudController extends CrudController
              'model'       => "App\Models\Role", // foreign key model
              'pivot'       => true, // on create&update, do you need to add/delete pivot table entries?
          ]);
-         $this->crud->setValidation([      
+         $this->crud->setValidation([
              'email' => ['required', 'email', \Illuminate\Validation\Rule::unique('users')->ignore(request()->id)],
          ]);
     }
 
     /**
      * Define what happens when the Show operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-show
      * @return void
      */
@@ -148,12 +160,12 @@ class UserCrudController extends CrudController
     protected function store(Request $request) {
         $this->crud->setRequest($this->crud->validateRequest());
         $password = bcrypt($request->password);
-        $request->merge(['password' => $password]); 
+        $request->merge(['password' => $password]);
         $user = $this->crud->create($request->all());
         if ($this->crud->getRequest()->role_id) {
             $role_id = $this->crud->getRequest()->role_id;
             $user_id = $user->id;
-            
+
             ModelHasRole::where('model_id', $user_id)->delete();
             ModelHasRole::create([
                 'role_id' => $role_id,
@@ -176,11 +188,11 @@ class UserCrudController extends CrudController
             $request->request->remove('password_confirmation');
         }
         $user = $this->crud->update($request->id, $request->all());
-        
+
         if ($this->crud->getRequest()->role_id) {
             $role_id = $this->crud->getRequest()->role_id;
             $user_id = $user->id;
-            
+
             ModelHasRole::where('model_id', $user_id)->delete();
             ModelHasRole::create([
                 'role_id' => $role_id,

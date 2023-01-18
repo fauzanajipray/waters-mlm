@@ -14,6 +14,10 @@ use Prologue\Alerts\Facades\Alert;
 trait MemberTrait {
     public function downloadCardMember($id)
     {
+        if(!backpack_user()->hasPermissionTo('Read Member')) {
+            Alert::error('You don\'t have permission to access this page.')->flash();
+            return redirect()->back();
+        }
         $member = Member::with('level')->where('id', $id)->firstOrFail();
         $title = "Card Member ($member->member_numb - $member->name)";
         $level = $member->level->name;
@@ -29,6 +33,10 @@ trait MemberTrait {
 
     public function reportMember(Request $request, $id)
     {
+        if(!backpack_user()->hasPermissionTo('Read Member')) {
+            Alert::error('You don\'t have permission to access this page.')->flash();
+            return redirect()->back();
+        }
         $totalDownlineLevel = ($request->input('total_downline_level')) ? $request->input('total_downline_level') : 2;
         if($totalDownlineLevel <= 0) {
             Alert::error('Total Downline Level must be greater than 0')->flash();

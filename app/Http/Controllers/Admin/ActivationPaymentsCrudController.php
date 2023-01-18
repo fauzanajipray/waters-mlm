@@ -32,6 +32,18 @@ class ActivationPaymentsCrudController extends CrudController
      */
     public function setup()
     {
+        if(!backpack_user()->hasPermissionTo('Read Activation Payment')){
+            $this->crud->denyAccess(['list', 'show']);
+        }
+        if(!backpack_user()->hasPermissionTo('Create Activation Payment')){
+            $this->crud->denyAccess('create');
+        }
+        if(!backpack_user()->hasPermissionTo('Update Activation Payment')){
+            $this->crud->denyAccess('update');
+        }
+        if(!backpack_user()->hasPermissionTo('Delete Activation Payment')){
+            $this->crud->denyAccess('delete');
+        }
         $this->crud->setModel(\App\Models\ActivationPayments::class);
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/activation-payments');
         $this->crud->setEntityNameStrings('activation payments', 'activation payments');

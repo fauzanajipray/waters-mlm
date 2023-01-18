@@ -22,11 +22,23 @@ class PaymentMethodCrudController extends CrudController
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
-     * 
+     *
      * @return void
      */
     public function setup()
     {
+        if(!backpack_user()->hasPermissionTo('Create Payment Method')){
+            $this->crud->denyAccess(['create']);
+        }
+        if(!backpack_user()->hasPermissionTo('Read Payment Method')){
+            $this->crud->denyAccess(['list', 'show']);
+        }
+        if(!backpack_user()->hasPermissionTo('Update Payment Method')){
+            $this->crud->denyAccess(['update']);
+        }
+        if(!backpack_user()->hasPermissionTo('Delete Payment Method')){
+            $this->crud->denyAccess(['delete']);
+        }
         $this->crud->setModel(\App\Models\PaymentMethod::class);
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/payment-method');
         $this->crud->setEntityNameStrings('payment method', 'payment methods');
@@ -34,7 +46,7 @@ class PaymentMethodCrudController extends CrudController
 
     /**
      * Define what happens when the List operation is loaded.
-     * 
+     *
      * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
      * @return void
      */
@@ -47,7 +59,7 @@ class PaymentMethodCrudController extends CrudController
 
     /**
      * Define what happens when the Create operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-create
      * @return void
      */
@@ -61,7 +73,7 @@ class PaymentMethodCrudController extends CrudController
 
     /**
      * Define what happens when the Update operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-update
      * @return void
      */

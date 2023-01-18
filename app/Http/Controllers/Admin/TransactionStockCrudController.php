@@ -33,11 +33,23 @@ class TransactionStockCrudController extends CrudController
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
-     * 
+     *
      * @return void
      */
     public function setup()
     {
+        if(!backpack_user()->hasPermissionTo('Read Stock Transaction')){
+            $this->crud->denyAccess(['list']);
+        }
+        if(!backpack_user()->hasPermissionTo('Create Stock Transaction')){
+            $this->crud->denyAccess(['create']);
+        }
+        if(!backpack_user()->hasPermissionTo('Delete Stock Transaction')){
+            $this->crud->denyAccess(['delete']);
+        }
+        if(!backpack_user()->hasPermissionTo('Detail Stock Transaction')){
+            $this->crud->denyAccess(['show']);
+        }
         $this->crud->setModel(Transaction::class);
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/transaction-stock');
         $this->crud->setEntityNameStrings('stock transaction', 'stock transactions');
@@ -49,16 +61,16 @@ class TransactionStockCrudController extends CrudController
         $this->crud->firstCellNonFlex = true;
         $this->crud->addColumns([
             'code',
-            'transaction_date', 
+            'transaction_date',
             [
                 'name' => 'member_numb',
                 'label' => 'Unique Number',
-            ], 
+            ],
             'member_name',
             [
                 'name' => 'total_price',
                 'type' => 'number_format',
-            ], 
+            ],
             'id_card',
             'customer_id',
             [
@@ -73,7 +85,7 @@ class TransactionStockCrudController extends CrudController
         $this->crud->addButtonFromModelFunction('line', 'letter_road', 'letterRoad', 'beginning');
         $this->crud->addButtonFromModelFunction('line', 'invoice', 'invoice', 'beginning');
         $this->crud->addButtonFromModelFunction('line', 'add_payment', 'buttonAddPayment', 'beginning');
-        
+
         $this->crud->addClause('where', 'type', 'Stock');
 
         // FILTER
@@ -81,8 +93,8 @@ class TransactionStockCrudController extends CrudController
             'type' => 'date_range',
             'name' => 'transaction_date',
             'label'=> 'Transaction Date',
-        ], 
-        false, 
+        ],
+        false,
         function($value) {
             $dates = json_decode($value);
             $this->crud->addClause('where', 'transaction_date', '>=', $dates->from);
@@ -107,7 +119,7 @@ class TransactionStockCrudController extends CrudController
                 'entity' => 'updatedBy',
                 'attribute' => 'name' ,
                 'model' => User::class,
-            ],            
+            ],
             'created_at',
             'updated_at',
         ]);
@@ -137,7 +149,7 @@ class TransactionStockCrudController extends CrudController
             ],
             'default' => date('d-m-Y H:i:s'),
         ]);
-        
+
         $this->crud->addField([
             'name' => 'member_id',
             'type' => 'select2_from_ajax',
@@ -146,7 +158,7 @@ class TransactionStockCrudController extends CrudController
             'data_source' => url('members/branch-owner'),
             'delay' => 500
         ]);
-        
+
         $this->crud->addField([
             'name' => 'customer_id',
             'type' => 'relationship',
@@ -164,7 +176,7 @@ class TransactionStockCrudController extends CrudController
             'data_source' => url('customer/get-customer-by-member-id'),
             'placeholder' => 'Select a customer',
         ]);
-        
+
         $this->crud->addField([
             'name' => 'shipping_address',
             'type' => 'textarea',
@@ -181,7 +193,7 @@ class TransactionStockCrudController extends CrudController
             'label' => 'Member is customer',
             'wrapperAttributes' => [
                 'class' => 'form-group col-md-12'
-            ], 
+            ],
             'value' => 1,
         ]);
 
@@ -261,7 +273,7 @@ class TransactionStockCrudController extends CrudController
     public function create(Request $request)
     {
         $this->crud->hasAccessOrFail('create');
-        
+
         $this->data['crud'] = $this->crud;
         $this->data['fields'] = $this->crud->getCreateFields();
         $this->data['saveAction'] = $this->crud->getSaveAction();
@@ -275,7 +287,7 @@ class TransactionStockCrudController extends CrudController
         }
         return view('crud::create', $this->data);
     }
-    
+
     public function update()
     {
         // show a success message
@@ -301,7 +313,7 @@ class TransactionStockCrudController extends CrudController
                 $products = $requests['products'];
             }
             foreach ($products as $key => $item) {
-                for ($key2=$key; $key2 < count($products); $key2++) { 
+                for ($key2=$key; $key2 < count($products); $key2++) {
                     if($item['product_id'] == $products[$key2]['product_id'] && $key != $key2){
                         $errors['products.'.$key2.'.product_id'] = 'Product '.$item['product_id'].' already taken';
                     }
@@ -348,7 +360,7 @@ class TransactionStockCrudController extends CrudController
             // Save Log Product Sold
             foreach ($products as $key => $item) {
                 $product = Product::
-                    leftJoin(DB::raw('( SELECT * FROM branch_products WHERE branch_id = '.$requests['branch_id'].' ) as branch_products2'), 
+                    leftJoin(DB::raw('( SELECT * FROM branch_products WHERE branch_id = '.$requests['branch_id'].' ) as branch_products2'),
                         function($join) { $join->on('branch_products2.product_id', '=', 'products.id'); }
                     )
                     ->where('products.id', $item['product_id'])
@@ -369,7 +381,11 @@ class TransactionStockCrudController extends CrudController
             $requests['transaction_id'] = $transaction->id;
             Alert::success(trans('backpack::crud.insert_success'))->flash();
             DB::commit();
-            return redirect(backpack_url('transaction-payment') . '/create?transaction_id=' . $transaction->id);
+            if(backpack_user()->hasPermissionTo('Create Payment Transaction')){
+                return redirect(backpack_url('transaction-payment') . '/create?transaction_id=' . $transaction->id);
+            } else {
+                return redirect(backpack_url('transaction-stock') . '/' . $transaction->id . '/show');
+            }
         } catch (\Exception $e) {
             DB::rollback();
             Alert::error("Something when wrong")->flash();

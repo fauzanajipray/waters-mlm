@@ -38,6 +38,12 @@ class TransactionPaymentCrudController extends CrudController
      */
     public function setup()
     {
+        if(!backpack_user()->hasPermissionTo('Create Payment Transaction')){
+            $this->crud->denyAccess(['create']);
+        }
+        if(!backpack_user()->hasPermissionTo('Read Payment Transaction')){
+            $this->crud->denyAccess(['list', 'show']);
+        }
         $this->crud->setModel(\App\Models\TransactionPayment::class);
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/transaction-payment');
         $this->crud->setEntityNameStrings('transaction payment', 'transaction payments');

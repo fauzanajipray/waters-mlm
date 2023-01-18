@@ -25,6 +25,10 @@ class Customer extends Model
 
 
     public function deleteButton(){
-        return '<a href="'. backpack_url('customer') . '/' . $this->id . '/delete" class="btn btn-sm btn-link btn-delete-customer"><i class="la la-trash"></i> Delete</a>';
+        if(backpack_user()->hasPermissionTo('Delete Customer')){
+            return '<a href="'. backpack_url('customer') . '/' . $this->id . '/delete" class="btn btn-sm btn-link btn-delete-customer"><i class="la la-trash"></i> Delete</a>';
+        } else {
+            return '';
+        }
     }
 }

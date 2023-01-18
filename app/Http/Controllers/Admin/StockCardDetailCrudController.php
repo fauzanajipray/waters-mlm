@@ -25,11 +25,14 @@ class StockCardDetailCrudController extends CrudController
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
-     * 
+     *
      * @return void
      */
     public function setup()
     {
+        if(!backpack_user()->hasPermissionTo('Detail Stock Card')){
+            $this->crud->denyAccess(['list', 'show']);
+        }
         $stockID = request()->segment(2);
         $this->crud->stock = Stock::with(['product', 'branch' => function($query) {
             return $query->with('member');
@@ -42,7 +45,7 @@ class StockCardDetailCrudController extends CrudController
 
     /**
      * Define what happens when the List operation is loaded.
-     * 
+     *
      * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
      * @return void
      */
@@ -72,7 +75,7 @@ class StockCardDetailCrudController extends CrudController
         }
         $this->crud->startDate = $startDate;
         $this->crud->endDate = $endDate;
-        
+
         $this->crud->addClause('where', 'stock_histories.branch_id', $this->crud->stock->branch->id);
         $this->crud->addClause('where', 'stock_histories.product_id', $this->crud->stock->product->id);
         $this->crud->addClause('where', 'stock_histories.created_at', '>=', $startDate);
@@ -93,11 +96,11 @@ class StockCardDetailCrudController extends CrudController
                 $dates = json_decode($value);
             }
         );
-        
+
         $this->crud->addColumn([ 'name' => 'created_at', 'label' => 'Date', 'type' => 'datetime' ]);
-        $this->crud->addColumn([ 
-            'name' => 'type', 
-            'label' => 'Type', 
+        $this->crud->addColumn([
+            'name' => 'type',
+            'label' => 'Type',
             'type' => 'text',
             'value' => function($entry) {
                 switch ($entry->type) {
@@ -114,9 +117,9 @@ class StockCardDetailCrudController extends CrudController
                 }
             },
         ]);
-        $this->crud->addColumn([ 
-            'name' => 'quantity', 
-            'label' => 'Quantity', 
+        $this->crud->addColumn([
+            'name' => 'quantity',
+            'label' => 'Quantity',
             'type' => 'text',
             'value' => function($entry) {
                 switch ($entry->type) {
@@ -185,7 +188,7 @@ class StockCardDetailCrudController extends CrudController
                 }
             },
         ]);
-    
+
         $this->crud->addColumn([
             'name' => 'sales_on',
             'label' => 'Sales On',
@@ -216,7 +219,7 @@ class StockCardDetailCrudController extends CrudController
 
     /**
      * Define what happens when the Show operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-show
      * @return void
      */
@@ -239,7 +242,7 @@ class StockCardDetailCrudController extends CrudController
         $this->setupListOperation();
     }
 
-    public function index() 
+    public function index()
     {
         $this->crud->hasAccessOrFail('list');
         $this->data['crud'] = $this->crud;
@@ -289,7 +292,7 @@ class StockCardDetailCrudController extends CrudController
         $this->crud->setOperationSetting('totalEntryCount', $totalEntryCount);
         $response = $this->crud->getEntriesAsJsonForDatatables($entries, $totalEntryCount, $filteredEntryCount, $start);
         $response['period_name'] = Carbon::parse($this->crud->startDate)->format('Y F d') . ' - ' . Carbon::parse($this->crud->endDate)->format('Y F d');
-       
+
         $data = $this->detailCustomQuery($this->crud->startDate, $this->crud->endDate, $this->crud->stock->branch_id, $this->crud->stock->product_id)->first();
         $response['initial_stock'] = $data->initial_stock;
         $response['final_stock'] = $data->final_stock;
@@ -302,13 +305,13 @@ class StockCardDetailCrudController extends CrudController
             /* Now */
             leftJoin( // Stock In
                 DB::raw("(
-                    SELECT 
-                        stock_histories.product_id, 
-                        stock_histories.branch_id, 
-                        SUM(stock_histories.quantity) as quantity, 
+                    SELECT
+                        stock_histories.product_id,
+                        stock_histories.branch_id,
+                        SUM(stock_histories.quantity) as quantity,
                         stock_histories.created_at
-                    FROM stock_histories 
-                    WHERE stock_histories.created_at 
+                    FROM stock_histories
+                    WHERE stock_histories.created_at
                         BETWEEN '$startDate' AND '$endDate'
                     AND stock_histories.type = 'in'
                     GROUP BY stock_histories.product_id, stock_histories.branch_id
@@ -320,14 +323,14 @@ class StockCardDetailCrudController extends CrudController
             )
             ->leftJoin( // Stock Out
                 DB::raw("(
-                    SELECT 
-                        stock_histories.product_id, 
-                        stock_histories.branch_id, 
-                        SUM(stock_histories.quantity) as quantity, 
+                    SELECT
+                        stock_histories.product_id,
+                        stock_histories.branch_id,
+                        SUM(stock_histories.quantity) as quantity,
                         stock_histories.in_from,
                         stock_histories.created_at
-                    FROM stock_histories 
-                    WHERE stock_histories.created_at 
+                    FROM stock_histories
+                    WHERE stock_histories.created_at
                         BETWEEN '$startDate' AND '$endDate'
                     AND stock_histories.type = 'out'
                     GROUP BY stock_histories.product_id, stock_histories.branch_id
@@ -345,7 +348,7 @@ class StockCardDetailCrudController extends CrudController
                         SUM(stock_histories.quantity) as quantity,
                         stock_histories.created_at
                     FROM stock_histories
-                    WHERE stock_histories.created_at 
+                    WHERE stock_histories.created_at
                         BETWEEN '$startDate' AND '$endDate'
                     AND stock_histories.type = 'sales'
                     GROUP BY stock_histories.product_id, stock_histories.branch_id
@@ -363,7 +366,7 @@ class StockCardDetailCrudController extends CrudController
                         SUM(stock_histories.quantity) as quantity,
                         stock_histories.created_at
                     FROM stock_histories
-                    WHERE stock_histories.created_at 
+                    WHERE stock_histories.created_at
                         BETWEEN '$startDate' AND '$endDate'
                     AND stock_histories.type = 'adjustment'
                     GROUP BY stock_histories.product_id, stock_histories.branch_id
@@ -376,13 +379,13 @@ class StockCardDetailCrudController extends CrudController
             /* Yesterday */
             ->leftJoin( // Stock In
                 DB::raw("(
-                    SELECT 
-                        stock_histories.product_id, 
-                        stock_histories.branch_id, 
-                        SUM(stock_histories.quantity) as quantity, 
+                    SELECT
+                        stock_histories.product_id,
+                        stock_histories.branch_id,
+                        SUM(stock_histories.quantity) as quantity,
                         stock_histories.in_from,
                         stock_histories.created_at
-                    FROM stock_histories 
+                    FROM stock_histories
                     WHERE stock_histories.created_at <= '$startDateYesterdayEndOfDay'
                     AND stock_histories.type = 'in'
                     GROUP BY stock_histories.product_id, stock_histories.branch_id
@@ -394,13 +397,13 @@ class StockCardDetailCrudController extends CrudController
             )
             ->leftJoin( // Stock Out
                 DB::raw("(
-                    SELECT 
-                        stock_histories.product_id, 
-                        stock_histories.branch_id, 
-                        SUM(stock_histories.quantity) as quantity, 
+                    SELECT
+                        stock_histories.product_id,
+                        stock_histories.branch_id,
+                        SUM(stock_histories.quantity) as quantity,
                         stock_histories.in_from,
                         stock_histories.created_at
-                    FROM stock_histories 
+                    FROM stock_histories
                     WHERE stock_histories.created_at <= '$startDateYesterdayEndOfDay'
                     AND stock_histories.type = 'out'
                     GROUP BY stock_histories.product_id, stock_histories.branch_id
@@ -410,7 +413,7 @@ class StockCardDetailCrudController extends CrudController
                         ->whereRaw('`stocks`.`branch_id` = `stock_out_histories_yesterday`.`branch_id`');
                 }
             )
-            ->leftJoin( // Sales Yesterday 
+            ->leftJoin( // Sales Yesterday
                 DB::raw("(
                     SELECT
                         stock_histories.product_id,
@@ -450,22 +453,22 @@ class StockCardDetailCrudController extends CrudController
                 'stocks.id',
                 // Initial Stock
                 DB::raw('(
-                    IFNULL(`stock_in_histories_yesterday`.`quantity`, 0) - 
-                    IFNULL(`stock_out_histories_yesterday`.`quantity`, 0) - 
-                    IFNULL(SUM(`transactions_yesterday`.`quantity`), 0) + 
+                    IFNULL(`stock_in_histories_yesterday`.`quantity`, 0) -
+                    IFNULL(`stock_out_histories_yesterday`.`quantity`, 0) -
+                    IFNULL(SUM(`transactions_yesterday`.`quantity`), 0) +
                     IFNULL(SUM(`adjustments_yesterday`.`quantity`), 0)
                 ) as `initial_stock`'),
                 // Final Stock
                 DB::raw('(
-                    IFNULL(`stock_in_histories_yesterday`.`quantity`, 0) - 
-                    IFNULL(`stock_out_histories_yesterday`.`quantity`, 0) - 
-                    IFNULL(SUM(`transactions_yesterday`.`quantity`), 0) + 
+                    IFNULL(`stock_in_histories_yesterday`.`quantity`, 0) -
+                    IFNULL(`stock_out_histories_yesterday`.`quantity`, 0) -
+                    IFNULL(SUM(`transactions_yesterday`.`quantity`), 0) +
                     IFNULL(SUM(`adjustments_yesterday`.`quantity`), 0) +
                     IFNULL(`stock_in_histories_now`.`quantity`, 0) -
                     IFNULL(`stock_out_histories_now`.`quantity`, 0) -
                     IFNULL(SUM(`transactions_now`.`quantity`), 0) +
-                    IFNULL(SUM(`adjustments_now`.`quantity`), 0) 
-                ) as `final_stock`'),                
+                    IFNULL(SUM(`adjustments_now`.`quantity`), 0)
+                ) as `final_stock`'),
             )
             ->orderBy('branches.name', 'asc')
             ->where('stocks.branch_id', $branchID)

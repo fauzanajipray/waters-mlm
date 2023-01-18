@@ -33,6 +33,15 @@ class CustomerCrudController extends CrudController
      */
     public function setup()
     {
+        if(!backpack_user()->hasPermissionTo('Create Customer')){
+            $this->crud->denyAccess(['create']);
+        }
+        if(!backpack_user()->hasPermissionTo('Read Customer')){
+            $this->crud->denyAccess(['list', 'show']);
+        }
+        if(!backpack_user()->hasPermissionTo('Update Customer')){
+            $this->crud->denyAccess(['update']);
+        }
         $this->crud->setModel(\App\Models\Customer::class);
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/customer');
         $this->crud->setEntityNameStrings('customer', 'customers');

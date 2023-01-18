@@ -26,11 +26,17 @@ class StockCrudController extends CrudController
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
-     * 
+     *
      * @return void
      */
     public function setup()
     {
+        if(!backpack_user()->hasPermissionTo('Read Stock')){
+            $this->crud->denyAccess(['list', 'show']);
+        }
+        if(!backpack_user()->hasPermissionTo('Create Stock')){
+            $this->crud->denyAccess('create');
+        }
         $this->crud->setModel(\App\Models\Stock::class);
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/stock');
         $this->crud->setEntityNameStrings('stock', 'stocks');
@@ -38,7 +44,7 @@ class StockCrudController extends CrudController
 
     /**
      * Define what happens when the List operation is loaded.
-     * 
+     *
      * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
      * @return void
      */
@@ -76,21 +82,21 @@ class StockCrudController extends CrudController
         $this->crud->column('branch_id');
         $this->crud->column('quantity');
         $this->crud->column('updated_at');
-        
+
         $this->crud->addClause('where', 'quantity', '>', 0);
         $this->getFilter();
     }
 
     /**
      * Define what happens when the Create operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-create
      * @return void
      */
     protected function setupCreateOperation()
     {
         $this->crud->setValidation(StockRequest::class);
-        
+
         $request = request();
         if($request->has('branch_id')){
             $branch_id = $request->branch_id;
@@ -115,7 +121,7 @@ class StockCrudController extends CrudController
                 'model' => "App\Models\Branch",
                 'options'   => (function ($query) {
                     $data = $query->where('id', '1')->with('member')->orderBy('name', 'DESC')->get();
-                    $data->map(function($item){ 
+                    $data->map(function($item){
                         if(isset($item->member)){
                             $item->name = $item->name . ' | ' . $item->member->name;
                         }
@@ -139,7 +145,7 @@ class StockCrudController extends CrudController
             'method' => 'POST',
             'tab' => 'Product'
         ]);
-        
+
         $this->crud->addField([
             'name' => 'product_id',
             'type' => 'select2_from_ajax',
@@ -153,7 +159,7 @@ class StockCrudController extends CrudController
             'dependencies' => ['branch_id', 'origin_branch_id'],
             'tab' => 'Product'
         ]);
-        
+
         $this->crud->addField([
             'name' => 'product_stock',
             'label' => 'Product Stock',
@@ -164,21 +170,21 @@ class StockCrudController extends CrudController
                 'disabled' => 'disabled'
             ],
         ]);
-        
+
         $this->crud->addField([
             'name' => 'quantity',
             'label' => 'Quantity',
             'type' => 'number',
             'tab' => 'Product'
         ]);
-        
+
         $this->crud->addField([ 'name' => 'url', 'type' => 'hidden', 'value' => url(''), 'attributes' => ['disabled' => 'disabled'] ]);
         Widget::add()->type('script')->content(asset('assets/js/admin/form/stock.js'));
     }
 
     /**
      * Define what happens when the Update operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-update
      * @return void
      */
@@ -189,7 +195,7 @@ class StockCrudController extends CrudController
 
     /**
      * Define what happens when the Show operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-show
      * @return void
      */
@@ -253,12 +259,12 @@ class StockCrudController extends CrudController
         } catch (\Exception $e) {
             DB::rollback();
             return redirect()->back()->with('error', $e->getMessage());
-        }      
+        }
         return redirect()->route('stock.index');
     }
 
     protected function getFilter() {
-        
+
         $this->crud->addFilter(
             [
                 'name' => 'branch_id',
@@ -266,7 +272,7 @@ class StockCrudController extends CrudController
                 'label'=> 'Branch',
                 'placeholder' => 'Pick a branch',
                 'method' => 'POST'
-            ], 
+            ],
             url('branches/for-filter'),
             function($value) {
                 $this->crud->addClause('where', 'branch_id', $value);
@@ -280,7 +286,7 @@ class StockCrudController extends CrudController
                 'label'=> 'Product',
                 'placeholder' => 'Pick a product',
                 'method' => 'POST'
-            ], 
+            ],
             url('product/for-filter'),
             function($value) {
                 $this->crud->addClause('where', 'product_id', $value);
@@ -344,6 +350,6 @@ class StockCrudController extends CrudController
         } catch (\Exception $e) {
             DB::rollback();
             return throw new Exception($e->getMessage());
-        }      
+        }
     }
 }

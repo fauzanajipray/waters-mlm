@@ -21,11 +21,14 @@ class LevelUpHistoriesCrudController extends CrudController
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
-     * 
+     *
      * @return void
      */
     public function setup()
     {
+        if(!backpack_user()->hasPermissionTo('Read Level History')){
+            $this->crud->denyAccess(['list', 'show']);
+        }
         CRUD::setModel(\App\Models\LevelUpHistories::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/level-up-histories');
         CRUD::setEntityNameStrings('level up histories', 'level up histories');
@@ -33,7 +36,7 @@ class LevelUpHistoriesCrudController extends CrudController
 
     /**
      * Define what happens when the List operation is loaded.
-     * 
+     *
      * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
      * @return void
      */
@@ -53,13 +56,13 @@ class LevelUpHistoriesCrudController extends CrudController
             ],
         ]);
         CRUD::column('old_level_code');
-        CRUD::column('new_level_code');   
+        CRUD::column('new_level_code');
         CRUD::column('created_at');
     }
 
     /**
      * Define what happens when the Create operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-create
      * @return void
      */
@@ -79,7 +82,7 @@ class LevelUpHistoriesCrudController extends CrudController
 
     /**
      * Define what happens when the Update operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-update
      * @return void
      */
@@ -90,7 +93,7 @@ class LevelUpHistoriesCrudController extends CrudController
 
     /**
      * Define what happens when the Show operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-show
      * @return void
      */

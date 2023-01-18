@@ -26,6 +26,16 @@ class LevelNsiCrudController extends CrudController
      */
     public function setup()
     {
+        if(!backpack_user()->hasPermissionTo('Create Config Level NSI')){
+            $this->crud->denyAccess(['create']);
+        }
+        if(!backpack_user()->hasPermissionTo('Delete Config Level NSI')){
+            $this->crud->denyAccess(['delete']);
+        }
+        if(!backpack_user()->hasPermissionTo('Update Config Level NSI')){
+            $this->crud->denyAccess(['update']);
+        }
+        
         CRUD::setModel(\App\Models\LevelNsi::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/level-nsi');
         CRUD::setEntityNameStrings('Level NSI', 'Level NSI');

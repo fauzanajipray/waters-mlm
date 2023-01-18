@@ -28,6 +28,12 @@ class BranchProductCrudController extends CrudController
      */
     public function setup()
     {
+        if(!backpack_user()->hasPermissionTo('Read Branch Product')){
+            $this->crud->denyAccess(['list', 'show']);
+        }
+        if(!backpack_user()->hasPermissionTo('Update Branch Product')){
+            $this->crud->denyAccess('update');
+        }
         $this->crud->setModel(\App\Models\BranchProduct::class);
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/branch-product');
         $this->crud->setEntityNameStrings('branch product', 'branch products');

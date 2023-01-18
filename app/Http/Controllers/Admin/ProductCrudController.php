@@ -31,6 +31,18 @@ class ProductCrudController extends CrudController
      */
     public function setup()
     {
+        if(!backpack_user()->hasPermissionTo('Read Product')){
+            $this->crud->denyAccess(['list', 'show']);
+        }
+        if(!backpack_user()->hasPermissionTo('Create Product')){
+            $this->crud->denyAccess('create');
+        }
+        if(!backpack_user()->hasPermissionTo('Update Product')){
+            $this->crud->denyAccess('update');
+        }
+        if(!backpack_user()->hasPermissionTo('Delete Product')){
+            $this->crud->denyAccess('delete');
+        }
         $this->crud->setModel(Product::class);
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/product');
         $this->crud->setEntityNameStrings('product', 'products');
@@ -44,6 +56,7 @@ class ProductCrudController extends CrudController
      */
     protected function setupListOperation()
     {
+        // dd(backpack_user());
         $this->crud->column('name')->label('Name');
         $this->crud->column('model');
         $this->crud->column('capacity')->label('Remarks');

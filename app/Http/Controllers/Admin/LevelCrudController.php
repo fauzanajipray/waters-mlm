@@ -23,11 +23,24 @@ class LevelCrudController extends CrudController
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
-     * 
+     *
      * @return void
      */
     public function setup()
     {
+        if(!backpack_user()->hasPermissionTo('Create Config Level Member')){
+            $this->crud->denyAccess(['create']);
+        }
+        if(!backpack_user()->hasPermissionTo('Delete Config Level Member')){
+            $this->crud->denyAccess(['delete']);
+        }
+        if(!backpack_user()->hasPermissionTo('Update Config Level Member')){
+            $this->crud->denyAccess(['update']);
+        }
+        if(!backpack_user()->hasPermissionTo('Read Config Level Member')){
+            $this->crud->denyAccess(['list', 'show']);
+        }
+
         $this->crud->setModel(\App\Models\Level::class);
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/level');
         $this->crud->setEntityNameStrings('level', 'levels');
@@ -35,7 +48,7 @@ class LevelCrudController extends CrudController
 
     /**
      * Define what happens when the List operation is loaded.
-     * 
+     *
      * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
      * @return void
      */
@@ -55,7 +68,7 @@ class LevelCrudController extends CrudController
 
     /**
      * Define what happens when the Create operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-create
      * @return void
      */
@@ -77,7 +90,7 @@ class LevelCrudController extends CrudController
 
     /**
      * Define what happens when the Update operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-update
      * @return void
      */
@@ -93,7 +106,7 @@ class LevelCrudController extends CrudController
 
     /**
      * Define what happens when the Show operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-show
      * @return void
      */

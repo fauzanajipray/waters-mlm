@@ -23,11 +23,23 @@ class RoleCrudController extends CrudController
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
-     * 
+     *
      * @return void
      */
     public function setup()
     {
+        if(!backpack_user()->hasPermissionTo('Read Role')){
+            $this->crud->denyAccess(['list', 'show']);
+        }
+        if(!backpack_user()->hasPermissionTo('Create Role')){
+            $this->crud->denyAccess(['create']);
+        }
+        if(!backpack_user()->hasPermissionTo('Update Role')){
+            $this->crud->denyAccess(['update']);
+        }
+        if(!backpack_user()->hasPermissionTo('Delete Role')){
+            $this->crud->denyAccess(['delete']);
+        }
         $this->crud->setModel(\App\Models\Role::class);
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/role');
         $this->crud->setEntityNameStrings('role', 'roles');
@@ -39,25 +51,13 @@ class RoleCrudController extends CrudController
 
     /**
      * Define what happens when the List operation is loaded.
-     * 
+     *
      * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
      * @return void
      */
     protected function setupListOperation()
     {
-        $this->crud->column('name');        
-        $this->crud->query->withCount('users');
-        $this->crud->addColumn([
-            'label'     => 'Users',
-            'type'      => 'text',
-            'name'      => 'users_count',
-            'wrapper'   => [
-                'href' => function ($crud, $column, $entry, $related_key) {
-                    return backpack_url('user?role='.$entry->getKey());
-                },
-            ],
-            'suffix'    => ' '.strtolower(trans('backpack::permissionmanager.users')),
-        ]);        
+        $this->crud->column('name');
         if (config('backpack.permissionmanager.multiple_guards')) {
             $this->crud->addColumn([
                 'name'  => 'guard_name',
@@ -65,21 +65,12 @@ class RoleCrudController extends CrudController
                 'type'  => 'text',
             ]);
         }
-        $this->crud->addColumn([
-            // n-n relationship (with pivot table)
-            'label'     => mb_ucfirst(trans('backpack::permissionmanager.permission_plural')),
-            'type'      => 'select_multiple',
-            'name'      => 'permissions', // the method that defines the relationship in your Model
-            'entity'    => 'permissions', // the method that defines the relationship in your Model
-            'attribute' => 'name', // foreign key attribute that is shown to user
-            'model'     => 'App\Models\Permissions', // foreign key model
-            'pivot'     => true, // on create&update, do you need to add/delete pivot table entries?
-        ]);
+
     }
 
     /**
      * Define what happens when the Create operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-create
      * @return void
      */
@@ -93,13 +84,13 @@ class RoleCrudController extends CrudController
         /**
          * Fields can be defined using the fluent syntax or array syntax:
          * - $this->crud->field('price')->type('number');
-         * - $this->crud->addField(['name' => 'price', 'type' => 'number'])); 
+         * - $this->crud->addField(['name' => 'price', 'type' => 'number']));
          */
     }
 
     /**
      * Define what happens when the Update operation is loaded.
-     * 
+     *
      * @see https://backpackforlaravel.com/docs/crud-operation-update
      * @return void
      */

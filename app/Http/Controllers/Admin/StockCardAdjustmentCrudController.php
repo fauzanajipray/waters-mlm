@@ -19,11 +19,14 @@ class StockCardAdjustmentCrudController extends CrudController
 
     /**
      * Configure the CrudPanel object. Apply settings to all operations.
-     * 
+     *
      * @return void
      */
     public function setup()
     {
+        if(!backpack_user()->hasPermissionTo('Adjustment Stock Card')){
+            abort(403);
+        }
         $stockID = request()->segment(2);
         $this->crud->stock = Stock::with(['product', 'branch' => function($query) {
             return $query->with('member');
@@ -33,7 +36,7 @@ class StockCardAdjustmentCrudController extends CrudController
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/stock-card/' . $stockID . '/adjustment');
         $this->crud->setEntityNameStrings('Stock Adjustment', 'Stock Adjustment');
     }
-    
+
     protected function setupCreateOperation(){
         if($this->crud->stock->product->type == 'sparepart'){
             $this->crud->stock->product->text = $this->crud->stock->product->name;
@@ -108,7 +111,7 @@ class StockCardAdjustmentCrudController extends CrudController
             } else if($request->quantity < $this->crud->stock->quantity){
                 $diff = $this->crud->stock->quantity - $request->quantity;
                 $request->quantity = - (int) $diff;
-            } 
+            }
             $stock = Stock::find($request->stock_id);
             $stock->quantity = $stock->quantity + $request->quantity;
             $stock->save();
@@ -126,6 +129,6 @@ class StockCardAdjustmentCrudController extends CrudController
         } catch(Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', $e->getMessage())->withInput();
-        } 
+        }
     }
 }

@@ -30,6 +30,9 @@ class BonusHistoryCrudController extends CrudController
      */
     public function setup()
     {
+        if(!backpack_user()->hasPermissionTo('Read Bonus History')){
+            $this->crud->denyAccess(['list', 'show']);
+        }
         $this->crud->setModel(\App\Models\BonusHistory::class);
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/bonus-history');
         $this->crud->setEntityNameStrings('bonus history', 'bonus histories');

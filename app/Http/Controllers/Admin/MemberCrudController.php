@@ -39,6 +39,18 @@ class MemberCrudController extends CrudController
      */
     public function setup()
     {
+        if(!backpack_user()->hasPermissionTo('Read Member')){
+            $this->crud->denyAccess(['list', 'show']);
+        }
+        if(!backpack_user()->hasPermissionTo('Create Member')){
+            $this->crud->denyAccess(['create']);
+        }
+        if(!backpack_user()->hasPermissionTo('Update Member')){
+            $this->crud->denyAccess(['update']);
+        }
+        if(!backpack_user()->hasPermissionTo('Delete Member')){
+            $this->crud->denyAccess(['delete']);
+        }
         $this->crud->setModel(\App\Models\Member::class);
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/member');
         $this->crud->setEntityNameStrings('member', 'members');

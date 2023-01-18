@@ -52,6 +52,18 @@ class BranchCrudController extends CrudController
      */
     protected function setupListOperation()
     {
+        if(!backpack_user()->hasPermissionTo('Read Branch')){
+            $this->crud->denyAccess(['list', 'show']);
+        }
+        if(!backpack_user()->hasPermissionTo('Create Branch')){
+            $this->crud->denyAccess(['create']);
+        }
+        if(!backpack_user()->hasPermissionTo('Update Branch')){
+            $this->crud->denyAccess(['update']);
+        }
+        if(!backpack_user()->hasPermissionTo('Delete Branch')){
+            $this->crud->denyAccess(['delete']);
+        }
         $this->crud->column('name');
         $this->crud->column('address');
         $this->crud->column('type');
@@ -69,7 +81,9 @@ class BranchCrudController extends CrudController
             ],
         ]);
         // $this->crud->addButtonFromModelFunction('line', 'add_stock', 'stockButton', 'beginning'); // TODO: add stock button
-        $this->crud->addButtonFromModelFunction('line', 'add_owner', 'addOwnerButton', 'beginning');
+        if(backpack_user()->hasPermissionTo('Add Owner Branch')){
+            $this->crud->addButtonFromModelFunction('line', 'add_owner', 'addOwnerButton', 'beginning');
+        }
         $this->crud->addButtonFromModelFunction('line', 'deleteButton', 'deleteButton', 'end');
     }
 
@@ -204,7 +218,9 @@ class BranchCrudController extends CrudController
     }
 
     public function addOwner($id){
-        $this->crud->hasAccessOrFail('update');
+        if(!backpack_user()->hasPermissionTo('Add Owner Branch')){
+            abort(403);
+        }
         // get entry ID from Request (makes sure its the last ID for nested resources)
         $id = $this->crud->getCurrentEntryId() ?? $id;
         // get the info for that entry

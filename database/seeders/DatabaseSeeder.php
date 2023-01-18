@@ -79,17 +79,6 @@ class DatabaseSeeder extends Seeder
             'email' => 'benny@rectmedia.com',
             'password' => bcrypt('qwerty'),
             'name' => 'Benny',
-            'role_id' => 1,
-        ]);
-        $user->assignRole('Super Admin');
-
-        $user = User::updateOrCreate([
-            'email' => 'fauzan@rectmedia.id'
-        ], [
-            'email' => 'fauzan@rectmedia.id',
-            'password' => bcrypt('qwerty'),
-            'name' => 'Fauzan',
-            'role_id' => 2,
         ]);
         $user->assignRole('Super Admin');
 
@@ -99,9 +88,17 @@ class DatabaseSeeder extends Seeder
             'email' => 'kevin@rectmedia.com',
             'password' => bcrypt('qwerty'),
             'name' => 'Kevin',
-            'role_id' => 3,
         ]);
         $user->assignRole('Admin');
+
+        $user = User::updateOrCreate([
+            'email' => 'fauzan@rectmedia.id'
+        ], [
+            'email' => 'fauzan@rectmedia.id',
+            'password' => bcrypt('qwerty'),
+            'name' => 'Fauzan',
+        ]);
+        $user->assignRole('Member');
     }
 
     private function product()

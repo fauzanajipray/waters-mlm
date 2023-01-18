@@ -32,7 +32,7 @@ Route::group([
     Route::get('member/register-form', 'MemberCrudController@downloadFormRegister');
     Route::get('member/member-type', 'MemberCrudController@getMemberType');
     Route::crud('role', 'RoleCrudController');
-    Route::crud('permission', 'PermissionCrudController');
+    // Route::crud('permission', 'PermissionCrudController');
     Route::crud('product', 'ProductCrudController');
     Route::prefix('product')->group(function () {
         Route::post('get-product', 'ProductCrudController@getProduct');
