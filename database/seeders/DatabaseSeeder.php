@@ -117,6 +117,7 @@ class DatabaseSeeder extends Seeder
                 "price" => $csvData["Netto Price"],
                 "is_demokit" => $csvData["Is Demokit"],
                 "type" => $csvData["Type"],
+                "min_stock_pusat" => $csvData["Min Stock Pusat"],
             ]);
         }
 

@@ -34,6 +34,7 @@ Route::group([
     Route::crud('role', 'RoleCrudController');
     // Route::crud('permission', 'PermissionCrudController');
     Route::crud('product', 'ProductCrudController');
+    Route::crud('product-below-stock', 'ProductBelowStockCrudController');
     Route::prefix('product')->group(function () {
         Route::post('get-product', 'ProductCrudController@getProduct');
         Route::post('get-demokit-products', 'ProductCrudController@getDemokitProducts');

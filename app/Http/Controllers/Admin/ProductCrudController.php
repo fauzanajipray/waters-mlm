@@ -56,7 +56,6 @@ class ProductCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        // dd(backpack_user());
         $this->crud->column('name')->label('Name');
         $this->crud->column('model');
         $this->crud->column('capacity')->label('Remarks');
@@ -86,7 +85,11 @@ class ProductCrudController extends CrudController
                 }
             },
         ]);
-
+        $this->crud->addColumn([
+            'name' => 'min_stock_pusat',
+            'label' => 'Min Stock Pusat',
+            'type' => 'number',
+        ]);
         $this->crud->addFilter([
             'name' => 'type',
             'type' => 'dropdown',
@@ -153,6 +156,8 @@ class ProductCrudController extends CrudController
         $this->crud->field('capacity')->label('Remarks');
         $this->crud->field('price')->label('Netto Price')->type('number_format')->prefix('Rp. ');
         $this->crud->field('is_demokit')->label('Is Demokit');
+        $this->crud->field('min_stock_pusat')->label('Min Stock Pusat')
+            ->type('number')->attributes(['min' => 0])->default(0);
         Widget::add()->type('script')->content(asset('assets/js/admin/form/product.js'));
     }
 
