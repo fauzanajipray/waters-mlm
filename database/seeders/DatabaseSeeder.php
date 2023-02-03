@@ -279,25 +279,32 @@ class DatabaseSeeder extends Seeder
         $this->command->line("Completed --> Member");
     }
 
-    private function customer()
+    private function  customer()
     {
         $filename = Storage::path('sample/customer.csv');
         $csvDatas = $this->csvToArray($filename);
 
         foreach ($csvDatas as $csvData) {
-            if($csvData["Member ID"]){
-                Customer::updateOrCreate([
-                    "id" => $csvData["ID"],
-                    "name" => $csvData["Name"],
-                ],[
-                    "id" => $csvData["ID"],
-                    "name" => $csvData["Name"],
-                    "address" => $csvData["Address"],
-                    "city" => $csvData["City"],
-                    "phone" => $csvData["HP"],
-                    "member_id" => $csvData["Member ID"],
-                    "is_member" => $csvData["Is Member"] ?? 0,
-                ]);
+            try {
+                if($csvData["Member ID"]){
+                    $cust = Customer::updateOrCreate([
+                        "id" => $csvData["ID"],
+                        "name" => $csvData["Name"],
+                    ],[
+                        "id" => $csvData["ID"],
+                        "name" => $csvData["Name"],
+                        "address" => $csvData["Address"],
+                        "city" => $csvData["City"],
+                        "phone" => $csvData["HP"],
+                        "member_id" => $csvData["Member ID"],
+                        "is_member" => $csvData["Is Member"] ?? 0,
+                    ]);
+                } else {
+                    throw new Exception("Member ID is null");
+                }
+            } catch (Exception $e) {
+                $this->command->line("Error --> Customer ID : ".$csvData["ID"]);
+                $this->command->line($e->getMessage());
             }
         }
         $members = Member::all();
