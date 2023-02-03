@@ -330,30 +330,36 @@ class DatabaseSeeder extends Seeder
         $transCrud = new TransactionCrudController();
 
         foreach ($csvDatas as $csvData) {
-            if($csvData["Member ID"] ) {
-                // $existTrans = Transaction::where("code", $csvData['Code'] ?? 0)->exists();
-                $customer = Customer::where("id", $csvData['Customer ID'])->first();
-                $requests = [
-                    "id" => $csvData["ID"],
-                    "transaction_date" => Carbon::createFromFormat('d/m/Y', $csvData['Transaction Date'])->format("Y-m-d"),
-                    "customer_id" => $csvData['Customer ID'],
-                    "shipping_address" => $csvData['Shipping Address'],
-                    "is_member" => (isset($customer)) ? $customer->is_member : 0,
-                    "member_id" => $csvData['Member ID'],
-                    "product_id" => $csvData['Product ID'],
-                    "discount_percentage" => $csvData['Discount Percentage'],
-                    "discount_amount" => $csvData['Discount Amount'],
-                    "quantity" => $csvData['Qty'],
-                    "created_by" => 1,
-                    "updated_by" => 1,
-                    "type" => $csvData['Tipe Penjualan'] ,
-                    "branch_id" => $csvData['Branch ID'],
-                    "stock_from" => Branch::find($csvData['Branch ID'])->name,
-                ];
+            try {
 
-                // if (!$existTrans) {
-                    $transCrud->createByImport($requests);
-                // }
+                if($csvData["Member ID"] ) {
+                    // $existTrans = Transaction::where("code", $csvData['Code'] ?? 0)->exists();
+                    $customer = Customer::where("id", $csvData['Customer ID'])->first();
+                    $requests = [
+                        "id" => $csvData["ID"],
+                        "transaction_date" => Carbon::createFromFormat('d/m/Y', $csvData['Transaction Date'])->format("Y-m-d"),
+                        "customer_id" => $csvData['Customer ID'],
+                        "shipping_address" => $csvData['Shipping Address'],
+                        "is_member" => (isset($customer)) ? $customer->is_member : 0,
+                        "member_id" => $csvData['Member ID'],
+                        "product_id" => $csvData['Product ID'],
+                        "discount_percentage" => $csvData['Discount Percentage'],
+                        "discount_amount" => $csvData['Discount Amount'],
+                        "quantity" => $csvData['Qty'],
+                        "created_by" => 1,
+                        "updated_by" => 1,
+                        "type" => $csvData['Tipe Penjualan'] ,
+                        "branch_id" => $csvData['Branch ID'],
+                        "stock_from" => Branch::find($csvData['Branch ID'])->name,
+                    ];
+
+                    // if (!$existTrans) {
+                        $transCrud->createByImport($requests);
+                    // }
+                }
+            } catch (Exception $e) {
+                $this->command->line("Error --> Transaction ID : ".$csvData["ID"]);
+                $this->command->line($e->getMessage());
             }
 
         }
