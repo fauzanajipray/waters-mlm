@@ -442,7 +442,7 @@ class TransactionPaymentCrudController extends CrudController
         }
         $transactionBill = $totalPrice - $transaction->transactionPayments->sum('amount');
         if($transactionBill < $requests['amount']) {
-            return throw new Exception('Transaction bill is less than payment amount');
+            return throw new Exception('Transaction bill is less than payment amount. bill : ' . $transactionBill . ', payment : ' . $requests['amount']);
         }
         $paymentMethodCust = PaymentMethod::where('name', $requests['payment_method'])->first();
 
