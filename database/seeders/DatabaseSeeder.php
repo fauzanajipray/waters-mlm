@@ -462,7 +462,7 @@ class DatabaseSeeder extends Seeder
                     "payment_date" => Carbon::createFromFormat('d/m/Y', $csvData['Tanggal Payment'])->format("Y-m-d"),
                     "payment_method" => $csvData['Payment Method'],
                     "amount" => $csvData['Nominal'],
-                    "type" => $csvData['Status'],
+                    "type" => ucwords(strtolower($csvData['Status'])),
                 ];
                 try {
                     $transPaymentCrud->createByImport($requests);
