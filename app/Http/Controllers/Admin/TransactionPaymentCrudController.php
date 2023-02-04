@@ -404,7 +404,8 @@ class TransactionPaymentCrudController extends CrudController
         }
     }
 
-    public function index(){
+    public function index()
+    {
         $this->crud->hasAccessOrFail('list');
 
         $this->data['crud'] = $this->crud;
@@ -414,7 +415,8 @@ class TransactionPaymentCrudController extends CrudController
         return view('transaction.list_payment', $this->data);
     }
 
-    public function createByImport($requests){
+    public function createByImport($requests)
+    {
         // $transaction = Transaction::findOrfail($requests['transaction_id']);
         $transaction = Transaction::with(['transactionPayments', 'transactionProducts'])->findOrFail($requests['transaction_id']);
         $totalPrice =  0;
@@ -521,7 +523,7 @@ class TransactionPaymentCrudController extends CrudController
                     $stock->save();
 
                     /* Add stock history */
-                    if($transaction->type != "Display"){
+                    if($transaction->type != "Stock"){
                         $stockHistory = new StockHistory();
                         $stockHistory->type = 'sales';
                         $stockHistory->branch_id = $transaction->branch_id;

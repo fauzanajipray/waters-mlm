@@ -402,4 +402,5 @@ class TransactionStockCrudController extends CrudController
         $this->data['products'] = TransactionProduct::where('transaction_id', $id)->get();
         return view('transaction.show', $this->data);
     }
+    
 }

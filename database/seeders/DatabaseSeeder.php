@@ -338,7 +338,6 @@ class DatabaseSeeder extends Seeder
 
         foreach ($csvDatas as $csvData) {
             try {
-
                 if($csvData["Member ID"] ) {
                     // $existTrans = Transaction::where("code", $csvData['Code'] ?? 0)->exists();
                     $customer = Customer::where("id", $csvData['Customer ID'])->first();
