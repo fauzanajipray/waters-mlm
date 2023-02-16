@@ -247,6 +247,7 @@ class DatabaseSeeder extends Seeder
                     "branch_id" => $csvData["Office ID"],
                     "lastpayment_status" => $csvData["Last Payment Status"] == "Paid" ? "1" : "0",
                     "npwp" => $csvData["NPWP Number"],
+                    "free_pass_or_gm" => $csvData["Free Pass OR GM"],
                 ]);
 
                 $branch = Branch::with('member')->find($csvData["Office ID"]);

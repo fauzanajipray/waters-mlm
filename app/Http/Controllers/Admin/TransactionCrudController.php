@@ -553,7 +553,7 @@ class TransactionCrudController extends CrudController
         }
 
         // check member type nsi
-        if ($member->member_type == 'NSI')  $requests['nsi'] = $member->id;
+        // if ($member->member_type == 'NSI')  $requests['nsi'] = $member->id;
         $requests['code'] = $this->generateCode(Carbon::parse($requests['transaction_date'])->format('ymd'));
         $requests['id_card'] = $member->id_card;
         $requests['member_name'] = $member->name;

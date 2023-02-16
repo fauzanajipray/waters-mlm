@@ -26,7 +26,7 @@ class MemberRequestUpdate extends FormRequest
     {
         return [
             'name' => 'required|min:4|max:255',
-            'member_numb' => 'required|min:5|max:255',
+            // 'member_numb' => 'required|min:5|max:255',
             'address' => 'required|min:5|max:255',
             'phone' => 'required|min:5|max:255',
             'id_card' => 'required|min:5|max:255',
@@ -38,7 +38,7 @@ class MemberRequestUpdate extends FormRequest
             'id_card_type' => 'required|in:KTP,SIM',
             'postal_code' => 'nullable|min:1|max:255',
             'npwp' => 'nullable|min:1|max:255',
-            'member_type' => 'required|in:DEFAULT,STOKIST,CABANG,NSI',
+            // 'member_type' => 'nullable|in:DEFAULT,STOKIST,CABANG,NSI',
         ];
     }
 

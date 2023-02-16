@@ -35,15 +35,16 @@ trait TransactionPaymentTrait {
                 ]);
                 $log[] = $member->name . " mendapatkan Bonus Penjualan sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
             }
-            /* Bonus Sponsor */
+            /* End Bonus Penjualan Pribadi */
+
             $upline = $member->upline;
             if ($upline) {
-                $uplineProductSold = TransactionProduct::with('transaction')->whereHas('transaction', function($query) use ($upline) {
-                    $query->where('member_id', $upline->id);
-                })->sum('quantity');
-                $uplineLevel = Level::where('id', $upline->level_id)->first();
-                if ($uplineProductSold >= $upline->level->minimum_sold && $uplineLevel->gm_percentage > 0 && $this->isActiveMember($upline)) {  // Cek apakah pernah melakukan transaksi
+                /* Bonus Goldmine */
 
+                $uplineLevel = Level::where('id', $upline->level_id)->first();
+                if ($upline->free_pass_or_gm) {
+                    // Mempunyai Free Pass OR/GM
+                    // dd('Mempunyai Free Pass OR/GM', $upline);
                     $bonus = BonusHistory::create([
                         'member_id' => $upline->id,
                         'member_numb' => $upline->member_numb,
@@ -56,16 +57,34 @@ trait TransactionPaymentTrait {
                         'updated_at' => $lastPaymentDate,
                     ]);
                     $log[] = $upline->name . " mendapatkan Bonus Sponsor sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
+                } else {
+                    // dd('Tidak Mempunyai Free Pass OR/GM', $upline);
+                    $uplineProductSold = TransactionProduct::with('transaction')->whereHas('transaction', function($query) use ($upline) {
+                        $query->where('member_id', $upline->id);
+                    })->sum('quantity');
+                    if ($uplineProductSold >= $upline->level->minimum_sold && $uplineLevel->gm_percentage > 0 && $this->isActiveMember($upline)) {  // Cek apakah pernah melakukan transaksi
+                        $bonus = BonusHistory::create([
+                            'member_id' => $upline->id,
+                            'member_numb' => $upline->member_numb,
+                            'transaction_id' => $transaction['id'],
+                            'level_id' => $upline->level_id,
+                            'bonus_type' => "GM",
+                            'bonus_percent' => $uplineLevel->gm_percentage,
+                            'bonus' => $transaction['total_price'] * $uplineLevel->gm_percentage / 100,
+                            'created_at' => $lastPaymentDate,
+                            'updated_at' => $lastPaymentDate,
+                        ]);
+                        $log[] = $upline->name . " mendapatkan Bonus Sponsor sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
+                    }
                 }
+                /* End Bonus Goldmine */
+
                 /* Bonus Overriding */
                 $upline2 = $upline->upline ?? null;
                 if ($upline2) {
-                    // Cek apakah pernah melakukan transaksi
-                    $uplineProductSold = TransactionProduct::with('transaction')->whereHas('transaction', function($query) use ($upline2) {
-                        $query->where('member_id', $upline2->id);
-                    })->sum('quantity');
                     $upline2Level = Level::where('id', $upline2->level_id)->first();
-                    if($uplineProductSold >= $upline2->level->minimum_sold && $upline2Level->or_percentage > 0 && $this->isActiveMember($upline2)) {
+                    if ($upline2->free_pass_or_gm) {
+                        // Mempunyai Free Pass OR/GM
                         $bonus = BonusHistory::create([
                             'member_id' => $upline2->id,
                             'member_numb' => $upline2->member_numb,
@@ -79,8 +98,29 @@ trait TransactionPaymentTrait {
                         ]);
 
                         $log[] = $upline2->name . " mendapatkan Bonus Overriding sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
+                    } else {
+                        // Cek apakah pernah melakukan transaksi
+                        $uplineProductSold = TransactionProduct::with('transaction')->whereHas('transaction', function($query) use ($upline2) {
+                            $query->where('member_id', $upline2->id);
+                        })->sum('quantity');
+                        if($uplineProductSold >= $upline2->level->minimum_sold && $upline2Level->or_percentage > 0 && $this->isActiveMember($upline2)) {
+                            $bonus = BonusHistory::create([
+                                'member_id' => $upline2->id,
+                                'member_numb' => $upline2->member_numb,
+                                'transaction_id' => $transaction['id'],
+                                'level_id' => $upline2->level_id,
+                                'bonus_type' => "OR",
+                                'bonus_percent' => $upline2Level->or_percentage,
+                                'bonus' => $transaction['total_price'] * $upline2Level->or_percentage / 100,
+                                'created_at' => $lastPaymentDate,
+                                'updated_at' => $lastPaymentDate,
+                            ]);
+
+                            $log[] = $upline2->name . " mendapatkan Bonus Overriding sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
+                        }
                     }
                 }
+                /* End Bonus Overriding */
             }
 
             /* Bonus Penjualan Cabang */

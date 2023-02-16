@@ -316,15 +316,8 @@ class MemberCrudController extends CrudController
         $this->crud->removeField('upline_id');
         $this->crud->removeField('branch_office_id');
         $this->crud->removeField('member_type');
-        $this->crud->addField([
-            'name' => 'member_type',
-            'label' => 'Member Type',
-            'type' => 'text',
-            'attributes' => [
-                'disabled' => 'disable',
-            ],
-        ]);
-        if( $entry->branch) {
+        
+        if($entry->branch) {
             $this->crud->removeField('branch_id');
             $this->crud->addField([
                 'name' => 'branch_id',
@@ -358,6 +351,12 @@ class MemberCrudController extends CrudController
             'attributes' => [
                 'readonly' => 'disabled'
             ],
+        ]);
+        $this->crud->addField([
+            'name' => 'free_pass_or_gm',
+            'label' => 'Free Pass OR/GM',
+            'type' => 'checkbox',
+            'tab' => 'Free Pass',
         ]);
         $this->crud->removeField('level_id');
         $this->crud->removeField('level_name');
@@ -412,6 +411,7 @@ class MemberCrudController extends CrudController
         DB::beginTransaction();
         try {
             $requests['member_numb'] = $this->generateMemberNumber();
+            $requests['branch_id'] = $requests['branch_office_id'] ?? $requests['branch_id'] ?? null;
             $member = Member::create($requests);
             Customer::create([
                 'name' => $requests['name'],
