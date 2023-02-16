@@ -30,7 +30,7 @@ crud.field('member_id').onChange(function(field) {
         type: 'GET',
         success: function(data) {
             if(data == 'NSI'){
-                crud.field('is_nsi').check();
+                crud.field('is_nsi').uncheck();
                 crud.field('is_nsi').disable();
                 crud.field('nsi').hide();
             } else {
@@ -41,10 +41,10 @@ crud.field('member_id').onChange(function(field) {
     });
   } else {
         crud.field('customer_id').hide();
-      crud.field('is_member').hide();
-      crud.field('shipping_address').hide();
-      crud.field('is_nsi').enable();
-      crud.field('is_nsi').uncheck();
+        crud.field('is_member').hide();
+        crud.field('shipping_address').hide();
+        crud.field('is_nsi').enable();
+        crud.field('is_nsi').uncheck();
   }
 }).change();
 
