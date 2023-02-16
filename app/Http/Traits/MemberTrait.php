@@ -141,7 +141,7 @@ trait MemberTrait {
     {
         $uplineID = request()->input('upline_id') ?? 0;
         $memberType = request()->input('member_type') ?? 'PERSONAL';
-        if($memberType == 'PERSONAL'){
+        if($memberType == 'PERSONAL' || $memberType == 'NSI'){
             $branchID = request()->input('branch_office_id') ?? 0;
         } else {
             $branchID = request()->input('branch_id') ?? 0;
