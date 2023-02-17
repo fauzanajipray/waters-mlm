@@ -14,6 +14,7 @@ use App\Models\Configuration;
 use App\Models\Customer;
 use App\Models\Level;
 use App\Models\LevelNsi;
+use App\Models\LevelSnapshot;
 use App\Models\Member;
 use App\Models\PaymentMethod;
 use App\Models\Product;
@@ -45,6 +46,7 @@ class DatabaseSeeder extends Seeder
         $this->branchProduct();
         $this->customer();
         $this->transaction();
+        $this->levelSnapshot();
         $this->paymentMethod();
         $this->stocks();
         $this->transactionPayment();
@@ -172,6 +174,55 @@ class DatabaseSeeder extends Seeder
         }
 
         $this->command->line("Completed --> Level");
+    }
+
+    private function levelSnapshot()
+    {
+        /**
+         * Notes :
+         * - BP = Bonus Penjualan
+         * - GM = Goldmine (Bonus dari downline level 1)
+         * - OR = Overriding (Bonus dari downline level 2)
+         */
+        $filename = Storage::path('sample/level_log_changes.csv');
+        $csvDatas = $this->csvToArray($filename);
+
+        // first transaction
+        $firstTransaction = Transaction::orderBy('transaction_date', 'asc')->first();
+        $firstTransactionDate = $firstTransaction->transaction_date;
+        $startDate = Carbon::parse($firstTransactionDate)->startOfMonth()->startOfDay();
+
+        // create level snapshot for first transaction
+        $levels = Level::all();
+        foreach ($levels as $level) {
+            LevelSnapshot::create([
+                'level_id' => $level->id,
+                'minimum_downline' => $level->minimum_downline,
+                'minimum_sold_by_downline' => $level->minimum_sold_by_downline,
+                'minimum_sold' => $level->minimum_sold,
+                'ordering_level' => $level->ordering_level,
+                'bp_percentage' => $level->bp_percentage,
+                'gm_percentage' => $level->gm_percentage,
+                'or_percentage' => $level->or_percentage,
+                'date_start' => $startDate,
+            ]);
+        }
+
+        foreach ($csvDatas as $csvData) {
+            $dateStart = Carbon::createFromFormat('d/m/Y', $csvData["Date Change"])->startOfMonth()->startOfDay();
+            LevelSnapshot::create([
+                'level_id' => $csvData["Level ID"],
+                'minimum_downline' => $csvData["Minimum Downline"],
+                'minimum_sold_by_downline' => $csvData["Minimum Sold by Downline"],
+                'minimum_sold' => $csvData["Minimun Sold"],
+                'ordering_level' => $csvData["Ordering Level"],
+                'bp_percentage' => $csvData["BP"],
+                'gm_percentage' => $csvData["GM"],
+                'or_percentage' => $csvData["OR"],
+                'or2_percentage' => $csvData["OR2"],
+                'date_start' => $dateStart,
+            ]);
+        }
     }
 
     private function levelNSI()
