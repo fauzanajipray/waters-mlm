@@ -35,6 +35,7 @@ class LevelRequest extends FormRequest
             'bp_percentage' => 'required|numeric|between:0,100',
             'gm_percentage' => 'required|numeric|between:0,100',
             'or_percentage' => 'required|numeric|between:0,100',
+            'or2_percentage' => 'required|numeric|between:0,100',
         ];
     }
 

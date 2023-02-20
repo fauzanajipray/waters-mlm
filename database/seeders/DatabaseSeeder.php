@@ -222,6 +222,18 @@ class DatabaseSeeder extends Seeder
                 'or2_percentage' => $csvData["OR2"],
                 'date_start' => $dateStart,
             ]);
+
+            // update level
+            $level = Level::where('id', $csvData["Level ID"])->update([
+                'minimum_downline' => $csvData["Minimum Downline"],
+                'minimum_sold_by_downline' => $csvData["Minimum Sold by Downline"],
+                'minimum_sold' => $csvData["Minimun Sold"],
+                'ordering_level' => $csvData["Ordering Level"],
+                'bp_percentage' => $csvData["BP"],
+                'gm_percentage' => $csvData["GM"],
+                'or_percentage' => $csvData["OR"],
+                'or2_percentage' => $csvData["OR2"],
+            ]);
         }
     }
 

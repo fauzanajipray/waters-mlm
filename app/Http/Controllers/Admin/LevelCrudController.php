@@ -64,6 +64,7 @@ class LevelCrudController extends CrudController
         $this->crud->column('bp_percentage')->label('BP Percentage');
         $this->crud->column('gm_percentage')->label('GM Percentage');
         $this->crud->column('or_percentage')->label('OR Percentage');
+        $this->crud->column('or2_percentage')->label('OR2 Percentage');
     }
 
     /**
@@ -86,6 +87,7 @@ class LevelCrudController extends CrudController
         $this->crud->field('bp_percentage')->label('BP Percentage');
         $this->crud->field('gm_percentage')->label('GM Percentage');
         $this->crud->field('or_percentage')->label('OR Percentage');
+        $this->crud->field('or2_percentage')->label('OR2 Percentage');
     }
 
     /**

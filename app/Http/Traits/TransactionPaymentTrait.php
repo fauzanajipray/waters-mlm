@@ -23,7 +23,6 @@ trait TransactionPaymentTrait {
             ->orderBy('level_snapshots.date_start', 'desc')
             ->first();
     }
-
     private function calculateBonus($transaction, $member, $lastPaymentDate ,$log = [])
     {
         $levelNow = $this->levelNow($lastPaymentDate, $member->level_id);
@@ -184,10 +183,16 @@ trait TransactionPaymentTrait {
                         }
                     }
                     /* Bonus Bonus Overriding2 */
-                    $upline = $upline2->upline;
-                    $log = $this->bonusOverriding2($transaction, $upline, $lastPaymentDate, 1, $log);
-                    if($log) {
-                        foreach($log as $l) { Alert::info($l)->flash();  }
+                    $dateStartFeb = "2023-02-01";
+                    $dateStartFeb = Carbon::parse($dateStartFeb);
+                    $paymentDate = Carbon::parse($lastPaymentDate);
+
+                    if($dateStartFeb->lte($paymentDate)) { // gte (>=)
+                        $upline = $upline2->upline;
+                        $log = $this->bonusOverriding2($transaction, $upline, $lastPaymentDate, 1, $log);
+                        if($log) {
+                            foreach($log as $l) { Alert::info($l)->flash();  }
+                        }
                     }
                     /* End Bonus Bonus Overriding2 */
                 }
@@ -515,7 +520,7 @@ trait TransactionPaymentTrait {
                     'member_numb' => $member->member_numb,
                     'transaction_id' => $transaction['id'],
                     'level_id' => $member->level_id,
-                    'bonus_type' => "OR",
+                    'bonus_type' => "OR2",
                     'bonus_percent' => $levelNow->or2_percentage,
                     'bonus' => $transaction['total_price'] * $levelNow->or2_percentage / 100,
                     'created_at' => $lastPaymentDate,
@@ -532,7 +537,7 @@ trait TransactionPaymentTrait {
                         'member_numb' => $member->member_numb,
                         'transaction_id' => $transaction['id'],
                         'level_id' => $member->level_id,
-                        'bonus_type' => "OR",
+                        'bonus_type' => "OR2",
                         'bonus_percent' => $levelNow->or2_percentage,
                         'bonus' => $transaction['total_price'] * $levelNow->or2_percentage / 100,
                         'created_at' => $lastPaymentDate,
