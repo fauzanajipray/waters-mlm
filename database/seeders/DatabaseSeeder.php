@@ -438,6 +438,21 @@ class DatabaseSeeder extends Seeder
     }
 
     private function paymentMethod(){
+
+        PaymentMethod::updateOrCreate([
+            "name" => "Transfer",
+        ],[
+            "name" => "Transfer",
+            "description" => "",
+        ]);
+
+        PaymentMethod::updateOrCreate([
+            "name" => "Tunai",
+        ],[
+            "name" => "Tunai",
+            "description" => "",
+        ]);
+
         PaymentMethod::updateOrCreate([
             "name" => "HCI",
         ],[
@@ -480,19 +495,7 @@ class DatabaseSeeder extends Seeder
             "description" => "",
         ]);
 
-        PaymentMethod::updateOrCreate([
-            "name" => "Transfer",
-        ],[
-            "name" => "Transfer",
-            "description" => "",
-        ]);
-
-        PaymentMethod::updateOrCreate([
-            "name" => "Tunai",
-        ],[
-            "name" => "Tunai",
-            "description" => "",
-        ]);
+        $this->command->line("Completed --> Payment Method");
     }
 
     private function stocks(){

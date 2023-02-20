@@ -20,15 +20,17 @@ class Kernel extends ConsoleKernel
         //     ->everyMinute()
         //     ->sendOutputTo(storage_path('logs/inspire.log'), true);
 
+        $schedule->command('snapshot-levels')
+            ->monthlyOn(1, '00:00')
+            ->appendOutputTo(storage_path('logs/snapshot-levels.log'));
+
         $dayEndInMonth = Carbon::now()->endOfMonth()->format('d');
         $schedule->command('level-up-member')
             ->monthlyOn($dayEndInMonth, '23:00')
-            // ->everyMinute()
             ->appendOutputTo(storage_path('logs/level-up-member.log'));
 
         $schedule->command('bonus-nsi')
             ->monthlyOn($dayEndInMonth, '23:00')
-            // ->everyMinute()
             ->appendOutputTo(storage_path('logs/bonus-nsi.log'));
     }
 
