@@ -2,8 +2,6 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-
 use App\Http\Controllers\Admin\StockCrudController;
 use App\Http\Controllers\Admin\TransactionCrudController;
 use App\Http\Controllers\Admin\TransactionPaymentCrudController;
