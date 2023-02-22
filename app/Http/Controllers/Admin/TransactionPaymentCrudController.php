@@ -443,8 +443,12 @@ class TransactionPaymentCrudController extends CrudController
             return throw new Exception('Transaction already paid');
         }
         $transactionBill = $totalPrice - $transaction->transactionPayments->sum('amount');
+
         if($transactionBill < $requests['amount']) {
             return throw new Exception('Transaction bill is less than payment amount. bill : ' . $transactionBill . ', payment : ' . $requests['amount']);
+        }
+        if ($requests['type'] == 'Full' && $transactionBill != $requests['amount']) {
+            return throw new Exception('Transaction type is full but payment amount is not equal to transaction bill. bill : ' . $transactionBill . ', payment : ' . $requests['amount']);
         }
         $paymentMethodCust = PaymentMethod::where('name', $requests['payment_method'])->first();
 
@@ -494,7 +498,7 @@ class TransactionPaymentCrudController extends CrudController
             $requests['created_at'] = $requests['payment_date'];
             $requests['updated_at'] = $requests['payment_date'];
             $payment = TransactionPayment::updateOrCreate(['id' => $requests['id']], $requests);
-            $transaction = $transaction = Transaction::with(['transactionPayments', 'transactionProducts'])->find($requests['transaction_id']);
+            $transaction =  Transaction::with(['transactionPayments', 'transactionProducts'])->find($requests['transaction_id']);
             /* Check Stock */
             $transactionProducts = $transaction->transactionProducts;
             foreach ($transactionProducts as $transactionProduct) {
