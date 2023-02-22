@@ -403,6 +403,7 @@ class DatabaseSeeder extends Seeder
                 if($csvData["Member ID"] ) {
                     // $existTrans = Transaction::where("code", $csvData['Code'] ?? 0)->exists();
                     $customer = Customer::where("id", $csvData['Customer ID'])->first();
+                    $price = (int) str_replace(["Rp", ".", " "], "", $csvData['Unit Price']);
                     $requests = [
                         "id" => $csvData["ID"],
                         "transaction_date" => Carbon::createFromFormat('d/m/Y', $csvData['Transaction Date'])->format("Y-m-d"),
@@ -411,6 +412,7 @@ class DatabaseSeeder extends Seeder
                         "is_member" => (isset($customer)) ? $customer->is_member : 0,
                         "member_id" => $csvData['Member ID'],
                         "product_id" => $csvData['Product ID'],
+                        "product_price" => $price,
                         "discount_percentage" => $csvData['Discount Percentage'],
                         "discount_amount" => $csvData['Discount Amount'],
                         "quantity" => $csvData['Qty'],

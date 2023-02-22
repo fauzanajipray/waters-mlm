@@ -506,6 +506,7 @@ class TransactionCrudController extends CrudController
                 [
                     'product_id' =>  $requests['product_id'],
                     'quantity' =>  $requests['quantity'],
+                    'price' =>  $requests['product_price'],
                     'product_notes' =>  $requests['product_notes'] ?? '',
                     'discount_percentage' =>  $requests['discount_percentage'] ?? 0,
                     'discount_amount' =>  $requests['discount_amount'] ?? 0,
@@ -532,23 +533,21 @@ class TransactionCrudController extends CrudController
         $totalPrice = 0;
         if ($requests['type'] == "Bebas Putus") {
             foreach ($products as $key => $item) {
-                $product = Product::find($item['product_id']);
                 if($requests['discount_percentage']) {
-                    $discount = $product->price * $item['quantity'] * $requests['discount_percentage'] / 100;
+                    $discount = $item['price'] * $item['quantity'] * $requests['discount_percentage'] / 100;
                 } else {
                     $discount = $item['discount_amount'];
                 }
-                $totalPrice += $product->price * $item['quantity'] - $discount;
+                $totalPrice += $item['price'] * $item['quantity'] - $discount;
             }
         } else if ($requests['type'] == "Demokit" || $requests['type'] == "Display") {
             foreach ($products as $key => $item) {
-                $product = Product::find($item['product_id']);
-                $totalPrice += $product->price * $item['quantity'] - ($product->price * $item['quantity'] * $item['discount_percentage'] / 100);
+                $totalPrice += $item['price'] * $item['quantity'] - ($item['price'] * $item['quantity'] * $item['discount_percentage'] / 100);
+
             }
         } else {
             foreach ($products as $key => $item) {
-                $product = Product::find($item['product_id']);
-                $totalPrice += $product->price * $item['quantity'];
+                $totalPrice += $item['price'] * $item['quantity'];
             }
         }
 
@@ -565,6 +564,7 @@ class TransactionCrudController extends CrudController
         unset($requests['quantity']);
         unset($requests['discount_percentage']);
         unset($requests['discount_amount']);
+        unset($requests['product_price']);
 
         $transaction = Transaction::updateOrCreate([ "id" => $requests['id'],], $requests);
         // Save Log Product Sold
@@ -581,7 +581,7 @@ class TransactionCrudController extends CrudController
                 'product_id' => $product->id,
                 'name' => $product->name,
                 'model' => $product->model,
-                'price' => $product->netto_price,
+                'price' => $item['price'],
                 'capacity' => $product->capacity,
                 'quantity' => $item['quantity'],
                 'discount_percentage' => $item['discount_percentage'] ?? 0,
