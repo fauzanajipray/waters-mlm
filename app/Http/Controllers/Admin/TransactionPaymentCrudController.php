@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\TransactionPaymentRequest;
 use App\Http\Traits\TransactionPaymentTrait;
+use App\Models\Branch;
 use App\Models\PaymentMethod;
 use App\Models\Stock;
 use App\Models\StockHistory;
@@ -506,7 +507,9 @@ class TransactionPaymentCrudController extends CrudController
                     ->where('branch_id', $transaction->branch_id)
                     ->first();
                 if(!$product) {
-                    throw new \Exception('Stock '. $transactionProduct->name.' '. $transactionProduct->model .' is not enough');
+                    // dd('Stock '. $transactionProduct->name.' '. $transactionProduct->model .' is not enough', $product, $transaction->branch_id);
+                    $branch = Branch::find($transaction->branch_id);
+                    throw new \Exception('Stock '. $transactionProduct->name.' '. $transactionProduct->model .' from branch '.$branch->name.' is not enough');
                 }
                 if ($product->quantity < $transactionProduct->quantity) {
                     throw new \Exception('Stock '. $transactionProduct->name.' '. $transactionProduct->model .' is not enough');
@@ -580,6 +583,7 @@ class TransactionPaymentCrudController extends CrudController
             DB::commit();
             return ;
         } catch (Exception $e) {
+            // dd($e->getTraceAsString());
             DB::rollBack();
             throw new Exception($e->getMessage());
         }
