@@ -440,20 +440,20 @@ class TransactionPaymentCrudController extends CrudController
             });
         }
         if ($transaction->transactionPayments->sum('amount') >= $totalPrice) {
-            return throw new Exception('Transaction already paid');
+            throw new Exception('Transaction already paid');
         }
         $transactionBill = $totalPrice - $transaction->transactionPayments->sum('amount');
 
         if($transactionBill < $requests['amount']) {
-            return throw new Exception('Transaction bill is less than payment amount. bill : ' . $transactionBill . ', payment : ' . $requests['amount']);
+            throw new Exception('Transaction bill is less than payment amount. bill : ' . $transactionBill . ', payment : ' . $requests['amount']);
         }
         if ($requests['type'] == 'Full' && $transactionBill != $requests['amount']) {
-            return throw new Exception('Transaction type is full but payment amount is not equal to transaction bill. bill : ' . $transactionBill . ', payment : ' . $requests['amount']);
+            throw new Exception('Transaction type is full but payment amount is not equal to transaction bill. bill : ' . $transactionBill . ', payment : ' . $requests['amount']);
         }
         $paymentMethodCust = PaymentMethod::where('name', $requests['payment_method'])->first();
 
         if(!$paymentMethodCust) {
-            return throw new Exception('Payment method '.$requests['payment_method']. ' transaction id' . $requests['transaction_id'] . ' not found', 400);
+            throw new Exception('Payment method '.$requests['payment_method']. ' transaction id' . $requests['transaction_id'] . ' not found', 400);
         }
         $requests['payment_method_id'] = $paymentMethodCust->id;
 
@@ -486,7 +486,7 @@ class TransactionPaymentCrudController extends CrudController
         ]);
 
         if ($validator->fails()) {
-            return throw new Exception($validator->errors()->first());
+            throw new Exception($validator->errors()->first());
         }
 
         DB::beginTransaction();
@@ -512,10 +512,13 @@ class TransactionPaymentCrudController extends CrudController
                     throw new \Exception('Stock '. $transactionProduct->name.' '. $transactionProduct->model .' is not enough');
                 }
             }
+
             if ($transaction->transactionPayments->sum('amount') == $totalPrice) {
                 $transaction->status_paid = true;
                 $transaction->save();
                 $lastPaymentDate = $transaction->transactionPayments->sortByDesc('payment_date')->first()->payment_date;
+
+
                 $this->calculateBonus($transaction, $transaction->member, $lastPaymentDate);
 
                 /* Minus stock */
@@ -578,7 +581,7 @@ class TransactionPaymentCrudController extends CrudController
             return ;
         } catch (Exception $e) {
             DB::rollBack();
-            return throw new Exception($e->getMessage());
+            throw new Exception($e->getMessage());
         }
     }
 }

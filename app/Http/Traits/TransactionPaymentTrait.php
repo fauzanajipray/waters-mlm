@@ -189,7 +189,9 @@ trait TransactionPaymentTrait {
 
                     if($dateStartFeb->lte($paymentDate)) { // gte (>=)
                         $upline = $upline2->upline;
-                        $log = $this->bonusOverriding2($transaction, $upline, $lastPaymentDate, 1, $log);
+                        if($upline){
+                            $log = $this->bonusOverriding2($transaction, $upline, $lastPaymentDate, 1, $log);
+                        }
                         if($log) {
                             foreach($log as $l) { Alert::info($l)->flash();  }
                         }

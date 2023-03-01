@@ -533,6 +533,7 @@ class DatabaseSeeder extends Seeder
                 try {
                     $transPaymentCrud->createByImport($requests);
                 } catch (Exception $e) {
+                    // dd($e->getTraceAsString());
                     $this->command->line("Error --> Transaction Payment, ID " . $csvData['Transaction ID']);
                     $this->command->line($e->getMessage());
                 }
