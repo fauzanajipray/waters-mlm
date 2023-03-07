@@ -49,6 +49,8 @@ trait TransactionPaymentTrait {
                     if($memberCabang->id == 1) continue;
                     for($i=0; $i<$p->quantity; $i++){
                         if($branchesWithOwner->type == 'CABANG'){
+                            if($transaction->branch_id == $branchesWithOwner->id) continue; // Jika owner cabang membeli produk di cabang?
+                            // ? Jika owner cabang membeli produk di pusat
                             $bonus = BonusHistory::create([
                                 'member_id' => $memberCabang->id,
                                 'member_numb' => $memberCabang->member_numb,
@@ -66,6 +68,7 @@ trait TransactionPaymentTrait {
                         }
                         else if ($branchesWithOwner->type == 'STOKIST') {
                             if($branch->type == 'CABANG'){
+                            // ? Jika owner stokist membeli sparepart di stokist
                                 $bonus = BonusHistory::create([
                                     'member_id' => $memberCabang->id,
                                     'member_numb' => $memberCabang->member_numb,
@@ -216,7 +219,7 @@ trait TransactionPaymentTrait {
                 $branch = Branch::where('id', $transaction->branch_id)->first();
                 if($member->id == 1) return;
                 if ($transaction->branch_id == 1) {
-                    // Jika member membeli sparepart di pusat
+                    // ? Jika member membeli sparepart di pusat
                     if(!$isMemberOwner) {
                         $bonus = BonusHistory::create([
                             'member_id' => $member->id,
@@ -232,7 +235,7 @@ trait TransactionPaymentTrait {
                             'updated_at' => $lastPaymentDate,
                         ]);
                     }
-                    // Jika owner cabang,stokist membeli sparepart di pusat
+                    // ? Jika owner cabang,stokist membeli sparepart di pusat
                     else {
                         $bonus = BonusHistory::create([
                             'member_id' => $member->id,
@@ -251,7 +254,7 @@ trait TransactionPaymentTrait {
                     $log[] = $member->name . " mendapatkan Bonus Penjualan Sparepart sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
                 } else {
                     if (!$isMemberOwner) {
-                        // Jika member membeli dari cabang
+                        // ? Jika member membeli dari cabang
                         if ($branch->type == 'CABANG') {
                             $member = Member::with('branch')->where('id', $transaction->member_id)->first();
                             $bonus = BonusHistory::create([
@@ -283,7 +286,7 @@ trait TransactionPaymentTrait {
                                 $log[] = "Bonus Penjualan Sparepart Cabang tidak ditemukan";
                             }
                         }
-                        // Jika member membeli dari stokist
+                        // ? Jika member membeli dari stokist
                         else if ($branch->type == 'STOKIST') {
                             $member = Member::with('branch')->where('id', $transaction->member_id)->first();
                             $bonus = BonusHistory::create([
@@ -316,7 +319,7 @@ trait TransactionPaymentTrait {
                             }
                         }
                     } else {
-                        // Jika owner stokist membeli sparepart di cabang
+                        // ? Jika owner stokist membeli sparepart di cabang
                         if ($branchMember->type == 'STOKIST') {
                             $bonus = BonusHistory::create([
                                 'member_id' => $member->id,
@@ -348,10 +351,6 @@ trait TransactionPaymentTrait {
                                 $log[] = "Bonus Penjualan Sparepart Cabang tidak ditemukan";
                             }
                         }
-
-                        // TODO : Jika owner cabang membeli sparepart di cabang?
-                        // TODO : Jika owner stokist membeli sparepart di stokist?
-
                     }
                 }
             }
@@ -367,7 +366,7 @@ trait TransactionPaymentTrait {
                 for($i=0; $i<$p->quantity; $i++){
                     if($p->type == 'sparepart') {
                         $member = Member::with('branch')->where('id', $transaction->member_id)->first();
-                        // Jika menambah stok sparepart di cabang
+                        // ? Jika menambah stok sparepart di cabang
                         if($member->branch->type == 'CABANG'){
                             $bonus = BonusHistory::create([
                                 'member_id' => $member->id,
@@ -384,7 +383,7 @@ trait TransactionPaymentTrait {
                             ]);
                             $log[] = 'Bonus Komisi Sparepart Cabang member ' . $member->member_numb . " ditambahkan sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
                         }
-                        // Jika menambah stok sparepart di stokist
+                        // ? Jika menambah stok sparepart di stokist
                         else if ($member->branch->type == 'STOKIST') {
                             $ownerBranch = Branch::with('member')->where('id', $transaction->branch_id)->first()->member;
                             $bonusHistoryCabang = BonusHistory::
@@ -421,7 +420,7 @@ trait TransactionPaymentTrait {
                         }
                     } else {
                         $member = Member::with('branch')->where('id', $transaction->member_id)->first();
-                        // Komisi jika menambah produk di cabang
+                        // ? Komisi jika menambah produk di cabang
                         if($member->branch->type == 'CABANG'){
                             $configBonusCabang = Configuration::where('key', 'bonus_cabang_percentage_for_product')->first();
                             $bonusPercent = (Double) $configBonusCabang->value; // 4.195%
@@ -440,7 +439,7 @@ trait TransactionPaymentTrait {
                             ]);
                             $log[] = 'Bonus Komisi Cabang member ' . $member->member_numb . " ditambahkan sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
                         }
-                        // Komisi jika menambahkan produk di stokist
+                        // ? Komisi jika menambahkan produk di stokist
                         else if ($member->branch->type == 'STOKIST') {
                             $config = Configuration::where('key', 'bonus_stokist_percentage_for_product')->first();
                             $bonusPercent = (Double) $config->value; // 2.0975%
