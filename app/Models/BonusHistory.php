@@ -43,6 +43,10 @@ class BonusHistory extends Model
         return $this->belongsTo(Member::class, 'member_id');
     }
 
+    public function bonusFrom(){
+        return $this->belongsTo(Branch::class, 'bonus_from', 'id');
+    }
+
     /*
     |--------------------------------------------------------------------------
     | SCOPES

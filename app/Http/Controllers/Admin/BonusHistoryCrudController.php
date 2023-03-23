@@ -10,6 +10,8 @@ use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
+use function PHPSTORM_META\type;
+
 /**
  * Class BonusHistoryCrudController
  * @package App\Http\Controllers\Admin
@@ -99,6 +101,20 @@ class BonusHistoryCrudController extends CrudController
                 $bonusAfterTax = $entry->bonus - ($entry->bonus * (50/100) * $tax / 100);
                 return "Rp. " . number_format($bonusAfterTax, 2, ',', '.');
             },
+        ]);
+
+        $this->crud->addColumn([
+            'name' => 'bonus_from',
+            'label' => 'Bonus From',
+            'type' => 'relationship',
+            'entity' => 'bonusFrom',
+            'attribute' => 'name',
+            'model' => 'App\Models\Branch',
+            'wrapper' => [
+                'href' => function ($crud, $column, $entry, $related_key) {
+                    return backpack_url('branch/'.$related_key.'/show');
+                },
+            ],
         ]);
         $this->crud->column('created_at');
         $this->crud->column('updated_at');

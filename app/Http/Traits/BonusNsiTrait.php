@@ -36,6 +36,7 @@ trait BonusNsiTrait {
                 'bonus_type' => "KN",
                 'bonus_percent' => $level->bonus_percentage,
                 'bonus' => $bonusPembulatan,
+                'bonus_from' => 1,
                 'created_at' => $date,
                 'updated_at' => $date,
             ]);
