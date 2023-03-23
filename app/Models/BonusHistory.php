@@ -82,6 +82,15 @@ class BonusHistory extends Model
         return $query;
     }
 
+    public function scopeWhereBonusFrom($query, $bonusFrom) {
+        if (request()->has('bonus_from')) {
+            $query->where('bonus_from', $bonusFrom);
+        } else {
+            $query->where('bonus_from', 1);
+        }
+        return $query;
+    }
+
     public function scopeMonthYear($query, $monthYear)
     {
         return $query->whereMonth('created_at', $monthYear->month)

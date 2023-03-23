@@ -26,7 +26,7 @@ trait TransactionPaymentTrait {
     private function calculateBonus($transaction, $member, $lastPaymentDate ,$log = [])
     {
         $levelNow = $this->levelNow($lastPaymentDate, $member->level_id);
-
+        
         if ($this->isMemberTypePusat($member)) return;
 
         if ($transaction->type == 'Normal') {
@@ -387,6 +387,7 @@ trait TransactionPaymentTrait {
                                 'updated_at' => $lastPaymentDate,
                                 'product_id' => $p->product_id,
                                 'kc_type' => 'STOCK',
+                                'bonus_from' => $transaction->branch_id,
                             ]);
                             $log[] = 'Bonus Komisi Cabang member ' . $member->member_numb . " ditambahkan sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
                         }
@@ -407,8 +408,9 @@ trait TransactionPaymentTrait {
                                 'created_at' => $lastPaymentDate,
                                 'updated_at' => $lastPaymentDate,
                             ]);
-
                             $log[] = 'Bonus Komisi Stokist member ' . $member->member_numb . " ditambahkan sebesar Rp. " . number_format($bonus->bonus, 0, ',', '.');
+                        } else {
+                            $log[] = 'Bonus Komisi Stokist member ' . $member->member_numb . " tidak ditambahkan karena tidak ada cabang";
                         }
                     }
                 }

@@ -210,6 +210,25 @@ class BonusHistoryCrudController extends CrudController
                 $this->crud->addClause('whereIn', 'bonus_type', ['GM', 'OR', 'OR2', 'SS', 'KN', 'KC', 'KS']);
             },
         );
+        // Filter Bonus From
+        $this->crud->addFilter([
+                'name' => 'bonus_from',
+                'type' => 'select2_ajax',
+                'label'=> 'Bonus From',
+                'placeholder' => 'Pick a branch',
+                'method' => 'POST',
+                'init_selection' => [
+                    '1' => 'CNA Pusat',
+                ]
+            ],
+            url('branches/for-filter'),
+            function($value) {
+                $this->crud->addClause('where', 'bonus_from', $value);
+            },
+            function() {
+                $this->crud->addClause('where', 'bonus_from', 1);
+            },
+        );
 
     }
 
@@ -228,6 +247,7 @@ class BonusHistoryCrudController extends CrudController
         $bonusType = null;
         $dateRange = null;
         $memberId = null;
+        $bonusFrom = null;
         if ($requests->has('bonus_type')) {
             $bonusType = $requests->get('bonus_type');
             $bonusType = json_decode($requests->get('bonus_type'));
@@ -238,6 +258,9 @@ class BonusHistoryCrudController extends CrudController
         }
         if ($requests->has('member_id')) {
             $memberId = $requests->get('member_id');
+        }
+        if ($requests->has('bonus_from')) {
+            $bonusFrom = $requests->get('bonus_from');
         }
         $bonus = BonusHistory::
             leftJoin(
@@ -263,6 +286,7 @@ class BonusHistoryCrudController extends CrudController
             ->whereBonusType($bonusType)
             ->whereCreatedAt($dateRange)
             ->whereMember($memberId)
+            ->whereBonusFrom($bonusFrom)
             ->select(
                 DB::raw('SUM(bonus) as total_bonus'),
                 DB::raw('SUM(bonus - (bonus * (50/100) * (members.tax_percentage / 100) )) as total_bonus_after_tax'),

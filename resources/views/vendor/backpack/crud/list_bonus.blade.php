@@ -225,7 +225,7 @@
 
       var url = window.location.href;
       var params = url.split('?')[1];
-      var bonusType, dateRange, MemberID;
+      var bonusType, dateRange, MemberID, bonusFrom;
       if (params != undefined){
         var params = params.split('&');
         params.filter(function(param) {
@@ -245,7 +245,13 @@
             MemberID = param.split('=')[1];
           }
         });
+        params.filter(function(param) {
+          if(param.includes('bonus_from=')) {
+            bonusFrom = param.split('=')[1];
+          }
+        });
       }
+
 
       $.ajax({
         url: "{{ url('') }}" + '/bonus-history/total',
@@ -253,7 +259,8 @@
         data: {
           bonus_type: bonusType,
           created_at: dateRange,
-          member_id: MemberID
+          member_id: MemberID,
+          bonus_from: bonusFrom
         },
         success: function(data) {
           totalTransaction.innerHTML = data.total_transactions;

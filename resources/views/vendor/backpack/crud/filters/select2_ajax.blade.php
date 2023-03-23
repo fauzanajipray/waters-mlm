@@ -2,6 +2,7 @@
 
 @php
     $filter->options['quiet_time'] = $filter->options['quiet_time'] ?? $filter->options['delay'] ?? 500;
+    $initValue = $filter->options['init_selection'] ?? null;
 @endphp
 
 <li filter-name="{{ $filter->name }}"
@@ -27,8 +28,14 @@
                 filter-quiet-time="{{ $filter->options['quiet_time'] }}"
             >
 				@if (Request::get($filter->name))
-					<option value="{{ Request::get($filter->name) }}" selected="selected"> {{ Request::get($filter->name.'_text') ?? 'Previous selection' }} </option>
-				@endif
+                    <option value="{{ Request::get($filter->name) }}" selected="selected"> {{ Request::get($filter->name.'_text') ?? 'Previous selection' }} </option>
+                @else 
+                    @if(isset($initValue) && is_array($initValue))
+                        @foreach($initValue as $key => $value)
+                            <option value="{{ $key }}" selected="selected"> {{ $value }} </option>
+                        @endforeach
+                    @endif
+                @endif
 			</select>
 	    </div>
     </div>

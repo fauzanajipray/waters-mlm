@@ -521,8 +521,9 @@ class TransactionPaymentCrudController extends CrudController
                 $transaction->save();
                 $lastPaymentDate = $transaction->transactionPayments->sortByDesc('payment_date')->first()->payment_date;
 
-
-                $this->calculateBonus($transaction, $transaction->member, $lastPaymentDate);
+                if($transaction->type == 'Normal' || $transaction->type == 'Stock' || $transaction->type == 'Sparepart'){
+                    $this->calculateBonus($transaction, $transaction->member, $lastPaymentDate);
+                }
 
                 /* Minus stock */
                 foreach ($transactionProducts as $transactionProduct) {
