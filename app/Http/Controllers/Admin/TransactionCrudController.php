@@ -438,7 +438,7 @@ class TransactionCrudController extends CrudController
                 $totalPrice += $product->netto_price * $item['quantity'];
             }
             // check member type nsi
-            // if ($member->member_type == 'NSI')  $requests['nsi'] = $member->id;
+            if ($member->member_type == 'NSI')  $requests['nsi'] = $member->id;
             $requests['code'] = $this->generateCode();
             $requests['id_card'] = $member->id_card;
             $requests['member_name'] = $member->name;
@@ -552,7 +552,7 @@ class TransactionCrudController extends CrudController
         }
 
         // check member type nsi
-        // if ($member->member_type == 'NSI')  $requests['nsi'] = $member->id;
+        if ($member->member_type == 'NSI')  $requests['nsi'] = $member->id;
         $requests['code'] = $this->generateCode(Carbon::parse($requests['transaction_date'])->format('ymd'));
         $requests['id_card'] = $member->id_card;
         $requests['member_name'] = $member->name;
