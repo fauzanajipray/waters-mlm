@@ -80,6 +80,7 @@ class BranchCrudController extends CrudController
                 },
             ],
         ]);
+        $this->crud->column('area');
         // $this->crud->addButtonFromModelFunction('line', 'add_stock', 'stockButton', 'beginning'); // TODO: add stock button
         if(backpack_user()->hasPermissionTo('Add Owner Branch')){
             $this->crud->addButtonFromModelFunction('line', 'add_owner', 'addOwnerButton', 'beginning');
@@ -106,6 +107,13 @@ class BranchCrudController extends CrudController
             'default' => 'CABANG',
         ]);
         $this->crud->field('address');
+        $this->crud->addField([
+            'name' => 'area_id',
+            'type' => 'relationship',
+            'attribute' => 'name',
+            'entity' => 'area',
+            'model' => 'App\Models\Area',
+        ]);
     }
 
     /**
@@ -145,13 +153,12 @@ class BranchCrudController extends CrudController
             return redirect()->route('branch.index');
         } catch (Exception $e) {
             DB::rollBack();
-            dd($e->getMessage());
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
 
-    public function memberNotExist(Request $request){
-
+    public function memberNotExist(Request $request)
+    {
         $search_term = $request->input('q');
         $member_type = request()->form[3];
 
@@ -180,8 +187,8 @@ class BranchCrudController extends CrudController
         return $branch;
     }
 
-    public function memberExist(Request $request){
-
+    public function memberExist(Request $request)
+    {
         $search_term = $request->input('q');
 
         if($search_term) {
@@ -217,7 +224,8 @@ class BranchCrudController extends CrudController
         ]);
     }
 
-    public function addOwner($id){
+    public function addOwner($id)
+    {
         if(!backpack_user()->hasPermissionTo('Add Owner Branch')){
             abort(403);
         }
@@ -286,7 +294,8 @@ class BranchCrudController extends CrudController
         }
     }
 
-    public function getOriginBranch(Request $request){
+    public function getOriginBranch(Request $request)
+    {
         $search_term = $request->input('q');
         $branch_id = request()->form[2];
         if($branch_id['name'] != 'branch_id') {
@@ -320,8 +329,10 @@ class BranchCrudController extends CrudController
         return $branch;
     }
 
-    public function show(Request $request, $id) {
+    public function show(Request $request, $id)
+    {
         $this->crud->hasAccessOrFail('show');
+        $this->setupListOperation();
 
         $this->data['entry'] = $this->crud->getEntry($id);
         $this->data['crud'] = $this->crud;
@@ -333,7 +344,8 @@ class BranchCrudController extends CrudController
         return view('branch.show', $this->data);
     }
 
-    public function getBranchesForFilter(Request $request) {
+    public function getBranchesForFilter(Request $request)
+    {
         $search_term = $request->input('q');
 
         if($search_term) {
@@ -346,7 +358,8 @@ class BranchCrudController extends CrudController
         return $branch->pluck('name', 'id');
     }
 
-    public function getBranches() {
+    public function getBranches()
+    {
         $search_term = request()->input('q');
 
         if($search_term) {
@@ -363,7 +376,8 @@ class BranchCrudController extends CrudController
         return $branch;
     }
 
-    public function getBranchStock(){
+    public function getBranchStock()
+    {
         $search_term = request()->input('q');
         $form = collect(request()->form);
         $memberId = $form->where('name', 'member_id')->first();

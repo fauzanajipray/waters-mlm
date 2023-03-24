@@ -88,4 +88,7 @@ Route::group([
     });
     Route::crud('branch-product', 'BranchProductCrudController');
     Route::crud('level-nsi', 'LevelNsiCrudController');
+    Route::crud('area', 'AreaCrudController');
+    Route::crud('area/lsi', 'LsiCrudController');
+    Route::crud('area/pm', 'PmCrudController');
 }); // this should be the absolute last line of this file

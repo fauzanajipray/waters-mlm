@@ -1,3 +1,4 @@
+Nilai Bonus : 20.000
 Bonus Ada :
 1. Bonus Penjualan (BP) - Transaksi Normal : Bonus didapatkan oleh member yang melakukan penjualan
 2. Bonus Penjualan (GM) - Transaksi Normal : Bonus apabila member di bawahnya 1 menjual barang
@@ -11,12 +12,32 @@ Bonus Ada :
 7. Komisi Stokist (KS) - Transaksi Stock : Bonus yang di dapatkan stokist apabila menambahkan stock produk.
     - Jika yang menambahkan stock stokist maka dapat bonus (2.0975%) -> sekarang di dapat dari komisi/2 di history transaksi stock cabang .
 8. Komisi Sparepart (SS) - Transaksi Sparepart : Bonus penjualan sparepart didapatkan bila cabang/stokist/member menjulan sparepart.
-    - jika member membeli langsung dari pusat maka dapt bonus 10%
-    - jika owner cabang/stokist membeli langsung dari pusat maka dapat bonus 20%
-    - jika member membeli dari cabang maka dapat bonus 10%, bonus cabang yang tadinya 20% di update jadi 10%.
-    - jika member membeli dari stokist maka dapat bonus 10%, bonus stokist yang tadinya 15% di update jadi 5%.
-    - jika owner stokist membeli sparepart dari cabang maka dapat bonus 15%, bonus cabang yang tadinya 20% di update jadi 5%.
+    - jika member membeli langsung dari pusat maka dapt bonus 10%.
+    - jika owner cabang/stokist membeli langsung dari pusat maka dapat bonus 20%.
+    - jika owner stokist membeli sparepart dari cabang maka dapat bonus 15%, cabang harus memberikan bonusnya sebesar 15% dari total bonus awal ke stokist.
+    - jika member membeli dari cabang maka dapat bonus 10%, cabang harus membarikan bonusnya sebesar 10% dari total bonus awal ke member.
+    - jika member membeli dari stokist maka dapat bonus 10%, stokist harus memberikan bonusnya sebesar 10% dari total bonus awal ke member.
 9. Komisi Sparepart (SS) - Transaksi Stock : Bonus penjualan sparepart didapatkan bila cabang/stokist menambahkan stock sparepart.
     - jika cabang menambahkan stock sparepart maka dapat bonus 20%,
     - jika stokist menambahkan stock sparepart maka dapat bonus 15%, bonus cabang yang tadinya 20% di update jadi 5%.
 10. Komisi NSI (KN) - Transaksi Normal : Bonus yang didapatkan apabila terdapat member NSI. Komisi sesuai level NSI
+    - Jika penjualan Normal dibantu NSI makan NSI dapat komisi, ditotal dihitung akhir bulan
+    - Kalau NSI menjual barang makan dapat bonus BP dan komisi NSI
+11. Komisi LSI : Bonus yang didapatkan apabila  
+12. Komisi PM   
+    - 
+
+LSI dan PM
+
+1. Add Bonus From Branch in Bonus Histories, 
+2. Add Filter Bonus Form Branch in Bonus Histories
+3. Merubah aturan bonus NSI di transaksi Normal
+4. Membuat table LSI dan PM.
+5. crud area, lsi, pm
+
+menambahkan fitur LSI dan PM , nanti nambah wilayah, secara structural diatasnya cabang
+wilayah bisa memiliki double LSI dan PM
+ada bonus LSI-PM
+
+perubahan syarat :
+- GM SD GD gak ada batas waktu

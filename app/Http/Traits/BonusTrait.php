@@ -7,7 +7,7 @@ use App\Models\LevelNsi;
 use App\Models\Transaction;
 use Illuminate\Support\Facades\DB;
 
-trait BonusNsiTrait {
+trait BonusTrait {
     public function calculateBonusNsi($member, $date)
     {
         $log = [];

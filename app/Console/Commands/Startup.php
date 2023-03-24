@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Traits\BonusNsiTrait;
 use App\Http\Traits\LevelUpTrait;
 use App\Models\Member;
 use App\Models\Transaction;
@@ -14,7 +13,6 @@ use Illuminate\Support\Facades\DB;
 class Startup extends Command
 {
     use LevelUpTrait;
-    use BonusNsiTrait;
 
     /**
      * The name and signature of the console command.

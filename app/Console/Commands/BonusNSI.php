@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Traits\BonusNsiTrait;
+use App\Http\Traits\BonusTrait;
 use App\Http\Traits\LevelUpTrait;
 use App\Http\Traits\TransactionPaymentTrait;
 use App\Models\Member;
@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 
 class BonusNSI extends Command
 {
-    use BonusNsiTrait;
+    use BonusTrait;
     /**
      * The name and signature of the console command.
      *
