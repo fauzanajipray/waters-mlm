@@ -5,7 +5,7 @@ namespace App\Models;
 use Backpack\CRUD\app\Models\Traits\CrudTrait;
 use Illuminate\Database\Eloquent\Model;
 
-class Area extends Model
+class LevelPm extends Model
 {
     use CrudTrait;
 
@@ -15,7 +15,7 @@ class Area extends Model
     |--------------------------------------------------------------------------
     */
 
-    protected $table = 'areas';
+    protected $table = 'level_pm';
     // protected $primaryKey = 'id';
     // public $timestamps = false;
     protected $guarded = ['id'];
@@ -29,32 +29,11 @@ class Area extends Model
     |--------------------------------------------------------------------------
     */
 
-    // many to many
-    public function lsiMembers()
-    {
-        return $this->belongsToMany(Member::class, 'area_manegers', 'area_id', 'member_id')->where('type', 'LSI');
-    }
-
-    public function pmMembers()
-    {
-        return $this->belongsToMany(Member::class, 'area_manegers', 'area_id', 'member_id')->where('type', 'PM');
-    }
-
     /*
     |--------------------------------------------------------------------------
     | RELATIONS
     |--------------------------------------------------------------------------
     */
-
-    public function branch()
-    {
-        return $this->belongsTo(Branch::class);
-    }
-
-    public function members()
-    {
-        return $this->hasMany(Member::class);
-    }
 
     /*
     |--------------------------------------------------------------------------

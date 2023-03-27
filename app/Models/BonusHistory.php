@@ -58,7 +58,7 @@ class BonusHistory extends Model
         if (request()->has('bonus_type')) {
             $query->whereIn('bonus_type', $bonusType);
         } else  {
-            $query->whereIn('bonus_type', ['GM', 'OR', 'OR2', 'SS', 'KN', 'KC', 'KS']);
+            $query->whereIn('bonus_type', ['GM', 'OR', 'OR2', 'SS', 'KN', 'KC', 'KS', 'KLSI', 'KPM']);
         }
         return $query;
     }

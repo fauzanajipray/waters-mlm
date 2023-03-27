@@ -3,13 +3,12 @@
 namespace App\Console\Commands;
 
 use App\Http\Traits\BonusTrait;
-use App\Models\Member;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
-class BonusNSI extends Command
+class BonusLSI extends Command
 {
     use BonusTrait;
     /**
@@ -17,14 +16,14 @@ class BonusNSI extends Command
      *
      * @var string
      */
-    protected $signature = 'bonus-nsi';
+    protected $signature = 'bonus-lsi';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Bonus NSI';
+    protected $description = 'Bonus LSI';
 
     /**
      * Execute the console command.
@@ -35,19 +34,14 @@ class BonusNSI extends Command
     {
         DB::beginTransaction();
         try {
-            $this->info('--- Komisi NSI calculate bonus started, Date : '. date('Y-m-d H:i:s') . ' ---');
+            $this->info('--- Komisi LSI calculate bonus started, Date : '. date('Y-m-d H:i:s') . ' ---');
             $this->newLine();
-            $NsiMembers = Member::where('member_type', 'NSI')->get();
-            foreach($NsiMembers as $member){
-                $log = $this->calculateBonusNsi($member, Carbon::now());
-                if($log){
-                    foreach($log as $l){
-                        $this->info($l);
-                    }
-                }
+            $log = $this->calculateBonusLsi(Carbon::now());
+            if($log){
+                foreach($log as $l){ $this->info($l); }
             }
             $this->newLine();
-            $this->info('--- Komisi NSI calculate bonus end ---');
+            $this->info('--- Komisi LSI calculate bonus end ---');
             $this->newLine();
             DB::commit();
             return Command::SUCCESS;

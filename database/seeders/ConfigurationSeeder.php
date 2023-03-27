@@ -79,5 +79,21 @@ class ConfigurationSeeder extends Seeder
             'description' => 'Bonus stokist percentage for selling product',
         ]);
 
+        Configuration::updateOrCreate([
+            'key' => 'date_start_komisi_lsi',
+        ],[
+            'key' => 'date_start_komisi_lsi',
+            'value' => '2023-02-01',
+            'description' => 'Tanggal mulai komisi LSI',
+        ]);
+
+        Configuration::updateOrCreate([
+            'key' => 'date_start_komisi_pm',
+        ],[
+            'key' => 'date_start_komisi_pm',
+            'value' => '2023-02-01',
+            'description' => 'Tanggal mulai komisi PM',
+        ]);
+
     }
 }

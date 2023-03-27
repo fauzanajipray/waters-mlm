@@ -10,8 +10,6 @@ use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
-use function PHPSTORM_META\type;
-
 /**
  * Class BonusHistoryCrudController
  * @package App\Http\Controllers\Admin
@@ -200,14 +198,14 @@ class BonusHistoryCrudController extends CrudController
                 'name' => 'bonus_type',
                 'type' => 'select2_multiple',
                 'label'=> 'Bonus Type',
-                'init_selection'=> ['GM', 'OR', 'OR2', 'SS', 'KN', 'KC', 'KS'],
+                'init_selection'=> ['GM', 'OR', 'OR2', 'SS', 'KN', 'KC', 'KS', 'KLSI', 'KPM'],
             ],
-            [ 'GM' => 'GM', 'OR' => 'OR', 'BP' => 'BP', 'OR2' => 'OR2', 'SS' => 'SS', 'KN' => 'KN', 'KC' => 'KC', 'KS' => 'KS'],
+            [ 'GM' => 'GM', 'OR' => 'OR', 'BP' => 'BP', 'OR2' => 'OR2', 'SS' => 'SS', 'KN' => 'KN', 'KC' => 'KC', 'KS' => 'KS', 'KLSI' => 'KLSI', 'KPM' => 'KPM'],
             function($value) {
                 $this->crud->addClause('whereIn', 'bonus_type', json_decode($value));
             },
             function() {
-                $this->crud->addClause('whereIn', 'bonus_type', ['GM', 'OR', 'OR2', 'SS', 'KN', 'KC', 'KS']);
+                $this->crud->addClause('whereIn', 'bonus_type', ['GM', 'OR', 'OR2', 'SS', 'KN', 'KC', 'KS', 'KLSI', 'KPM']);
             },
         );
         // Filter Bonus From

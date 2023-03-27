@@ -108,6 +108,9 @@
 @can('Read Branch')
 <li class="nav-item"><a class="nav-link" href="{{ backpack_url('branch') }}"><i class="nav-icon la la-city"></i> Branches</a></li>
 @endcan
+@can('Read Area')
+<li class="nav-item"><a class="nav-link" href="{{ backpack_url('area') }}"><i class="nav-icon la la-users"></i> Areas</a></li>
+@endcan
 @can('Read Customer')
 <li class="nav-item"><a class="nav-link" href="{{ backpack_url('customer') }}"><i class="nav-icon la la-users"></i> Customers</a></li>
 @endcan
@@ -146,15 +149,4 @@
     @endcan
   </ul>
 </li>
-@endif
-
-<!--  -->
-@if (backpack_user()->hasAnyPermission(['Read User', 'Read Role', 'Read Permission']))
-<li class="nav-item nav-dropdown">
-  <a class="nav-link nav-dropdown-toggle" href="#"><i class="nav-icon la la-users"></i> Area</a>
-  <ul class="nav-dropdown-items">
-    <li class="nav-item"><a class="nav-link" href="{{ backpack_url('area') }}"> <i class="nav-icon la la-stop"></i> Areas</a></li>
-    <li class="nav-item"><a class="nav-link" href="{{ backpack_url('area/lsi') }}"> <i class="nav-icon la la-user-lock"></i> LSI</a></li>
-    <li class="nav-item"><a class="nav-link" href="{{ backpack_url('area/pm') }}"> <i class="nav-icon la la-user-astronaut"></i> PM</a></li>
-  </ul>
 @endif

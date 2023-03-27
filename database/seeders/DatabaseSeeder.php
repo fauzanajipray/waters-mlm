@@ -11,7 +11,9 @@ use App\Models\BranchProduct;
 use App\Models\Configuration;
 use App\Models\Customer;
 use App\Models\Level;
+use App\Models\LevelLsi;
 use App\Models\LevelNsi;
+use App\Models\LevelPm;
 use App\Models\LevelSnapshot;
 use App\Models\Member;
 use App\Models\PaymentMethod;
@@ -39,6 +41,8 @@ class DatabaseSeeder extends Seeder
         $this->product();
         $this->level();
         $this->levelNSI();
+        $this->levelLSI();
+        $this->levelPM();
         $this->branch();
         $this->member();
         $this->branchProduct();
@@ -242,6 +246,42 @@ class DatabaseSeeder extends Seeder
 
         foreach ($csvDatas as $csvData) {
             LevelNsi::updateOrCreate([
+                'id' => $csvData["ID"],
+            ], [
+                'id' => $csvData["ID"],
+                'min_sold' => $csvData["Min Sold"],
+                'bonus_percentage' => $csvData["Percentage"],
+            ]);
+        }
+
+        $this->command->line("Completed --> Level NSI");
+    }
+
+    private function levelLSI()
+    {
+        $filename = Storage::path('sample/level_lsi.csv');
+        $csvDatas = $this->csvToArray($filename);
+
+        foreach ($csvDatas as $csvData) {
+            LevelLsi::updateOrCreate([
+                'id' => $csvData["ID"],
+            ], [
+                'id' => $csvData["ID"],
+                'min_sold' => $csvData["Min Sold"],
+                'bonus_percentage' => $csvData["Percentage"],
+            ]);
+        }
+
+        $this->command->line("Completed --> Level NSI");
+    }
+
+    private function levelPM()
+    {
+        $filename = Storage::path('sample/level_pm.csv');
+        $csvDatas = $this->csvToArray($filename);
+
+        foreach ($csvDatas as $csvData) {
+            LevelPm::updateOrCreate([
                 'id' => $csvData["ID"],
             ], [
                 'id' => $csvData["ID"],

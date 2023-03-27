@@ -6,6 +6,7 @@ use App\Http\Requests\ConfigurationRequest;
 use App\Models\Configuration;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Prologue\Alerts\Facades\Alert;
 
@@ -48,9 +49,9 @@ class ConfigurationCrudController extends CrudController
      */
     protected function setupListOperation()
     {
-        CRUD::column('key');
-        CRUD::column('value');
         CRUD::column('description');
+        CRUD::column('value');
+        CRUD::column('key');
         CRUD::column('created_at');
         CRUD::column('updated_at');
 
@@ -116,6 +117,9 @@ class ConfigurationCrudController extends CrudController
         }
         DB::beginTransaction();
         try {
+            if($requests['key'] == 'date_start_komisi_lsi' || $requests['key'] == 'date_start_komisi_pm'){
+                $requests['value'] = Carbon::parse($requests['value'])->startOfMonth()->format('Y-m-d');
+            }
             $config = Configuration::find($requests['id']);
             $config->update($requests);
             DB::commit();
@@ -157,6 +161,18 @@ class ConfigurationCrudController extends CrudController
                 'attributes' => [
                     'min' => 0,
                     'max' => 100,
+                ],
+            ]);
+        }
+
+        if ($this->data['entry']->key == 'date_start_komisi_pm' || $this->data['entry']->key == 'date_start_komisi_lsi') {
+
+            $this->crud->modifyField('value', [
+                'type' => 'date_picker',
+                'date_picker_options' => [
+                    'todayBtn' => true,
+                    'format' => 'yyyy-mm-dd',
+                    'language' => 'en'
                 ],
             ]);
         }

@@ -181,6 +181,12 @@ class RoleSeeder extends Seeder
                 'Update :object',
                 'Delete :object',
             ],
+            'Area' => [
+                'Create :object',
+                'Read :object',
+                'Update :object',
+                'Delete :object',
+            ],
         ];
 
         foreach ($permissions as $key => $value) {
