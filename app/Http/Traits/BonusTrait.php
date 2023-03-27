@@ -51,7 +51,7 @@ trait BonusTrait {
 
     public function calculateBonusLsi($date)
     {
-        $log = '';
+        $log = [];
         $transactionPast = Transaction::
             leftJoin(DB::raw('(
                 SELECT transaction_id,MAX(created_at) as last_payment_date from transaction_payments
@@ -97,7 +97,7 @@ trait BonusTrait {
 
     public function calculateBonusPM($date)
     {
-        $log = '';
+        $log = [];
         $transactionPast = Transaction::
             leftJoin(DB::raw('(
                 SELECT transaction_id,MAX(created_at) as last_payment_date from transaction_payments

@@ -55,7 +55,7 @@
                     </tbody>
                 </table>
 
-                <p class="font-italic">Notes : BP (Bonus Penjualan), GM (Goldmine), OR (Overriding), SS (Komisi Sparepart), KN (Komisi NSI), KC (Komisi Cabang), KS (Komisi Stokist)</p>
+                <p class="font-italic">Notes : BP (Bonus Penjualan), GM (Goldmine), OR (Overriding), SS (Komisi Sparepart), KN (Komisi NSI), KC (Komisi Cabang), KS (Komisi Stokist), KLSI (Komisi LSI), KPM (Komisi PM)</p>
             </div>
         </div>
       </div>

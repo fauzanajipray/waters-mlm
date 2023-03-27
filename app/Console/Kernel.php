@@ -32,6 +32,12 @@ class Kernel extends ConsoleKernel
         $schedule->command('bonus-nsi')
             ->monthlyOn($dayEndInMonth, '23:00')
             ->appendOutputTo(storage_path('logs/bonus-nsi.log'));
+        $schedule->command('bonus-lsi')
+            ->monthlyOn($dayEndInMonth, '23:00')
+            ->appendOutputTo(storage_path('logs/bonus-lsi.log'));
+        $schedule->command('bonus-ssi')
+            ->monthlyOn($dayEndInMonth, '23:00')
+            ->appendOutputTo(storage_path('logs/bonus-pm.log'));
     }
 
     /**

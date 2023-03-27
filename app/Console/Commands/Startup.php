@@ -104,7 +104,7 @@ class Startup extends Command
         $dateConfig = Carbon::parse($dateConfig->value)->startOfMonth();
         foreach($monthYears as $monthYear){
             $date = Carbon::parse($monthYear)->endOfMonth();
-            if($date->gt($dateConfig)){
+            if($dateConfig->gt($date)){
                 $this->info('   Skip calculate bonus PM, date config : ' . $dateConfig . ' date : ' . $date);
                 continue;
             }

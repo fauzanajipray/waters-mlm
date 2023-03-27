@@ -121,15 +121,15 @@ class AreaCrudController extends CrudController
         $this->data['datas'] = [
             'LSI' => [
                 'name' => 'LSI',
-                'entry' => $this->data['entry']->lsiMembers()->select('member_numb','name')->get(),
-                'columns_name' => ['Member Numb','Name'],
-                'columns' => ['member_numb', 'name'],
+                'entry' => $this->data['entry']->lsiMembers()->select('member_numb','name', 'members.created_at')->get(),
+                'columns_name' => ['Member Numb','Name', 'Created At'],
+                'columns' => ['member_numb', 'name', 'created_at'],
             ],
             'PM' => [
                 'name' => 'PM',
-                'entry' => $this->data['entry']->pmMembers()->select('member_numb','name')->get(),
-                'columns_name' => ['Member Numb','Name'],
-                'columns' => ['member_numb', 'name'],
+                'entry' => $this->data['entry']->pmMembers()->select('member_numb','name', 'members.created_at')->get(),
+                'columns_name' => ['Member Numb','Name', 'Created At'],
+                'columns' => ['member_numb', 'name', 'created_at'],
             ],
             'Branches' => [
                 'name' => 'Branches',
@@ -147,8 +147,8 @@ class AreaCrudController extends CrudController
         $requests = request()->all();
         DB::beginTransaction();
         try {
-            $lsiMemberNow = $requests['lsi_members'];
-            $pmMemberNow = $requests['pm_members'];
+            $lsiMemberNow = $requests['lsi_members'] ?? [];
+            $pmMemberNow = $requests['pm_members'] ?? [];
             $lsiMemberOld = AreaManager::where('area_id', $requests['id'])->where('type', 'lsi')->pluck('member_id')->toArray();
             $pmMemberOld = AreaManager::where('area_id', $requests['id'])->where('type', 'pm')->pluck('member_id')->toArray();
             $lsiMemberDelete = array_diff($lsiMemberOld, $lsiMemberNow);
@@ -178,7 +178,40 @@ class AreaCrudController extends CrudController
             unset($requests['lsi_members']);
             unset($requests['pm_members']);
             $this->crud->update($requests['id'], $requests);
-            
+    
+            DB::commit();
+            return redirect()->route('area.index');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    public function store()
+    {
+        $this->crud->validateRequest();
+        $requests = request()->all();
+        DB::beginTransaction();
+        try {
+            $lsiMember = $requests['lsi_members'];
+            $pmMember = $requests['pm_members'];
+            unset($requests['lsi_members']);
+            unset($requests['pm_members']);
+            $area = $this->crud->create($requests);
+            foreach ($lsiMember as $memberId) {
+                AreaManager::create([
+                    'area_id' => $area->id,
+                    'member_id' => $memberId,
+                    'type' => 'lsi',
+                ]);
+            }
+            foreach ($pmMember as $memberId) {
+                AreaManager::create([
+                    'area_id' => $area->id,
+                    'member_id' => $memberId,
+                    'type' => 'pm',
+                ]);
+            }
             DB::commit();
             return redirect()->route('area.index');
         } catch (\Exception $e) {
