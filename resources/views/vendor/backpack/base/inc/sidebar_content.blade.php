@@ -109,7 +109,7 @@
 <li class="nav-item"><a class="nav-link" href="{{ backpack_url('branch') }}"><i class="nav-icon la la-city"></i> Branches</a></li>
 @endcan
 @can('Read Area')
-<li class="nav-item"><a class="nav-link" href="{{ backpack_url('area') }}"><i class="nav-icon la la-users"></i> Areas</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ backpack_url('area') }}"><i class="nav-icon la la-landmark"></i> Areas</a></li>
 @endcan
 @can('Read Customer')
 <li class="nav-item"><a class="nav-link" href="{{ backpack_url('customer') }}"><i class="nav-icon la la-users"></i> Customers</a></li>

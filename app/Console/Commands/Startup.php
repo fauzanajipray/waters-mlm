@@ -56,6 +56,7 @@ class Startup extends Command
             $this->newLine();
             $this->info('* Startup Command : Level up member end');
             $this->newLine();
+
             $this->bonusNSI($monthYears);
             $this->bonusLSI($monthYears);
             $this->bonusPM($monthYears);

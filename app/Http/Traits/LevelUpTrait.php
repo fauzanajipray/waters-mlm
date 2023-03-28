@@ -79,14 +79,29 @@ trait LevelUpTrait {
 
   private function getDownline($uplineID, $transactionDate)
   {
-    $month = Carbon::parse($transactionDate)->format('m');
-    $year = Carbon::parse($transactionDate)->format('Y');
-    $downline = Member::with(['transactions' => function($query) use ($month, $year) {
-      $query->with('transactionProducts')
-        ->WhereMonth('transaction_date', $month)
-        ->whereYear('transaction_date', $year);
-    }])->where('upline_id', $uplineID)
-    ->get();
+    $date = Carbon::parse($transactionDate)->startOfMonth()->format('Y-m-d H:i:s');
+    $dateNext = Carbon::parse($transactionDate)->addMonth()->startOfMonth()->format('Y-m-d H:i:s');
+    $member = Member::where('id', $uplineID)->first();
+    $level = Level::where('id', $member->level_id)->first();
+    
+    if (!$level->month_unlimited) {
+      $downline = Member::with([
+        'transactions' => function($query) use ($date, $dateNext) {
+          $query->with('transactionProducts')
+            ->join('transaction_payments', 'transactions.id', '=', 'transaction_payments.transaction_id')
+            ->where('transaction_payments.payment_date', '>=', $date)
+            ->where('transaction_payments.payment_date', '<', $dateNext)
+            ->select('transactions.*', 'transaction_payments.payment_date');
+        }
+      ])->where('upline_id', $uplineID)->get();
+    } else {
+      $downline = Member::with(['transactions' => function($query) use ($date, $dateNext) {
+        $query->with('transactionProducts')
+          ->join('transaction_payments', 'transactions.id', '=', 'transaction_payments.transaction_id')
+          ->where('transaction_payments.payment_date', '<', $dateNext)
+          ->select('transactions.*', 'transaction_payments.payment_date');
+      }])->where('upline_id', $uplineID)->get();
+    }
     return $downline;
   }
 
