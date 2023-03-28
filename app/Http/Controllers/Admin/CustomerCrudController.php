@@ -6,6 +6,7 @@ use App\Http\Requests\CustomerInlineCreateRequest as InlineCreateRequest;
 use App\Http\Requests\CustomerRequest as StoreRequest;
 use App\Http\Requests\CustomerUpdateRequest as UpdateRequest;
 use App\Models\Customer;
+use App\Models\Member;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\Widget;
 use Illuminate\Http\Request;
@@ -122,8 +123,11 @@ class CustomerCrudController extends CrudController
 
         $this->crud->setValidation(InlineCreateRequest::class);
         $this->crud->removeField('member_id');
-        $memberID = request('main_form_fields')[0]['value'] ?? 1;
-        $member = Customer::where('member_id', $memberID)->first();
+        $requestsMain = request('main_form_fields');
+        $memberID = $requestsMain[0]['value'];
+
+        $member = Member::where('id', $memberID)->first();
+
         $this->crud->addField([
             'name' => 'member_id',
             'type' => 'hidden',
