@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Http\Traits\BonusTrait;
 use App\Http\Traits\LevelUpTrait;
+use App\Http\Traits\TransactionPaymentTrait;
 use App\Models\Configuration;
 use App\Models\Member;
 use App\Models\Transaction;
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\DB;
 
 class Startup extends Command
 {
-    use LevelUpTrait, BonusTrait;
+    use LevelUpTrait, BonusTrait, TransactionPaymentTrait;
 
     /**
      * The name and signature of the console command.
@@ -39,8 +40,7 @@ class Startup extends Command
     {
         DB::beginTransaction();
         try {
-            $this->info('* Startup Command : Level up member started');
-            $this->newLine();
+
             $transactions = Transaction::where("transaction_date", "<", Carbon::now()->startOfMonth()->toDateString())
                 ->where('type', 'Normal')
                 ->where('status_paid', 1)
@@ -49,18 +49,13 @@ class Startup extends Command
             foreach($transactions as $transaction){
                 $ym = Carbon::parse($transaction->transaction_date)->format('Y-m');
                 $monthYears[$ym] = $ym;
-                if($transaction->type != "Sparepart") {
-                    $this->levelUpMember($transaction->member->id, $transaction->transaction_date);
-                }
             }
-            $this->newLine();
-            $this->info('* Startup Command : Level up member end');
-            $this->newLine();
+
+            $this->calculateTotalAndLevelUp($monthYears);
 
             $this->bonusNSI($monthYears);
             $this->bonusLSI($monthYears);
             $this->bonusPM($monthYears);
-            
             DB::commit();
             return Command::SUCCESS;
         } catch (Exception $e) {
@@ -68,7 +63,50 @@ class Startup extends Command
             throw $e;
         }
     }
+    public function calculateTotalAndLevelUp($monthYears)
+    {
+        $this->info('* Startup Command : Level up member and calculated Bonus started');
+        $this->newLine();
 
+        $types = ['Normal', 'Sparepart', 'Stock'];
+
+        foreach($monthYears as $monthYear){
+            $dateStart = Carbon::parse($monthYear)->startOfMonth();
+            $dateEnd = Carbon::parse($monthYear)->endOfMonth();
+
+            $transactions = Transaction::
+                join('transaction_payments', 'transactions.id', '=', 'transaction_payments.transaction_id')
+                ->where("transaction_date", ">=", $dateStart->toDateString())
+                ->where("transaction_date", "<=", $dateEnd->toDateString())
+                ->whereIn('transactions.type', $types)
+                ->where('status_paid', 1)
+                ->select('transactions.*', 'transaction_payments.payment_date')
+                ->get();
+            foreach ($transactions as $transaction) {
+                $lastPaymentDate = $transaction->transactionPayments->sortByDesc('payment_date')->first()->payment_date;
+                $log = $this->calculateBonus($transaction, $transaction->member, $lastPaymentDate);  
+                if($log){
+                    foreach($log as $l){ $this->info('   -> '.$l); }
+                } else {
+                    $this->info('   -> No bonus for transaction ' . $transaction->code);
+                }
+            }
+
+            $transactionsGroupByMember = $transactions->groupBy('member_id');
+
+            foreach ($transactionsGroupByMember as $member_id => $transactions) {
+                foreach ($transactions as $transaction) {
+                    if($transaction->type == "Normal") {
+                        $this->levelUpMember($member_id, $transaction->transaction_date);
+                    }
+                }
+            }
+        }
+        $this->newLine();
+        $this->info('* Startup Command : Level up member end');
+        $this->newLine();
+        
+    }
     public function bonusNSI($monthYears){
 
         $this->info('* Startup Command : Calculate Bonus NSI started');

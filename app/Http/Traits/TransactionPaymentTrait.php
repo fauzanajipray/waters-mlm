@@ -92,7 +92,7 @@ trait TransactionPaymentTrait {
             /* End Bonus Penjualan Cabang */
 
             /* Bonus Penjualan Pribadi */
-            if ($this->isActiveMember($member)) {
+            if ($this->isActiveMember2($member)) {
                 $bonus = BonusHistory::create([
                     'member_id' => $member->id,
                     'member_numb' => $member->member_numb,
@@ -113,7 +113,7 @@ trait TransactionPaymentTrait {
             if ($upline) {
                 /* Bonus Goldmine */
                 $uplineLevel = $this->levelNow($lastPaymentDate, $upline->level_id);
-                if ($uplineLevel->gm_percentage > 0 && $this->isActiveMember($upline) && !$this->isMemberTypePusat($upline)) {
+                if ($uplineLevel->gm_percentage > 0 && $this->isActiveMember2($upline) && !$this->isMemberTypePusat($upline)) {
                     if ($upline->free_pass_or_gm) { // Mempunyai Free Pass OR/GM
                         $bonus = BonusHistory::create([
                             'member_id' => $upline->id,
@@ -155,7 +155,7 @@ trait TransactionPaymentTrait {
                 $upline2 = $upline->upline ?? null;
                 if ($upline2) {
                     $upline2Level = $this->levelNow($lastPaymentDate, $upline2->level_id);
-                    if($upline2Level->or_percentage > 0 && $this->isActiveMember($upline2) && !$this->isMemberTypePusat($upline2)) {
+                    if($upline2Level->or_percentage > 0 && $this->isActiveMember2($upline2) && !$this->isMemberTypePusat($upline2)) {
                         if ($upline2->free_pass_or_gm) {
                             // Mempunyai Free Pass OR/GM
                             $bonus = BonusHistory::create([
@@ -204,6 +204,7 @@ trait TransactionPaymentTrait {
                         }
                         if($log) {
                             foreach($log as $l) { Alert::info($l)->flash();  }
+                            return $log;
                         }
                     }
                     /* End Bonus Bonus Overriding2 */
@@ -415,17 +416,16 @@ trait TransactionPaymentTrait {
                     }
                 }
             }
-        } else {
-            return;
         }
         if($log) {
             foreach($log as $l) {
                 Alert::info($l)->flash();
             }
+            return $log;
         }
     }
 
-    private function isActiveMember($member)
+    private function isActiveMember2($member)
     {
         if ($member->expired_at < Carbon::now()) {
             return false;
@@ -450,7 +450,7 @@ trait TransactionPaymentTrait {
         if ($totalOR > 5) {
             return $log;
         }
-        if ($this->isActiveMember($member) && $levelNow->or2_percentage > 0 && !$this->isMemberTypePusat($member)) {
+        if ($this->isActiveMember2($member) && $levelNow->or2_percentage > 0 && !$this->isMemberTypePusat($member)) {
             if ($member->free_pass_or_gm) {
                 $bonus = BonusHistory::create([
                     'member_id' => $member->id,

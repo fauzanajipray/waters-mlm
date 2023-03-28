@@ -39,6 +39,9 @@ trait LevelUpTrait {
 
     if ($downlineCountLevelNow >= $minimumDownlineNext) {
         if ($this->isActiveMember($uplineMember)){
+          if ($this->isAlreadyLevelUpThisMonth($uplineMember->id, $transactionDate)){
+              $historyLevelUp[] = 'Member '.$uplineMember->name.' sudah level up bulan ini';
+          } else {
             $uplineMember = Member::find($uplineMember->id);
             $uplineMember->level_id = $levelNext->id; // Naik Level
             $uplineMember->update();
@@ -48,6 +51,8 @@ trait LevelUpTrait {
                 'new_level_id' => $uplineMember->level_id,
                 'old_level_code' => $uplineLevel->code,
                 'new_level_code' => $uplineMember->level->code,
+                'created_at' => Carbon::parse($transactionDate)->format('Y-m-d H:i:s'),
+                'updated_at' => Carbon::parse($transactionDate)->format('Y-m-d H:i:s'),
             ]);
             $historyLevelUp[] = 'Member '.$uplineMember->name.' level up to '.$uplineMember->level->name;
 
@@ -64,6 +69,7 @@ trait LevelUpTrait {
             if ($downlineCountLevelNow >= $minimumDownlineNext) {
                 $this->levelUpMember($uplineMember->id, $transactionDate, true, $historyLevelUp);
             }
+          }
         }
         else {
             $historyLevelUp[] = 'Member '.$uplineMember->name.' tidak bisa level up karena tidak aktif';
@@ -75,6 +81,16 @@ trait LevelUpTrait {
             $this->info('   '.$l);
         }
     }
+  }
+
+  private function isAlreadyLevelUpThisMonth($member_id, $transactionDate) { 
+      $date = Carbon::parse($transactionDate)->startOfMonth()->format('Y-m-d H:i:s');
+      $dateNext = Carbon::parse($transactionDate)->addMonth()->startOfMonth()->format('Y-m-d H:i:s');
+      $levelUpHistory = LevelUpHistories::where('member_id', $member_id)
+        ->where('created_at', '>=', $date)
+        ->where('created_at', '<', $dateNext)
+        ->first();
+      return $levelUpHistory ? true : false;
   }
 
   private function getDownline($uplineID, $transactionDate)
