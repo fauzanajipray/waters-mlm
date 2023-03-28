@@ -4,6 +4,7 @@ namespace App\Http\Traits;
 use App\Models\BonusHistory;
 use App\Models\Branch;
 use App\Models\Configuration;
+use App\Models\Level;
 use App\Models\Member;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
@@ -48,7 +49,8 @@ trait MemberTrait {
         } else {
             $monthYear = Carbon::now();
         }
-        $members = $this->getMemberInGroup($id, $totalDownlineLevel);
+        $members = $this->getMemberInGroup($id, $totalDownlineLevel, $monthYear);
+        // dd($members, $monthYear);
         $dataMember = [];
         foreach ($members as $member) {
             // Count Bonus
@@ -100,40 +102,29 @@ trait MemberTrait {
         ]);
     }
 
-    protected function getMemberGroup($id)
+    public function getMemberInGroup($id, $totalDownlineLevel, $monthYear, $data = [])
     {
-        $downlineInGroup = [];
-        $mainMember = User::with('member')->where('id', $id)->firstOrFail()->member->toArray();
-        // add to downlineGroup
-        $downlineInGroup[$mainMember['id']] = $mainMember['member_numb'] . ' - ' . $mainMember['name'];
-        // get downline
-        $downline = Member::where('upline_id', $mainMember['id'])->get()->toArray();
-        // add to downlineGroup
-        foreach($downline as $d){
-            $downlineInGroup[$d['id']] = $d['member_numb'] . ' - ' . $d['name'];
+        $mainMember = Member::with(['level:id,name', 'levelHistories' => function ($query) use ($monthYear)  {
+            return $query
+                ->orderBy('created_at', 'desc')
+                ->where('created_at', '>', $monthYear->startOfMonth())
+                ->first();
+        }])->where('id', $id)->firstOrFail()->toArray();
+        if($mainMember['level_histories']){
+            $mainMember['level']['name'] = Level::where('id', $mainMember['level_histories'][0]['old_level_id'])->firstOrFail()->name;
+            $mainMember['level']['id'] = $mainMember['level_histories'][0]['old_level_id'];
         }
-        // get downline from downline
-        foreach($downline as $d){
-            $downline2 = Member::where('upline_id', $d['id'])->get()->toArray();
-            foreach($downline2 as $d2){
-                $downlineInGroup[$d2['id']] = $d2['member_numb'] . ' - ' . $d2['name'];
-            }
-        }
-        return $downlineInGroup;
-    }
-
-    public function getMemberInGroup($id, $totalDownlineLevel, $data = [])
-    {
-        $mainMember = Member::with(['level:id,name'])->where('id', $id)->firstOrFail()->toArray();
+        unset($mainMember['level_histories']);
         $downline = Member::where('upline_id', $mainMember['id'])->get()->toArray();
         $data[$mainMember['id']] = $mainMember;
         if($totalDownlineLevel > 0){
             foreach($downline as $d){
                 $data[$d['id']] = $d;
-                $members = $this->getMemberInGroup($d['id'], $totalDownlineLevel - 1, $data);
+                $members = $this->getMemberInGroup($d['id'], $totalDownlineLevel - 1, $monthYear, $data);
                 $data = $members;
             }
         }
+        // dd($data);
         return $data;
     }
 

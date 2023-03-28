@@ -70,6 +70,10 @@ class Member extends Model
         return $this->belongsTo('App\Models\Level', 'level_id', 'id');
     }
 
+    public function levelHistories(){
+        return $this->hasMany('App\Models\LevelUpHistories', 'member_id', 'id');
+    }
+
     public function upline(){
         return $this->belongsTo('App\Models\Member', 'upline_id', 'id');
     }

@@ -53,6 +53,12 @@
                         <select name="total_downline_level" id="levels" class="form-control">
                             <option value="1" @if($totalDownlineLevel == '1') selected @endif>1</option>
                             <option value="2" @if($totalDownlineLevel == '2') selected @endif>2</option>
+                            <option value="3" @if($totalDownlineLevel == '3') selected @endif>3</option>
+                            <option value="4" @if($totalDownlineLevel == '4') selected @endif>4</option>
+                            <option value="5" @if($totalDownlineLevel == '5') selected @endif>5</option>
+                            <option value="6" @if($totalDownlineLevel == '6') selected @endif>6</option>
+                            <option value="7" @if($totalDownlineLevel == '7') selected @endif>7</option>
+                            <option value="8" @if($totalDownlineLevel == '8') selected @endif>8</option>
                         </select>
                         {{-- <input type="number" name="total_downline_level" class="form-control" value="{{ $totalDownlineLevel }}" id="levels"> --}}
                     </div>
