@@ -24,20 +24,4 @@ Bonus Ada :
     - Jika penjualan Normal dibantu NSI makan NSI dapat komisi, ditotal dihitung akhir bulan
     - Kalau NSI menjual barang makan dapat bonus BP dan komisi NSI
 11. Komisi LSI : Bonus yang didapatkan apabila  
-12. Komisi PM   
-    - 
-
-LSI dan PM
-
-1. Add Bonus From Branch in Bonus Histories, 
-2. Add Filter Bonus Form Branch in Bonus Histories
-3. Merubah aturan bonus NSI di transaksi Normal
-4. Membuat table LSI dan PM.
-5. crud area, lsi, pm
-
-menambahkan fitur LSI dan PM , nanti nambah wilayah, secara structural diatasnya cabang
-wilayah bisa memiliki double LSI dan PM
-ada bonus LSI-PM
-
-perubahan syarat :
-- GM SD GD gak ada batas waktu
+12. Komisi PM  

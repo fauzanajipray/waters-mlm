@@ -444,6 +444,10 @@ class DatabaseSeeder extends Seeder
                     // $existTrans = Transaction::where("code", $csvData['Code'] ?? 0)->exists();
                     $customer = Customer::where("id", $csvData['Customer ID'])->first();
                     $price = (int) str_replace(["Rp", ".", " "], "", $csvData['Unit Price']);
+                    if($price == 0) {
+                        $product = Product::find($csvData['Product ID']);
+                        $price = $product->price;
+                    }
                     $requests = [
                         "id" => $csvData["ID"],
                         "transaction_date" => Carbon::createFromFormat('d/m/Y', $csvData['Transaction Date'])->format("Y-m-d"),
@@ -562,20 +566,20 @@ class DatabaseSeeder extends Seeder
         $transPaymentCrud = new TransactionPaymentCrudController();
         foreach ($csvDatas as $csvData) {
             if($csvData['Nominal']){
+                $nominal = (int) str_replace(["Rp",","," "], "", $csvData['Nominal']);
                 $requests = [
                     "id" => (int) $csvData["ID"],
                     "transaction_id" => $csvData['Transaction ID'],
-                    "payment_date" => Carbon::createFromFormat('d/m/Y', $csvData['Tanggal Payment'])->format("Y-m-d"),
+                    "payment_date" => $csvData['Tanggal Payment'] == "" ? null : Carbon::createFromFormat('d/m/Y', $csvData['Tanggal Payment'])->format("Y-m-d"),
                     "payment_method" => $csvData['Payment Method'],
-                    "amount" => $csvData['Nominal'],
+                    "amount" => $nominal,
                     "type" => ucwords(strtolower($csvData['Status'])),
                 ];
                 try {
                     $transPaymentCrud->createByImport($requests);
                 } catch (Exception $e) {
-                    // dd($e->getTraceAsString());
                     $this->command->line("Error --> Transaction Payment, ID " . $csvData['Transaction ID']);
-                    $this->command->line($e->getMessage());
+                    $this->command->line(" - " . $e->getMessage());
                 }
             }
         }

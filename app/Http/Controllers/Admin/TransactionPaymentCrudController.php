@@ -426,7 +426,7 @@ class TransactionPaymentCrudController extends CrudController
                 $discount = 0;
                 if ($item->discount_percentage > 0) {
                     $discount = $item->price * $item->discount_percentage / 100;
-                } else  {
+                } else  {   
                     $discount = $item->discount_amount;
                 }
                 return $item->price * $item->quantity - $discount;
@@ -454,7 +454,7 @@ class TransactionPaymentCrudController extends CrudController
         $paymentMethodCust = PaymentMethod::where('name', $requests['payment_method'])->first();
 
         if(!$paymentMethodCust) {
-            throw new Exception('Payment method '.$requests['payment_method']. ' transaction id' . $requests['transaction_id'] . ' not found', 400);
+            throw new Exception('Payment method '.$requests['payment_method']. ' transaction not found', 400);
         }
         $requests['payment_method_id'] = $paymentMethodCust->id;
 

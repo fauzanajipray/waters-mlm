@@ -40,22 +40,18 @@ class Startup extends Command
     {
         DB::beginTransaction();
         try {
-
-            $transactions = Transaction::where("transaction_date", "<", Carbon::now()->startOfMonth()->toDateString())
-                ->where('type', 'Normal')
+            $transactionsBefore = Transaction::where("transaction_date", "<", Carbon::now()->startOfMonth()->toDateString())
                 ->where('status_paid', 1)
                 ->get();
-            $monthYears = []; // array of month and year, example: 2021-01
-            foreach($transactions as $transaction){
-                $ym = Carbon::parse($transaction->transaction_date)->format('Y-m');
-                $monthYears[$ym] = $ym;
-            }
-
-            $this->calculateTotalAndLevelUp($monthYears);
-
+            $transactions = Transaction::where('type', 'Normal')
+                ->where('status_paid', 1)
+                ->get();
+            $this->calculateTotalAndLevelUp($this->getMonthYear($transactions));
+            $monthYears = $this->getMonthYear($transactionsBefore);
             $this->bonusNSI($monthYears);
             $this->bonusLSI($monthYears);
             $this->bonusPM($monthYears);
+            dd('done');
             DB::commit();
             return Command::SUCCESS;
         } catch (Exception $e) {
@@ -63,14 +59,29 @@ class Startup extends Command
             throw $e;
         }
     }
+
+    public function getMonthYear($transactions){
+        $monthYears = []; // array of month and year, example: 2021-01
+        foreach($transactions as $transaction){
+            $ym = Carbon::parse($transaction->transaction_date)->format('Y-m');
+            $monthYears[] = $ym;
+        }
+        $monthYears = array_unique($monthYears);
+        return $monthYears;
+    }
+
     public function calculateTotalAndLevelUp($monthYears)
     {
         $this->info('* Startup Command : Level up member and calculated Bonus started');
         $this->newLine();
 
         $types = ['Normal', 'Sparepart', 'Stock'];
+        $date = Carbon::now()->format('Y-m');
 
-        foreach($monthYears as $monthYear){
+        foreach($monthYears as $key => $monthYear){
+            $this->newLine();
+            $this->info('() Date : '. $monthYear . ' ()');
+
             $dateStart = Carbon::parse($monthYear)->startOfMonth();
             $dateEnd = Carbon::parse($monthYear)->endOfMonth();
 
@@ -92,8 +103,12 @@ class Startup extends Command
                 }
             }
 
+            $this->newLine();
+            if($monthYear == $date){
+                $this->info('   -> Skip level up member, date : ' . $date);
+                continue;
+            }
             $transactionsGroupByMember = $transactions->groupBy('member_id');
-
             foreach ($transactionsGroupByMember as $member_id => $transactions) {
                 foreach ($transactions as $transaction) {
                     if($transaction->type == "Normal") {
