@@ -51,7 +51,7 @@ class Startup extends Command
             $this->bonusNSI($monthYears);
             $this->bonusLSI($monthYears);
             $this->bonusPM($monthYears);
-            dd('done');
+            // dd('done');
             DB::commit();
             return Command::SUCCESS;
         } catch (Exception $e) {
