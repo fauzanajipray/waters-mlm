@@ -109,3 +109,4 @@ ID,Transaction ID,Tanggal Payment,Payment Method,Nominal,Notes,Status
 108,106,3/3/2023,," 14,480,000 ",,FULL
 109,107,3/3/2023,," 14,480,000 ",,FULL
 110,108,3/3/2023,," 3,600,000 ",,FULL
+111,109,3/29/2023,TRANSFER," 2,000,000 ",,FULL

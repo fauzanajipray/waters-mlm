@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\StockCrudController;
 use App\Http\Controllers\Admin\TransactionCrudController;
 use App\Http\Controllers\Admin\TransactionPaymentCrudController;
 use App\Models\ActivationPayments;
+use App\Models\Area;
 use App\Models\Branch;
 use App\Models\BranchProduct;
 use App\Models\Configuration;
@@ -43,6 +44,7 @@ class DatabaseSeeder extends Seeder
         $this->levelNSI();
         $this->levelLSI();
         $this->levelPM();
+        $this->area();
         $this->branch();
         $this->member();
         $this->branchProduct();
@@ -293,6 +295,23 @@ class DatabaseSeeder extends Seeder
         $this->command->line("Completed --> Level NSI");
     }
 
+    private function area()
+    {
+        Area::updateOrCreate([
+            'id' => 1,
+        ], [
+            'id' => 1,
+            'name' => 'Jawa Tengah',
+        ]);
+
+        Area::updateOrCreate([
+            'id' => 2,
+        ], [
+            'id' => 2,
+            'name' => 'Jawa Timur',
+        ]);
+    }
+
 
     private function branch()
     {
@@ -306,6 +325,7 @@ class DatabaseSeeder extends Seeder
                 "name" => $csvData["Name"],
                 "type" => $csvData["Type"],
                 "address" => $csvData["Address"],
+                "area_id" => $csvData["Area"],
             ]);
         }
 
