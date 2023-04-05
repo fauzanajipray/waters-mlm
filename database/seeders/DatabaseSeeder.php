@@ -113,6 +113,7 @@ class DatabaseSeeder extends Seeder
         $csvDatas = $this->csvToArray($filename);
 
         foreach ($csvDatas as $csvData) {
+            $price = (int) str_replace(["Rp", ".", " "], "", $csvData['Netto Price']);
             Product::updateOrCreate([
                 "name" => $csvData["Name"],
                 "model" => $csvData["Model"]
@@ -120,7 +121,7 @@ class DatabaseSeeder extends Seeder
                 "name" => $csvData["Name"],
                 "model" => $csvData["Model"],
                 "capacity" => $csvData["Capacity"],
-                "price" => $csvData["Netto Price"],
+                "price" => $price,
                 "is_demokit" => $csvData["Is Demokit"],
                 "type" => $csvData["Type"],
                 "min_stock_pusat" => $csvData["Min Stock Pusat"],
@@ -468,6 +469,7 @@ class DatabaseSeeder extends Seeder
                         $product = Product::find($csvData['Product ID']);
                         $price = $product->price;
                     }
+
                     $requests = [
                         "id" => $csvData["ID"],
                         "transaction_date" => Carbon::createFromFormat('d/m/Y', $csvData['Transaction Date'])->format("Y-m-d"),

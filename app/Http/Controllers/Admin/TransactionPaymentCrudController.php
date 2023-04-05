@@ -441,11 +441,15 @@ class TransactionPaymentCrudController extends CrudController
             });
         }
         if ($transaction->transactionPayments->sum('amount') >= $totalPrice) {
-            throw new Exception('Transaction already paid');
+            if($transaction->type != 'Bebas Putus') {
+                // dd($transaction->toArray(), $requests);
+                throw new Exception('Transaction already paid');
+            }
         }
         $transactionBill = $totalPrice - $transaction->transactionPayments->sum('amount');
 
         if($transactionBill < $requests['amount']) {
+            // dd($transactionBill, $requests, $transaction->toArray());
             throw new Exception('Transaction bill is less than payment amount. bill : ' . $transactionBill . ', payment : ' . $requests['amount']);
         }
         if ($requests['type'] == 'Full' && $transactionBill != $requests['amount']) {
@@ -508,6 +512,7 @@ class TransactionPaymentCrudController extends CrudController
                     ->first();
                 if(!$product) {
                     // dd('Stock '. $transactionProduct->name.' '. $transactionProduct->model .' is not enough', $product, $transaction->branch_id);
+                    // dd($transaction->toArray(), $requests, $product);
                     $branch = Branch::find($transaction->branch_id);
                     throw new \Exception('Stock '. $transactionProduct->name.' '. $transactionProduct->model .' from branch '.$branch->name.' is not enough');
                 }
