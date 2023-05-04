@@ -15,7 +15,8 @@ ID,Name,Model,Capacity,Netto Price,Is Demokit,Type,Min Stock Pusat
 14,Blass Reservoir,BMP 1000,10 Liter,3000000,0,sparepart,3
 15,Faucet (With Magnet),BMP 1000,Keran,1250000,0,sparepart,5
 16,Cotton Pad,Per-Packing,180 Pcs,480000,0,sparepart,20
-17,BMP 2000 2nd Filter,BMP 2000,Sparepart 2nd,Rp1.045.000,0,sparepart,10
-18,Catridge Therapy Shower,"LAVENDER, LEMON, ROSE",,Rp380.000,0,sparepart,10
-19,Kapas 120 Lembar,BMP 2000,,Rp320.000,,Sparepart,10
-20,Mineral Filter,BMP 2000,,Rp1.800.000,,Sparepart,10
+17,BMP 2000 2nd Filter,BMP 2000,Sparepart 2nd,1045000,0,sparepart,10
+18,Catridge Therapy Shower,"LAVENDER, LEMON, ROSE",,380000,0,sparepart,10
+19,Kapas 120 Lembar,BMP 2000,,320000,0,Sparepart,10
+20,Mineral Filter,BMP 2000,,1800000,0,Sparepart,10
+21,Main Filter,ACE BIO Plus,,1100000,0,Sparepart,10
