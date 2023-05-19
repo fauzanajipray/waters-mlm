@@ -470,6 +470,10 @@ class DatabaseSeeder extends Seeder
                         $price = $product->price;
                     }
 
+                    if(!in_array($csvData['Tipe Penjualan'], ["DEMOKIT", "BEBAS PUTUS", "DISPLAY"]) && (!empty($csvData['Discount Percentage']) || !empty($csvData['Discount Amount'])) ) {
+                        $this->command->line("Transaction ". $csvData["ID"]." --> Discount should be empty");
+                    }
+                    
                     $requests = [
                         "id" => $csvData["ID"],
                         "transaction_date" => Carbon::createFromFormat('d/m/Y', $csvData['Transaction Date'])->format("Y-m-d"),

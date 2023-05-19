@@ -17,7 +17,7 @@ use Backpack\CRUD\app\Library\Widget;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Prologue\Alerts\Facades\Alert;
-use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 
 /**
  * Class TransactionCrudController
@@ -40,6 +40,9 @@ class TransactionBebasPutusCrudController extends CrudController
      */
     public function setup()
     {
+        Transaction::addGlobalScope('selectedType', function (Builder $builder) {
+            $builder->where($builder->getQuery()->from . '.' . 'type', 'Bebas Putus');
+        });
         if(!backpack_user()->hasPermissionTo('Read Bebas Putus Transaction')){
             $this->crud->denyAccess(['list']);
         }
@@ -93,8 +96,6 @@ class TransactionBebasPutusCrudController extends CrudController
         $this->crud->addButtonFromModelFunction('line', 'letter_road', 'letterRoad', 'beginning');
         $this->crud->addButtonFromModelFunction('line', 'invoice', 'invoice', 'beginning');
         $this->crud->addButtonFromModelFunction('line', 'add_payment', 'buttonAddPayment', 'beginning');
-
-        $this->crud->addClause('where', 'type', 'Bebas Putus');
 
         // FILTER
         $this->crud->addFilter([
@@ -529,7 +530,7 @@ class TransactionBebasPutusCrudController extends CrudController
     {
         $this->crud->hasAccessOrFail('show');
 
-        $this->data['entry'] = Transaction::with('transactionPayments')->find($id);
+        $this->data['entry'] = Transaction::with('transactionPayments')->findOrFail($id);
         $this->data['crud'] = $this->crud;
         $this->data['products'] = TransactionProduct::where('transaction_id', $id)->get();
         return view('transaction.show', $this->data);

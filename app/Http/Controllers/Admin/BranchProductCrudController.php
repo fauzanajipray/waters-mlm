@@ -6,6 +6,7 @@ use App\Http\Requests\BranchProductRequest;
 use App\Models\Branch;
 use App\Models\BranchProduct;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -28,6 +29,9 @@ class BranchProductCrudController extends CrudController
      */
     public function setup()
     {
+        BranchProduct::addGlobalScope('selectedType', function (Builder $builder) {
+            $builder->where($builder->getQuery()->from . '.' . 'branch_id', '!=', 1);
+        });
         if(!backpack_user()->hasPermissionTo('Read Branch Product')){
             $this->crud->denyAccess(['list', 'show']);
         }
@@ -254,8 +258,6 @@ class BranchProductCrudController extends CrudController
         }, function($value) {
             $this->crud->addClause('where', 'branch_products.branch_id', $value);
         });
-
-        $this->crud->addClause('where', 'branch_products.branch_id', '!=', 1);
     }
 
     protected function customQuery()

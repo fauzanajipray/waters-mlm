@@ -14,6 +14,7 @@ use App\Models\Transaction;
 use App\Models\TransactionProduct;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\Widget;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Prologue\Alerts\Facades\Alert;
@@ -39,6 +40,9 @@ class TransactionDemokitCrudController extends CrudController
      */
     public function setup()
     {
+        Transaction::addGlobalScope('selectedType', function (Builder $builder) {
+            $builder->where($builder->getQuery()->from . '.' . 'type', 'Demokit');
+        });
         if(!backpack_user()->hasPermissionTo('Read Demokit Transaction')){
             $this->crud->denyAccess(['list']);
         }
@@ -92,8 +96,6 @@ class TransactionDemokitCrudController extends CrudController
         $this->crud->addButtonFromModelFunction('line', 'letter_road', 'letterRoad', 'beginning');
         $this->crud->addButtonFromModelFunction('line', 'invoice', 'invoice', 'beginning');
         $this->crud->addButtonFromModelFunction('line', 'add_payment', 'buttonAddPayment', 'beginning');
-
-        $this->crud->addClause('where', 'type', 'Demokit');
 
         // FILTER
         $this->crud->addFilter([
@@ -458,7 +460,7 @@ class TransactionDemokitCrudController extends CrudController
     {
         $this->crud->hasAccessOrFail('show');
 
-        $this->data['entry'] = Transaction::with('transactionPayments')->find($id);
+        $this->data['entry'] = Transaction::with('transactionPayments')->findOrFail($id);
         $this->data['crud'] = $this->crud;
         $this->data['products'] = TransactionProduct::where('transaction_id', $id)->get();
         return view('transaction.show', $this->data);

@@ -385,12 +385,19 @@ class BranchCrudController extends CrudController
             return response()->json([]);
         }
         $memberId = $memberId['value'];
-        $member = Member::with('branch')->find($memberId);
+        $member = Member::with(['branch' => function ($query) {
+            $query->join('areas', 'areas.id', '=', 'branches.area_id')
+                ->select('branches.*', 'areas.name as area_name', 'areas.id as area_id');
+        }])->find($memberId);
         if($search_term) {
             if($member->branch->type == 'STOKIST') {
-                $branches = Branch::where('type', 'CABANG')
-                    ->where('name', 'like', '%'.$search_term.'%')
-                    ->get();
+                if($member->branch->area_id == 1) {
+                    $branches = Branch::whereIn('type', ['CABANG', 'PUSAT'])
+                    ->where('name', 'like', '%'.$search_term.'%')->get();
+                } else {
+                    $branches = Branch::where('type', 'CABANG')
+                    ->where('name', 'like', '%'.$search_term.'%')->get();
+                }
             } else if($member->branch->type == 'CABANG') {
                 $branches = Branch::where('type', 'PUSAT')
                     ->where('name', 'like', '%'.$search_term.'%')
@@ -400,14 +407,18 @@ class BranchCrudController extends CrudController
             }
         } else {
             if($member->branch->type == 'STOKIST') {
-                $branches = Branch::where('type', 'CABANG')
-                    ->get();
+                if($member->branch->area_id == 1) {
+                    $branches = Branch::whereIn('type', ['CABANG', 'PUSAT'])->get();
+                } else {
+                    $branches = Branch::where('type', 'CABANG')->get();
+                }
             } else if($member->branch->type == 'CABANG') {
                 $branches = Branch::where('type', 'PUSAT')
                     ->get();
             } else {
                 return response()->json([]);
             }
+
         }
 
         $branches->map(function($item) {
